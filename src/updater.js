@@ -7,6 +7,9 @@
     this.prev = new Date().getTime();
 
     var self = this;
+    var requestAnimationFrame = window.requestAnimationFrame
+        || window.mozRequestAnimationFrame
+        || window.webkitRequestAnimationFrame;
     var update = function() {
       var now = new Date().getTime();
       self.tick = now - self.prev;
@@ -16,10 +19,10 @@
         self.updatees[i].update();
       }
 
-      window.requestAnimationFrame(update);
+      requestAnimationFrame(update);
     };
 
-    window.requestAnimationFrame(update);
+    requestAnimationFrame(update);
   };
 
   Updater.prototype = {
