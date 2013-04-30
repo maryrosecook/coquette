@@ -21,7 +21,7 @@
     this.state = this.STATE.INTRO;
 
     this.introImage = new Image();
-    this.introImage.src = '../resources/intro.png';
+    this.introImage.src = 'src/intro.png';
   };
 
   Game.prototype = {
