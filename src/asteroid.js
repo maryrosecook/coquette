@@ -70,17 +70,6 @@
       game.renderer.endClip();
     },
 
-    spawn: function(other) {
-      game.entityer.add(Asteroid, {
-        pos: { x:this.pos.x, y:this.pos.y },
-        radius: this.size.x / 2,
-        vel: {
-          x: this.vel.x + other.vel.x / 15 + Math.random() * 0.1,
-          y: this.vel.y + other.vel.y / 15 + Math.random() * 0.1,
-        }
-      });
-    },
-
     destroy: function(other) {
       for (var i = 0, len = this.collidingAsteroids.length; i < len; i++) {
         if (this.collidingAsteroids[i] !== undefined) {
@@ -100,14 +89,14 @@
     collision: function(other) {
       if (other instanceof Bullet) {
         if (this.collidingAsteroids.length === 0) {
-          this.spawn(other);
+          Asteroid.spawnTwin(this, other);
         } else if (this.collidingAsteroids.length > 0) {
           game.runner.add(this, function(self) {
             self.destroy(other);
           });
         }
       } else if (other instanceof Player) {
-        this.spawn(other);
+        Asteroid.spawnTwin(this, other);
       } else if (other instanceof Asteroid) {
         this.collidingAsteroids.push(other);
       }
@@ -125,19 +114,33 @@
     }
   };
 
-  // var getRandomPos = function() {
-  //   var pos = {
-  //     x: Math.random() * game.renderer.width * 3 - game.renderer.width,
-  //     y: Math.random() * game.renderer.height * 3 - game.renderer.height
-  //   };
+  Asteroid.spawnTwin = function(twin, other) {
+    game.entityer.add(Asteroid, {
+      pos: { x:twin.pos.x, y:twin.pos.y },
+      radius: twin.size.x / 2,
+      vel: {
+        x: twin.vel.x + other.vel.x / 15 + Math.random() * 0.1,
+        y: twin.vel.y + other.vel.y / 15 + Math.random() * 0.1,
+      }
+    });
+  };
 
-  //   if (game.maths.distance(pos, game.renderer.center()) >
-  //       game.renderer.width / 2) {
-  //     return pos;
-  //   } else {
-  //     return getRandomPos();
-  //   }
-  // };
+  Asteroid.spawnAfterShooting = function(player) {
+    var rAngle = game.maths.degToRad(player.angle());
+    var pos = {
+      x: game.renderer.width / 2 - 30 + Math.sin(rAngle) * 250,
+      y: game.renderer.height / 2 - 30 + Math.cos(rAngle) * 250
+    };
+
+    var vel = game.maths.normalise(game.maths.vectorTo(game.renderer.center(), pos));
+    vel.x /= 10;
+    vel.y /= 10;
+
+    game.entityer.add(Asteroid, {
+      pos: pos,
+      vel: vel
+    });
+  };
 
   exports.Asteroid = Asteroid;
 })(this);

@@ -82,6 +82,7 @@
         });
 
         this.lastShot = new Date().getTime();
+        Asteroid.spawnAfterShooting(this);
       }
     },
 
