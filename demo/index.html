@@ -22,22 +22,20 @@
 		}
 	</style>
 
-  <script src="src/head.loader.js"></script>
+  <script src="../src/head.loader.js"></script>
   <script type="text/javascript">
-    head.js("src/sylvester.js",
-            "src/maths.js",
-            "src/updater.js",
-            "src/entityer.js",
-            "src/asteroid.js",
-            "src/collider.js",
-            "src/runner.js",
-            "src/player.js",
-            "src/inputter.js",
-            "src/bullet.js",
-            // "src/.js",
-            // "src/.js",
-            "src/renderer.js",
-            "src/game.js",
+    head.js("../src/sylvester.js",
+            "../src/maths.js",
+            "../src/updater.js",
+            "../src/entityer.js",
+            "../src/collider.js",
+            "../src/runner.js",
+            "../src/inputter.js",
+            "../src/renderer.js",
+            "../demo/player.js",
+            "../demo/bullet.js",
+            "../demo/asteroid.js",
+            "../demo/game.js",
             function() {
               game = new Game('canvas', 600, 600);
               game.init();
