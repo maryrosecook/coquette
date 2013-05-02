@@ -19,15 +19,18 @@
       }
     },
 
-    create: function(clazz, settings) {
+    create: function(clazz, settings, callback) {
       Coquette.get().runner.add(this, function(entities) {
 	      var entity = new clazz(Coquette.get().game, settings || {});
         Coquette.get().updater.add(entity);
         entities._entities.push(entity);
+        if (callback !== undefined) {
+          callback(entity);
+        }
       });
     },
 
-    destroy: function(entity) {
+    destroy: function(entity, callback) {
       Coquette.get().runner.add(this, function(entities) {
         Coquette.get().updater.remove(entity);
         entity._killed = true;
@@ -35,6 +38,9 @@
         for(var i = 0; i < entities._entities.length; i++) {
           if(entities._entities[i] === entity) {
             entities._entities.splice(i, 1);
+            if (callback !== undefined) {
+              callback();
+            }
             break;
           }
         }
