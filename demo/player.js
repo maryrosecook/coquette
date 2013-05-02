@@ -40,7 +40,7 @@
     draw: function() {
       if (this.game.state !== this.game.STATE.PLAYING) return;
 
-      var ctx = this.game.coquette.renderer.ctx;
+      var ctx = this.game.coquette.renderer.getCtx();
 
       // path circle
       this.game.circle(this.pos, this.size.x / 2, "#222");

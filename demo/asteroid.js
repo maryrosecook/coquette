@@ -57,7 +57,7 @@
 
     draw: function() {
       if (this.game.state !== this.game.STATE.PLAYING) return;
-      var ctx = this.game.coquette.renderer.ctx;
+      var ctx = this.game.coquette.renderer.getCtx();
 
       this.game.startClip();
 

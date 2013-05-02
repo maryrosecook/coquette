@@ -7,6 +7,10 @@
   };
 
   Renderer.prototype = {
+    getCtx: function() {
+      return this.ctx;
+    },
+
     clear: function(color) {
       this.ctx.fillStyle = color;
 		  this.ctx.fillRect(0, 0, this.width, this.height);

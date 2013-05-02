@@ -69,34 +69,34 @@
           }
         }
       } else {
-        this.coquette.renderer.ctx.drawImage(this.introImage,
-                                             this.coquette.renderer.width / 2 - 100,
-                                             this.coquette.renderer.height / 2 - 50);
+        this.coquette.renderer.getCtx().drawImage(this.introImage,
+                                                  this.coquette.renderer.width / 2 - 100,
+                                                  this.coquette.renderer.height / 2 - 50);
       }
 	  },
 
     circle: function(pos, radius, color) {
-      this.coquette.renderer.ctx.strokeStyle = color;
-      this.coquette.renderer.ctx.beginPath();
-      this.coquette.renderer.ctx.arc(pos.x + radius, pos.y + radius,
-                                     radius, 0, Math.PI * 2, true);
-      this.coquette.renderer.ctx.closePath();
-      this.coquette.renderer.ctx.stroke();
-      this.coquette.renderer.ctx.fillRect(10, 10, 10, 10)
+      var ctx = this.coquette.renderer.getCtx();
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+      ctx.arc(pos.x + radius, pos.y + radius, radius, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fillRect(10, 10, 10, 10)
     },
 
     startClip: function() {
-      this.coquette.renderer.ctx.save();
-      this.coquette.renderer.ctx.beginPath();
-      this.coquette.renderer.ctx.arc(this.coquette.renderer.width / 2,
-                                     this.coquette.renderer.height / 2,
-                                     this.coquette.renderer.width / 2 , 0, Math.PI * 2, true);
-      this.coquette.renderer.ctx.closePath();
-      this.coquette.renderer.ctx.clip();
+      var ctx = this.coquette.renderer.getCtx();
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(this.coquette.renderer.width / 2, this.coquette.renderer.height / 2,
+              this.coquette.renderer.width / 2 , 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.clip();
     },
 
     endClip: function() {
-      this.coquette.renderer.ctx.restore();
+      this.coquette.renderer.getCtx().restore();
     },
 
     score: function() {
