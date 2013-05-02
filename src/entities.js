@@ -1,16 +1,9 @@
 ;(function(exports) {
   function Entities() {
-    this.jobs = [];
     this._entities = [];
   };
 
   Entities.prototype = {
-    update: function() {
-      while(this.jobs.length > 0) {
-        this.jobs.pop()();
-      }
-    },
-
     all: function(clazz) {
       if (clazz === undefined) {
         return this._entities;
@@ -27,23 +20,21 @@
     },
 
     create: function(clazz, settings) {
-      var self = this;
-      this.jobs.push(function() {
+      Coquette.get().runner.add(this, function(entities) {
 	      var entity = new clazz(Coquette.get().game, settings || {});
         Coquette.get().updater.add(entity);
-        self._entities.push(entity);
+        entities._entities.push(entity);
       });
     },
 
     destroy: function(entity) {
-      var self = this;
-      this.jobs.push(function() {
+      Coquette.get().runner.add(this, function(entities) {
         Coquette.get().updater.remove(entity);
         entity._killed = true;
         Coquette.get().updater.remove(entity);
-        for(var i = 0; i < self._entities.length; i++) {
-          if(self._entities[i] === entity) {
-            self._entities.splice(i, 1);
+        for(var i = 0; i < entities._entities.length; i++) {
+          if(entities._entities[i] === entity) {
+            entities._entities.splice(i, 1);
             break;
           }
         }

@@ -11,7 +11,6 @@
     this.collider = new Coquette.Collider();
 
     this.updater.add(this.collider);
-    this.updater.add(this.entities);
     this.updater.add(this.runner);
     this.updater.addGame(game);
     this.game = game;
