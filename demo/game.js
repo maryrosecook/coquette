@@ -20,8 +20,11 @@
     maxScore: 30,
 
     init: function() {
-      this.player = this.coquette.entities.create(Player, {
+      var self = this;
+      this.coquette.entities.create(Player, {
         pos: { x:0, y:0 }
+      }, function(player) {
+        self.player = player;
       });
     },
 

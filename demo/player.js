@@ -126,7 +126,11 @@
       this.game.coquette.entities.destroy(this);
       var self = this;
       setTimeout(function() {
-        self.game.coquette.entities.create(Player, { pos: { x:0, y:0 }});
+        self.game.coquette.entities.create(Player, {
+          pos: { x:0, y:0 }
+        }, function(player) {
+          self.game.player = player;
+        });
       }, respawnDelay);
     }
   };
