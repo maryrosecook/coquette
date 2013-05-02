@@ -1,17 +1,8 @@
 ;(function(exports) {
   var Game = function(canvasId, width, height) {
-    this.renderer = new Renderer(canvasId, width, height);
-    this.inputter = new Inputter();
+    this.coquette = new Coquette(this, canvasId, width, height);
+
     this.maths = new Maths();
-    this.updater = new Updater();
-    this.entityer = new Entityer();
-    this.runner = new Runner();
-    this.collider = new Collider();
-
-    this.updater.add(this.collider);
-    this.updater.add(this.entityer);
-    this.updater.add(this.runner);
-
     this.STATE = {
       INTRO: 0,
       PLAYING: 1,
@@ -21,16 +12,15 @@
     this.state = this.STATE.INTRO;
 
     this.introImage = new Image();
-    this.introImage.src = '../demo/intro.png';
+    this.introImage.src = 'intro.png';
   };
 
   Game.prototype = {
-    entities: [],
     player: null,
     maxScore: 30,
 
     init: function() {
-      this.player = game.entityer.add(Player, {
+      this.player = this.coquette.entities.create(Player, {
         pos: { x:0, y:0 }
       });
     },
@@ -41,17 +31,17 @@
           this.state = this.STATE.OVER;
         }
       } else if (this.state === this.STATE.INTRO || this.state === this.STATE.OVER) {
-        if(this.inputter.state(Inputter.SPACE)) {
-          var asteroids = game.entityer.all(Asteroid);
+        if(this.coquette.inputter.state(Coquette.Inputter.SPACE)) {
+          var asteroids = this.coquette.entities.all(Asteroid);
           for (var i = 0; i < asteroids.length; i++) {
             asteroids[i].kill();
           }
 
           for (var i = 0; i < 3; i++) {
-            this.entityer.add(Asteroid, {
+            this.coquette.entities.create(Asteroid, {
               pos: {
-                x: Math.random() * this.renderer.width,
-                y: Math.random() * this.renderer.height
+                x: Math.random() * this.coquette.renderer.width,
+                y: Math.random() * this.coquette.renderer.height
               }
             });
           }
@@ -59,34 +49,58 @@
           this.state = this.STATE.PLAYING;
         }
       }
-      this.draw();
 	  },
 
 	  draw: function() {
-      this.renderer.clear("#000");
+      this.coquette.renderer.clear("#000");
+
       if (this.state === this.STATE.PLAYING) {
         for (var i = 0; i < this.maxScore; i++) {
-          var rAngle = game.maths.degToRad(360 / this.maxScore * i);
+          var rAngle = this.maths.degToRad(360 / this.maxScore * i);
           var pos = {
-            x: game.renderer.width / 2 + Math.sin(rAngle) * 30,
-            y: game.renderer.height / 2 + Math.cos(rAngle) * 30
+            x: this.coquette.renderer.width / 2 + Math.sin(rAngle) * 30,
+            y: this.coquette.renderer.height / 2 + Math.cos(rAngle) * 30
           };
 
           if (i > this.score() - 1) {
-            game.renderer.circle(pos, 0.5, "#222");
+            this.circle(pos, 0.5, "#222");
           } else {
-            game.renderer.circle(pos, 0.5, "#666");
+            this.circle(pos, 0.5, "#666");
           }
         }
       } else {
-        this.renderer.ctx.drawImage(this.introImage,
-                                    this.renderer.width / 2 - 100,
-                                    this.renderer.height / 2 - 50);
+        this.coquette.renderer.ctx.drawImage(this.introImage,
+                                             this.coquette.renderer.width / 2 - 100,
+                                             this.coquette.renderer.height / 2 - 50);
       }
 	  },
 
+    circle: function(pos, radius, color) {
+      this.coquette.renderer.ctx.strokeStyle = color;
+      this.coquette.renderer.ctx.beginPath();
+      this.coquette.renderer.ctx.arc(pos.x + radius, pos.y + radius,
+                                     radius, 0, Math.PI * 2, true);
+      this.coquette.renderer.ctx.closePath();
+      this.coquette.renderer.ctx.stroke();
+      this.coquette.renderer.ctx.fillRect(10, 10, 10, 10)
+    },
+
+    startClip: function() {
+      this.coquette.renderer.ctx.save();
+      this.coquette.renderer.ctx.beginPath();
+      this.coquette.renderer.ctx.arc(this.coquette.renderer.width / 2,
+                                     this.coquette.renderer.height / 2,
+                                     this.coquette.renderer.width / 2 , 0, Math.PI * 2, true);
+      this.coquette.renderer.ctx.closePath();
+      this.coquette.renderer.ctx.clip();
+    },
+
+    endClip: function() {
+      this.coquette.renderer.ctx.restore();
+    },
+
     score: function() {
-      return this.maxScore - this.entityer.all(Asteroid).length;
+      return this.maxScore - this.coquette.entities.all(Asteroid).length;
     },
   };
 

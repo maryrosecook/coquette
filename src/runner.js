@@ -1,4 +1,4 @@
-;(function() {
+;(function(exports) {
   function Runner() {
     this.runs = [];
   };
@@ -23,5 +23,5 @@
     }
   };
 
-  this.Runner = Runner;
-}).call(this);
+  exports.Runner = Runner;
+})(typeof exports === 'undefined' ? this.Coquette : exports);

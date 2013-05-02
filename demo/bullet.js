@@ -1,5 +1,6 @@
 ;(function(exports) {
-  var Bullet = function(settings) {
+  var Bullet = function(game, settings) {
+    this.game = game;
     this.pos = settings.pos;
     this.vel = settings.vector;
   };
@@ -10,14 +11,14 @@
     zIndex: 1,
 
     update: function() {
-      if (game.state !== game.STATE.PLAYING) return;
+      if (this.game.state !== this.game.STATE.PLAYING) return;
 
-		  var mx = this.vel.x * game.updater.tick;
-		  var my = this.vel.y * game.updater.tick;
+		  var mx = this.vel.x * this.game.coquette.updater.tick;
+		  var my = this.vel.y * this.game.coquette.updater.tick;
       this.pos.x += mx;
       this.pos.y += my;
 
-      if (!game.renderer.onScreen(this)) {
+      if (!this.game.coquette.renderer.onScreen(this)) {
         this.kill();
       }
 
@@ -25,11 +26,11 @@
     },
 
     draw: function() {
-      if (game.state !== game.STATE.PLAYING) return;
+      if (this.game.state !== this.game.STATE.PLAYING) return;
 
-      game.renderer.startClip();
-      game.renderer.circle(this.pos, this.size.x / 2, "#fff");
-      game.renderer.endClip();
+      this.game.startClip();
+      this.game.circle(this.pos, this.size.x / 2, "#fff");
+      this.game.endClip();
     },
 
     collision: function(other) {
@@ -39,7 +40,7 @@
     },
 
     kill: function() {
-      game.entityer.remove(this);
+      this.game.coquette.entities.destroy(this);
     }
   };
 

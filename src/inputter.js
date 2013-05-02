@@ -3,6 +3,7 @@
 		window.addEventListener('keydown', this.keydown.bind(this), false);
 		window.addEventListener('keyup', this.keyup.bind(this), false);
 
+    // suppress scrolling
     window.addEventListener("keydown", function(e) {
       // space and arrow keys
       if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
@@ -19,7 +20,6 @@
       if (state !== undefined) {
         this._state[keyCode] = state;
       } else {
-        // console.log(this.bindings[keyCode])
         return this._state[keyCode];
       }
     },
@@ -38,4 +38,4 @@
   Inputter.SPACE = 32;
 
   exports.Inputter = Inputter;
-})(this);
+})(typeof exports === 'undefined' ? this.Coquette : exports);

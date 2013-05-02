@@ -1,6 +1,8 @@
 ;(function(exports) {
-  var Asteroid = function(settings) {
+  var Asteroid = function(game, settings) {
+    this.game = game;
     this.pos = settings.pos;
+    this.boundingBox = Coquette.Collider.CIRCLE;
 
     if (settings.radius === undefined) {
       this.size = { x: 60, y: 60 };
@@ -12,8 +14,8 @@
       this.vel = settings.vel;
     } else {
       this.vel = {
-        x: 0.02 + Math.random() * 0.1 * game.maths.plusMinus(),
-        y: 0.02 + Math.random() * 0.1 * game.maths.plusMinus()
+        x: 0.02 + Math.random() * 0.1 * this.game.maths.plusMinus(),
+        y: 0.02 + Math.random() * 0.1 * this.game.maths.plusMinus()
       };
     }
 
@@ -25,49 +27,47 @@
     destroyed: false,
 
 	  update: function() {
-      if (game.state !== game.STATE.PLAYING) return;
-		  var mx = this.vel.x * game.updater.tick;
-		  var my = this.vel.y * game.updater.tick;
+      if (this.game.state !== this.game.STATE.PLAYING) return;
+		  var mx = this.vel.x * this.game.coquette.updater.tick;
+		  var my = this.vel.y * this.game.coquette.updater.tick;
       this.pos.x += mx;
       this.pos.y += my;
 
       this.wrap();
-
-      this.draw();
 	  },
 
     wrap: function() {
-      if (game.maths.distance(game.maths.center(this), game.renderer.center()) >
-          (game.renderer.width / 2 + this.size.x) + 100) {
+      if (this.game.maths.distance(this.game.maths.center(this), this.game.coquette.renderer.center()) >
+          (this.game.coquette.renderer.width / 2 + this.size.x) + 100) {
         if (this.pos.x < 0) {
-          this.pos.x = game.renderer.width;
-          game.collider.removeEntity(this);
-        } else if (this.pos.x > game.renderer.width) {
+          this.pos.x = this.game.coquette.renderer.width;
+          this.game.coquette.collider.removeEntity(this);
+        } else if (this.pos.x > this.game.coquette.renderer.width) {
           this.pos.x = -this.size.x;
-          game.collider.removeEntity(this);
+          this.game.coquette.collider.removeEntity(this);
         } else if (this.pos.y < 0) {
-          this.pos.y = game.renderer.height + 1;
-          game.collider.removeEntity(this);
-        } else if (this.pos.y > game.renderer.height) {
+          this.pos.y = this.game.coquette.renderer.height + 1;
+          this.game.coquette.collider.removeEntity(this);
+        } else if (this.pos.y > this.game.coquette.renderer.height) {
           this.pos.y = 0;
-          game.collider.removeEntity(this);
+          this.game.coquette.collider.removeEntity(this);
         }
       }
     },
 
     draw: function() {
-      if (game.state !== game.STATE.PLAYING) return;
-      var ctx = game.renderer.ctx;
+      if (this.game.state !== this.game.STATE.PLAYING) return;
+      var ctx = this.game.coquette.renderer.ctx;
 
-      game.renderer.startClip();
+      this.game.startClip();
 
       var color = "#fff";
       if (this.collidingAsteroids.length === 0) {
         color = "#666";
       }
-      game.renderer.circle(this.pos, this.size.x / 2, color);
+      this.game.circle(this.pos, this.size.x / 2, color);
 
-      game.renderer.endClip();
+      this.game.endClip();
     },
 
     destroy: function(other) {
@@ -83,23 +83,34 @@
     },
 
     kill: function() {
-      game.entityer.remove(this);
+      this.game.coquette.entities.destroy(this);
     },
 
     collision: function(other) {
       if (other instanceof Bullet) {
         if (this.collidingAsteroids.length === 0) {
-          Asteroid.spawnTwin(this, other);
+          this.spawnTwin(other);
         } else if (this.collidingAsteroids.length > 0) {
-          game.runner.add(this, function(self) {
+          this.game.coquette.runner.add(this, function(self) {
             self.destroy(other);
           });
         }
       } else if (other instanceof Player) {
-        Asteroid.spawnTwin(this, other);
+        this.spawnTwin(other);
       } else if (other instanceof Asteroid) {
         this.collidingAsteroids.push(other);
       }
+    },
+
+    spawnTwin: function(other) {
+      this.game.coquette.entities.create(Asteroid, {
+        pos: { x:this.pos.x, y:this.pos.y },
+        radius: this.size.x / 2,
+        vel: {
+          x: this.vel.x + other.vel.x / 15 + Math.random() * 0.1,
+          y: this.vel.y + other.vel.y / 15 + Math.random() * 0.1,
+        }
+      });
     },
 
     uncollision: function(other) {
@@ -112,34 +123,6 @@
         }
       }
     }
-  };
-
-  Asteroid.spawnTwin = function(twin, other) {
-    game.entityer.add(Asteroid, {
-      pos: { x:twin.pos.x, y:twin.pos.y },
-      radius: twin.size.x / 2,
-      vel: {
-        x: twin.vel.x + other.vel.x / 15 + Math.random() * 0.1,
-        y: twin.vel.y + other.vel.y / 15 + Math.random() * 0.1,
-      }
-    });
-  };
-
-  Asteroid.spawnAfterShooting = function(player) {
-    var rAngle = game.maths.degToRad(player.angle());
-    var pos = {
-      x: game.renderer.width / 2 - 30 + Math.sin(rAngle) * 250,
-      y: game.renderer.height / 2 - 30 + Math.cos(rAngle) * 250
-    };
-
-    var vel = game.maths.normalise(game.maths.vectorTo(game.renderer.center(), pos));
-    vel.x /= 10;
-    vel.y /= 10;
-
-    game.entityer.add(Asteroid, {
-      pos: pos,
-      vel: vel
-    });
   };
 
   exports.Asteroid = Asteroid;

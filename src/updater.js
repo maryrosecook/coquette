@@ -1,4 +1,4 @@
-;(function() {
+;(function(exports) {
   var interval = 16;
 
   function Updater() {
@@ -12,9 +12,19 @@
       var now = new Date().getTime();
       self.tick = now - self.prev;
       self.prev = now;
-      game.update(); // make sure game updated before everything else
+
+      // call update fns
+      self.game.update(); // make sure game updated before everything else
       for (var i = 0; i < self.updatees.length; i++) {
         self.updatees[i].update();
+      }
+
+      // call draw fns
+      self.game.draw();
+      for (var i = 0; i < self.updatees.length; i++) {
+        if (self.updatees[i].draw !== undefined) {
+          self.updatees[i].draw();
+        }
       }
 
       requestAnimationFrame(update);
@@ -28,6 +38,11 @@
       this.updatees.push(updatee);
     },
 
+    // adds game as special updatee that gets updated first
+    addGame: function(game) {
+      this.game = game;
+    },
+
     remove: function(updatee) {
       for(var i = 0; i < this.updatees.length; i++) {
         if(this.updatees[i] === updatee) {
@@ -39,7 +54,7 @@
   };
 
   // From: https://gist.github.com/paulirish/1579671
-  // Thanks Erik Möller, Paul and Tino
+  // Thanks Erik, Paul and Tino
   var setupRequestAnimationFrame = function() {
     var lastTime = 0;
     var vendors = ['ms', 'moz', 'webkit', 'o'];
@@ -52,7 +67,7 @@
     if (!window.requestAnimationFrame) {
       window.requestAnimationFrame = function(callback, element) {
         var currTime = new Date().getTime();
-        var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+        var timeToCall = Math.max(0, interval - (currTime - lastTime));
         var id = window.setTimeout(function() { callback(currTime + timeToCall); },
                                    timeToCall);
         lastTime = currTime + timeToCall;
@@ -67,5 +82,5 @@
     }
   };
 
-  this.Updater = Updater;
-}).call(this);
+  exports.Updater = Updater;
+})(typeof exports === 'undefined' ? this.Coquette : exports);
