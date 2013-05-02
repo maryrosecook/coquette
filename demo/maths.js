@@ -55,11 +55,6 @@ Maths.prototype = {
       && point.y <= objPos.y + obj.size.y;
   },
 
-  circlesIntersecting: function(obj1, obj2) {
-    return this.distance(this.center(obj1), this.center(obj2)) <
-      obj1.size.x / 2 + obj2.size.x / 2;
-  },
-
   angleToVector: function(angle) {
     var r = this.degToRad(angle);
 
