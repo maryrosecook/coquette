@@ -1,0 +1,14 @@
+{
+  "name": "coquette.js",
+  "description": "A micro game framework.",
+  "author": "Mary Rose Cook <maryrosecook@maryrosecook.com> (http://maryrosecook.com/)",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node_modules/jasmine-node/bin/jasmine-node spec/",
+    "prepublish": "node scripts/minifier.js"
+  },
+  "devDependencies": {
+    "node.packer": "2.0.0",
+    "jasmine-node": "1.0.26"
+  }
+}
