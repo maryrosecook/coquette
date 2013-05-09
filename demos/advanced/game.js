@@ -1,6 +1,6 @@
 ;(function(exports) {
   var Game = function(canvasId, width, height) {
-    this.coquette = new Coquette(this, canvasId, width, height);
+    this.coquette = new Coquette(this, canvasId, width, height, "#000");
 
     this.maths = new Maths();
     this.STATE = {
@@ -55,8 +55,6 @@
 	  },
 
 	  draw: function() {
-      this.coquette.renderer.clear("#000");
-
       if (this.state === this.STATE.PLAYING) {
         for (var i = 0; i < this.maxScore; i++) {
           var rAngle = this.maths.degToRad(360 / this.maxScore * i);
