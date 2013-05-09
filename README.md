@@ -10,8 +10,6 @@ http://github.com/maryrosecook/coquette
 
 ## Get the code
 
-### Git
-
     $ git clone git://github.com/maryrosecook/coquette.git
 
 ## Example
