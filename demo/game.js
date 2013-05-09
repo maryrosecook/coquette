@@ -85,7 +85,6 @@
       ctx.arc(pos.x + radius, pos.y + radius, radius, 0, Math.PI * 2, true);
       ctx.closePath();
       ctx.stroke();
-      ctx.fillRect(10, 10, 10, 10)
     },
 
     startClip: function() {
