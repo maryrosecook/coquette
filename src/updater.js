@@ -14,13 +14,11 @@
       self.prev = now;
 
       // call update fns
-      self.game.update(); // make sure game updated before everything else
       for (var i = 0; i < self.updatees.length; i++) {
         self.updatees[i].update();
       }
 
       // call draw fns
-      self.game.draw();
       for (var i = 0; i < self.updatees.length; i++) {
         if (self.updatees[i].draw !== undefined) {
           self.updatees[i].draw();
@@ -36,11 +34,6 @@
   Updater.prototype = {
     add: function(updatee) {
       this.updatees.push(updatee);
-    },
-
-    // adds game as special updatee that gets updated first
-    addGame: function(game) {
-      this.game = game;
     },
 
     remove: function(updatee) {

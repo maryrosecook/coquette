@@ -12,8 +12,8 @@
 
     this.updater.add(this.collider);
     this.updater.add(this.runner);
-    this.updater.addGame(game);
     this.updater.add(this.renderer);
+    this.updater.add(game);
     this.game = game;
   };
 
