@@ -86,19 +86,21 @@
       this.game.coquette.entities.destroy(this);
     },
 
-    collision: function(other) {
-      if (other instanceof Bullet) {
-        if (this.collidingAsteroids.length === 0) {
-          this.spawnTwin(other);
-        } else if (this.collidingAsteroids.length > 0) {
-          this.game.coquette.runner.add(this, function(self) {
-            self.destroy(other);
-          });
-        }
-      } else if (other instanceof Player) {
+    collision: function(other, type) {
+      if (type === this.game.coquette.collider.INITIAL) {
+        if (other instanceof Bullet) {
+          if (this.collidingAsteroids.length === 0) {
+            this.spawnTwin(other);
+          } else if (this.collidingAsteroids.length > 0) {
+            this.game.coquette.runner.add(this, function(self) {
+              self.destroy(other);
+            });
+          }
+        } else if (other instanceof Player) {
         this.spawnTwin(other);
-      } else if (other instanceof Asteroid) {
-        this.collidingAsteroids.push(other);
+        } else if (other instanceof Asteroid) {
+          this.collidingAsteroids.push(other);
+        }
       }
     },
 
