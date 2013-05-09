@@ -39,14 +39,8 @@
       var recordId = this.getCollideRecord(entity1, entity2);
       if (recordId !== undefined) {
         var record = this.collideRecords[recordId];
-        if (record[0].uncollision !== undefined) {
-          record[0].uncollision(record[1]);
-        }
-
-        if (record[1].uncollision !== undefined) {
-          record[1].uncollision(record[0]);
-        }
-
+        notifyEntityOfUncollision(record[0], record[1])
+        notifyEntityOfUncollision(record[1], record[0])
         this.collideRecords.splice(recordId, 1);
       }
     },
@@ -75,6 +69,10 @@
       entity.collision(other, type);
     }
   };
+
+  var notifyEntityOfUncollision = function(entity, other) {
+    if (entity.uncollision !== undefined) {
+      entity.uncollision(other);
     }
   };
 
