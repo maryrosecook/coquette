@@ -2,12 +2,11 @@
 
 A micro framework for JavaScript games.
 
+http://github.com/maryrosecook/coquette
+
 * By Mary Rose Cook
 * http://maryrosecook.com
 * maryrosecook@maryrosecook.com
-
-* http://coquette.maryrosecook.com
-* http://github.com/maryrosecook/coquette
 
 ## Get the code
 
