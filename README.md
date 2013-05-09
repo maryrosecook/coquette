@@ -1,15 +1,77 @@
-# Left Right Space
+# Coquette
 
-http://maryrosecook.com/leftrightspace
+A micro framework for JavaScript games.
 
-http://github.com/maryrosecook/leftrightspace
-
-http://www.ludumdare.com/compo/ludum-dare-26/?action=preview&uid=22314
-
-* by Mary Rose Cook
+* By Mary Rose Cook
 * http://maryrosecook.com
 * maryrosecook@maryrosecook.com
 
-My entry for Ludum Dare 26.
+* http://coquette.maryrosecook.com
+* http://github.com/maryrosecook/coquette
 
-If you crash into a bubble, a bubble is created. If you shoot, a bubble is created. If your bullet hits a bubble that is not touching any other bubbles, a bubble is created. If your bullet hits a bubble that is touching other bubbles, all of them are destroyed. If you create more than thirty bubbles, you are destroyed.
+## Get the code
+
+### Git
+
+    $ git clone git://github.com/maryrosecook/coquette.git
+
+## Import the code
+
+    <script type="text/javascript" src="coquette-min.js"></script>
+
+## Example
+
+This code appears in `demos/simple/`.
+
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <script type="text/javascript" src="../../src/coquette-min.js"></script>
+        <script type="text/javascript">
+          var Person = function(game, settings) {
+            for (var i in settings) {
+              this[i] = settings[i];
+            }
+            this.size = { x:9, y:9 };
+            this.draw = function() {
+              game.coquette.renderer.getCtx().fillStyle = settings.color;
+              game.coquette.renderer.getCtx().fillRect(this.pos.x, this.pos.y,
+                                                       this.size.x, this.size.y);
+            };
+          };
+
+          var Game = function(canvasId, width, height) {
+            var coquette = new Coquette(this, canvasId, width, height, "#000");
+            this.coquette = coquette;
+
+            coquette.entities.create(Person, { pos:{x:68, y:40 }, color:"#0f0" }); // paramour
+            coquette.entities.create(Person, { pos:{x:74, y:110 }, color:"#f00", // player
+              update: function() {
+                if (coquette.inputter.state(coquette.inputter.UP_ARROW)) {
+                  this.pos.y -= 0.4;
+                }
+              },
+              collision: function(other) {
+                other.pos.y = this.pos.y; // follow the player
+              }
+            });
+          };
+
+          window.addEventListener('load', function() {
+            new Game("canvas", 150, 150);
+          });
+        </script>
+      </head>
+      <body><canvas id="canvas"></canvas></body>
+    </html>
+
+
+## Run the tests
+
+Install Node.js and npm: https://github.com/isaacs/npm
+
+Install the node dependencies and run the tests with:
+
+    $ cd path/to/coquette
+    $ npm install --dev
+    $ npm test
