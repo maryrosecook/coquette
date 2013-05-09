@@ -34,7 +34,7 @@
           this.state = this.STATE.OVER;
         }
       } else if (this.state === this.STATE.INTRO || this.state === this.STATE.OVER) {
-        if(this.coquette.inputter.state(Coquette.Inputter.SPACE)) {
+        if(this.coquette.inputter.state(this.coquette.inputter.SPACE)) {
           var asteroids = this.coquette.entities.all(Asteroid);
           for (var i = 0; i < asteroids.length; i++) {
             asteroids[i].kill();
