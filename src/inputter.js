@@ -20,7 +20,7 @@
       if (state !== undefined) {
         this._state[keyCode] = state;
       } else {
-        return this._state[keyCode];
+        return this._state[keyCode] || false;
       }
     },
 
