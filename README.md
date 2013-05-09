@@ -15,10 +15,6 @@ A micro framework for JavaScript games.
 
     $ git clone git://github.com/maryrosecook/coquette.git
 
-## Import the code
-
-    <script type="text/javascript" src="coquette-min.js"></script>
-
 ## Example
 
 This code appears in `demos/simple/`.
