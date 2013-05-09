@@ -31,11 +31,12 @@
     keyup: function(e) {
       this.state(e.keyCode, false);
     },
+
+	  LEFT_ARROW: 37,
+	  RIGHT_ARROW: 39,
+	  UP_ARROW: 38,
+	  DOWN_ARROW: 40,
+    SPACE: 32
   };
-
-	Inputter.LEFT_ARROW = 37;
-	Inputter.RIGHT_ARROW = 39;
-  Inputter.SPACE = 32;
-
   exports.Inputter = Inputter;
 })(typeof exports === 'undefined' ? this.Coquette : exports);
