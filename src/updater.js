@@ -15,7 +15,9 @@
 
       // call update fns
       for (var i = 0; i < self.updatees.length; i++) {
-        self.updatees[i].update();
+        if (self.updatees[i].update !== undefined) {
+          self.updatees[i].update();
+        }
       }
 
       // call draw fns
