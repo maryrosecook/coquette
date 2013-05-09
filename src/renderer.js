@@ -1,7 +1,8 @@
 ;(function(exports) {
-  var Renderer = function(canvasId, width, height) {
+  var Renderer = function(canvasId, width, height, backgroundColor) {
     var canvas = document.getElementById(canvasId);
     this.ctx = canvas.getContext('2d');
+    this.backgroundColor = backgroundColor;
     canvas.width = this.width = width;
     canvas.height = this.height = height;
   };
@@ -11,8 +12,8 @@
       return this.ctx;
     },
 
-    clear: function(color) {
-      this.ctx.fillStyle = color;
+    update: function() {
+      this.ctx.fillStyle = this.backgroundColor;
 		  this.ctx.fillRect(0, 0, this.width, this.height);
     },
 
