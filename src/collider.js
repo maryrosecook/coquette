@@ -10,7 +10,7 @@
         for (var j = i; j < len; j++) {
           if (ent[i] !== ent[j]) {
             if (Maths.isIntersecting(ent[i], ent[j])) {
-              this.addNewCollision(ent[i], ent[j]);
+              this.collision(ent[i], ent[j]);
             } else {
               this.removeOldCollision(ent[i], ent[j]);
             }
@@ -19,7 +19,7 @@
       }
     },
 
-    addNewCollision: function(entity1, entity2) {
+    collision: function(entity1, entity2) {
       if (this.getCollideRecord(entity1, entity2) === undefined) {
         this.collideRecords.push([entity1, entity2]);
         if (entity1.collision !== undefined) {
