@@ -22,13 +22,11 @@
     collision: function(entity1, entity2) {
       if (this.getCollideRecord(entity1, entity2) === undefined) {
         this.collideRecords.push([entity1, entity2]);
-        if (entity1.collision !== undefined) {
-          entity1.collision(entity2);
-        }
-
-        if (entity2.collision !== undefined) {
-          entity2.collision(entity1);
-        }
+        notifyEntityOfCollision(entity1, entity2, this.INITIAL);
+        notifyEntityOfCollision(entity2, entity1, this.INITIAL);
+      } else {
+        notifyEntityOfCollision(entity1, entity2, this.SUSTAINED);
+        notifyEntityOfCollision(entity2, entity1, this.SUSTAINED);
       }
     },
 
@@ -66,6 +64,17 @@
           return i;
         }
       }
+    },
+
+    INITIAL: 0,
+    SUSTAINED: 1
+  };
+
+  var notifyEntityOfCollision = function(entity, other, type) {
+    if (entity.collision !== undefined) {
+      entity.collision(other, type);
+    }
+  };
     }
   };
 
