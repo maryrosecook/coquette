@@ -1,6 +1,4 @@
 ;(function(exports) {
-  var coquette;
-
   var Coquette = function(game, canvasId, width, height, backgroundColor) {
     coquette = this;
     this.renderer = new Coquette.Renderer(canvasId, width, height, backgroundColor);
@@ -17,6 +15,7 @@
     this.game = game;
   };
 
+  var coquette;
   Coquette.get = function() {
     return coquette;
   };
