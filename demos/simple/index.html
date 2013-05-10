@@ -3,18 +3,6 @@
   <head>
     <script type="text/javascript" src="../../src/coquette-min.js"></script>
     <script type="text/javascript">
-      var Person = function(game, settings) {
-        for (var i in settings) {
-          this[i] = settings[i];
-        }
-        this.size = { x:9, y:9 };
-        this.draw = function() {
-          game.coquette.renderer.getCtx().fillStyle = settings.color;
-          game.coquette.renderer.getCtx().fillRect(this.pos.x, this.pos.y,
-                                                   this.size.x, this.size.y);
-        };
-      };
-
       var Game = function(canvasId, width, height) {
         var coquette = new Coquette(this, canvasId, width, height, "#000");
         this.coquette = coquette;
@@ -30,6 +18,18 @@
             other.pos.y = this.pos.y; // follow the player
           }
         });
+      };
+
+      var Person = function(game, settings) {
+        this.game = game;
+        for (var i in settings) {
+          this[i] = settings[i];
+        }
+        this.size = { x:9, y:9 };
+        this.draw = function() {
+          game.coq.renderer.getCtx().fillStyle = settings.color;
+          game.coq.renderer.getCtx().fillRect(this.pos.x, this.pos.y, this.size.x, this.size.y);
+        };
       };
 
       window.addEventListener('load', function() {
