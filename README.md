@@ -74,3 +74,23 @@ Install the node dependencies and run the tests with:
     $ cd path/to/coquette
     $ npm install --dev
     $ npm test
+
+## Documentation
+
+To begin, instantiate Coquette, passing in:
+
+* Your main game object
+* The ID of the canvas element, e.g. "canvas"
+* Desired width of the canvas element.
+* Desired height of the canvas element.
+* The background colour of your game, e.g. "#000"
+
+```javascript
+var coquette = new Coquette(game, "canvas", 150, 150, "#000");
+```
+
+When you instantiate Coquette, you get an object that has six modules that you can use in your game.
+
+### Inputter
+
+Handles keyboard input.  To find out if a certain key is pressed, call `coquette.inputter.state(keyCode)`, where `keyCode` is the key's code.  You can use the built-in keyCode constants, too: `coquette.inputter.state(coquette.inputter.LEFT_ARROW)`.
