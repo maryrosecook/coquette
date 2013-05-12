@@ -1,6 +1,6 @@
 # Coquette
 
-A micro JavaScript game framework.
+A JavaScript game micro framework.
 
 http://github.com/maryrosecook/coquette
 
