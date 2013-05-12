@@ -1,0 +1,46 @@
+body {
+	font-family:"Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, sans-serif;
+	font-size:12px;
+    width: 500px;
+    margin-left:auto;
+    margin-right:auto;
+    text-align: justify;
+}
+
+a { color:black; }
+a:visited { color:black; }
+
+h1 { font-size: 55px; font-weight:normal;
+     margin-left:auto; margin-right:auto; text-align:center;
+     margin-top:0; margin-bottom:0;
+   }
+h2 { font-size: 30px; font-weight:normal; margin: 8px 0 2px -2px; }
+h3 { font-size: 23px; font-weight:normal; margin-top:16px; margin-bottom:16px;  }
+h4 { font-size: 19px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
+h5 { font-size: 14px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
+
+p { line-height:15px; margin:8px 0 8px 0; }
+
+hr { color: #aaa; background-color:#aaa; height:1px; border:0; }
+
+img { margin:10px 0 10px 0; }
+
+.footer { width:100px; margin-left: auto; margin-right: auto;  }
+
+pre {
+  border-top:1px solid #ddd;
+  border-bottom:1px solid #ddd;
+  padding-top:15px;
+  padding-left:-50px;
+  margin-bottom:15px;
+  padding: 1em 0;
+  font-size:12px;
+  font-family: 'monaco', 'courier';
+}
+
+.byline { margin-top:-45px; margin-left:5px; }
+
+ol { padding-left: 16px; }
+li { padding: 5px 0 5px 0; }
+
+.demo { padding:11px 0 7px 0; }
