@@ -1,6 +1,6 @@
 # Coquette
 
-A JavaScript game micro framework.
+A micro framework for JavaScript games.
 
 Handles collision detection, the game update loop, keyboard input and canvas rendering.
 
