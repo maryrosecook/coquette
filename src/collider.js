@@ -61,7 +61,10 @@
     },
 
     INITIAL: 0,
-    SUSTAINED: 1
+    SUSTAINED: 1,
+
+    RECTANGLE: 0,
+    CIRCLE: 1
   };
 
   var notifyEntityOfCollision = function(entity, other, type) {
@@ -76,9 +79,6 @@
     }
   };
 
-  Collider.RECTANGLE = 0;
-  Collider.CIRCLE = 1;
-
   var Maths = {
     center: function(obj) {
       if(obj.pos !== undefined) {
@@ -90,16 +90,17 @@
     },
 
     isIntersecting: function(obj1, obj2) {
-      var obj1BoundingBox = obj1.boundingBox || Collider.RECTANGLE;
-      var obj2BoundingBox = obj2.boundingBox || Collider.RECTANGLE;
-
-      if (obj1BoundingBox === Collider.RECTANGLE && obj2BoundingBox === Collider.RECTANGLE) {
+      var obj1BoundingBox = obj1.boundingBox || Coquette.get().collider.RECTANGLE;
+      var obj2BoundingBox = obj2.boundingBox || Coquette.get().collider.RECTANGLE;
+      if (obj1BoundingBox === Coquette.get().collider.RECTANGLE &&
+          obj2BoundingBox === Coquette.get().collider.RECTANGLE) {
         return Maths.rectanglesIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === Collider.CIRCLE && obj2BoundingBox === Collider.CIRCLE) {
+      } else if (obj1BoundingBox === Coquette.get().collider.CIRCLE &&
+                 obj2BoundingBox === Coquette.get().collider.CIRCLE) {
         return Maths.circlesIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === Collider.CIRCLE) {
+      } else if (obj1BoundingBox === Coquette.get().collider.CIRCLE) {
         return Maths.circleAndRectangleIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === Collider.RECTANGLE) {
+      } else if (obj1BoundingBox === Coquette.get().collider.RECTANGLE) {
         return Maths.circleAndRectangleIntersecting(obj2, obj1);
       } else {
         throw "Objects being collision tested have unsupported bounding box types."
