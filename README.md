@@ -82,10 +82,10 @@ Install the node dependencies and run the tests with:
 Instantiate Coquette, passing in:
 
 * Your main game object.
-* The ID of the canvas element, e.g. "canvas".
+* The ID of the canvas element, e.g. `"canvas"`.
 * The desired width of the canvas element.
 * The desired height of the canvas element.
-* The background colour of your game, e.g. "#000".
+* The background colour of your game, e.g. `"#000"`.
 
 ```javascript
 var coquette = new Coquette(game, "canvas", 150, 150, "#000");
@@ -197,3 +197,25 @@ And, optionally, these methods:
 
 * `collision(other, type)`: called when an entity collides with another entity.  Takes `other`, the entity that has collided.  Takes `type`, which will be `coquette.collider.INITIAL`, if the entities began colliding in this tick, or `coquette.collider.SUSTAINED`, if the entities were colliding in the previous tick.
 * `uncollision(other)`: called when an entity stops colliding with another entity.  Takes `other`, the entity that has collided.
+
+e.g.:
+
+```javascript
+var Player = function() {
+  this.pos = { x: 10, y: 20 };
+  this.size = { x: 50, y: 30 };
+  this.boundingBox = coquette.collider.CIRCLE;
+
+  this.collision = function(other, type) {
+    if (type === coquette.collider.INITIAL) {
+      console.log("Ow,", other, "hit me.");
+    } else if (type === coquette.collider.SUSTAINED) {
+      console.log("Ow,", other, "is still hitting me.");
+    }
+  };
+
+  this.uncollision = function() {
+    console.log("Phew,", other, "has stopped hitting me.");
+  };
+};
+```
