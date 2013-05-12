@@ -2,6 +2,8 @@
 
 A JavaScript game micro framework.
 
+Handles collision detection, updating game entities and keyboard input.
+
 http://github.com/maryrosecook/coquette
 
 * By Mary Rose Cook
@@ -14,15 +16,15 @@ http://github.com/maryrosecook/coquette
 
 ## Example
 
-This code appears in `demos/simple/`.
+A game where you, the valiant player, must find a person of indeterminate gender in distress so you can take them away from all this.  The code appears in `demos/simple/`.
 
-An HTML page that includes Coquette and the game code:
+An HTML page that includes the Coquette library and the game code:
 
 ```html
 <!DOCTYPE html>
 <html>
   <head>
-    <script type="text/javascript" src="../../src/coquette-min.js"></script>
+    <script type="text/javascript" src="../../src/coquette.js"></script>
     <script type="text/javascript" src="game.js"></script>
   </head>
   <body><canvas id="canvas"></canvas></body>
@@ -93,7 +95,7 @@ var coquette = new Coquette(game, "canvas", 150, 150, "#000");
 
 ### Modules
 
-When you instantiate Coquette, you get an object that has six modules. You can use these modules in your game.
+When you instantiate Coquette, you get an object that has five modules. You can use these modules in your game.
 
 #### Inputter
 
@@ -111,7 +113,7 @@ var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
 
 Calls `update()` and `draw()` on every object added to it.
 
-Objects are added to the `Updater` module.  Each tick - each sixtieth of a second or so - the module calls the `update()` function, if it exists, of each object, then calls the `draw()` function, if it exists, of each object.
+Objects are added to the `Updater` module.  Each tick - each sixtieth of a second or so - the module calls the `update()` function, if it exists, on each object, then calls the `draw()` function, if it exists, on each object.
 
 The main game object is automatically added to the `Updater` module.  Its `update()` and `draw()` functions are called before any other entity's.
 
@@ -129,24 +131,29 @@ ctx.fillRect(0, 0, 10, 10);
 
 #### Entities
 
-Keeps track of all the game entities: the player, enemies.
+Keeps track of all game entities: the player, enemies.
 
 ##### Create an entity
 
-When you create an entity with `Entities`, it will not actually get created until the next tick.  This avoids logical and collision detection problems that might arise from creating an entity mid-tick.
+When you create an entity with the `Entities` module, the entity will not actually get created until the next tick.  This avoids logical and collision detection problems that arise from creating an entity mid-tick.
 
 When you create an entity, it is automatically added to the `Updater` module.
 
 Call `coquette.entities.create()` with:
 
-* The constructor function of the object you want to create, e.g. `Bubble`.
-* An optional settings object, e.g. `{ size: 60 }`.
+* The constructor function of the object you want to create, e.g. `Bubble`.  When this constructor is called, it will get passed the main game object and a settings object.
+* An optional settings object, e.g. `{ radius: 60 }`.
 * An optional callback that will be called when the object is created.  This function will receive the created entity as an argument.
 
 ```javascript
+var Bubble = function(game, settings) {
+    this.game = game;
+    this.radius = settings.radius;
+};
+
 var myBubble;
 coquette.entities.create(Bubble, {
-  size: 60
+  radius: 60
 }, function(bubble) {
   myBubble = bubble;
 });
@@ -154,13 +161,13 @@ coquette.entities.create(Bubble, {
 
 ##### Destroy an entity
 
-When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids logical and collision detection problems that might arise from destroying an entity mid-tick.
+When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids logical and collision detection problems that arise from destroying an entity mid-tick.
 
 When you destroy an entity, it is automatically removed from to the `Updater` module.
 
 Call `coquette.entities.destroy()` with:
 
-* The constructor entity you want to destroy, e.g. `bubble`.
+* The entity you want to destroy, e.g. `bubble`.
 * An optional callback that will be called when the object is destroyed.
 
 ```javascript
@@ -187,16 +194,16 @@ Reports when two entities collide.
 
 ##### Entity setup
 
-To support collisions, put these attributes on your entities:
+To make an entity support collisions, put these attributes on it:
 
-* `pos`: the top left coordinate of the entity, e.g.: `{ x: 10, y: 20 }`.
-* `size`: the entity's size, e.g.: `{ x: 50, y: 30 }`.
+* `pos`: the top left of the entity, e.g.: `{ x: 10, y: 20 }`.
+* `size`: the size of the entity, e.g.: `{ x: 50, y: 30 }`.
 * `boundingBox`: the shape that best approximates the shape of the entity, either `coquette.collider.RECTANGLE` or `coquette.collider.CIRCLE`.
 
 And, optionally, these methods:
 
-* `collision(other, type)`: called when an entity collides with another entity.  Takes `other`, the entity that has collided.  Takes `type`, which will be `coquette.collider.INITIAL`, if the entities began colliding in this tick, or `coquette.collider.SUSTAINED`, if the entities were colliding in the previous tick.
-* `uncollision(other)`: called when an entity stops colliding with another entity.  Takes `other`, the entity that has collided.
+* `collision(other, type)`: called when the entity collides with another entity.  Takes `other`, the other entity involved in the collision.  Takes `type`, which will be `coquette.collider.INITIAL`, if the entities were not colliding in the previous tick, or `coquette.collider.SUSTAINED`, if the entities were colliding in the previous tick.
+* `uncollision(other)`: called when the entity stops colliding with another entity.  Takes `other`, the other entity involved in the collision.
 
 e.g.:
 
@@ -214,7 +221,7 @@ var Player = function() {
     }
   };
 
-  this.uncollision = function() {
+  this.uncollision = function(other) {
     console.log("Phew,", other, "has stopped hitting me.");
   };
 };
