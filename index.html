@@ -1,0 +1,275 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Coquette</title>
+
+    <link type="text/css" rel="stylesheet" href="resources/main.css" />
+    <link type="text/css" rel="stylesheet" href="resources/prettify.css" />
+
+    <script type="text/javascript" src="/resources/prettify.js"></script>
+
+    <script type="text/javascript" src="../../src/coquette.js"></script>
+    <script type="text/javascript" src="demos/simple/game.js"></script>
+    <script type="text/javascript">
+      window.addEventListener('load', function() {
+        new Game("canvas", 500, 150, false);
+      });
+    </script>
+
+  </head>
+  <body onload="prettyPrint()">
+    <a href="https://github.com/maryrosecook/coquette"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
+    <h1>Coquette</h1>
+    <hr/>
+    <h2>About</h2>
+
+    <p>A JavaScript game micro framework.</p>
+
+    <p>Handles collision detection, the game update loop, keyboard input and canvas rendering.</p>
+
+    <h2>Example</h2>
+
+    <div class="demo"><canvas id="canvas"></canvas></body></div>
+
+    <p>A game where you, the valiant player, must find a person of indeterminate gender in distress so you can take them away from all this.  Click on the game, then press the up arrow key to play.</p>
+
+    An HTML page that includes the Coquette library and the game code:
+
+<pre class="prettyprint">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;script type="text/javascript" src="../../src/coquette.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="game.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;&lt;canvas id="canvas"&gt;&lt;/canvas&gt;&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+    The game code:
+
+<pre class="prettyprint">
+var Game = function(canvasId, width, height) {
+  this.coq = new Coquette(this, canvasId, width, height, "#000");
+
+  this.coq.entities.create(Person, { pos:{ x:68, y:40 }, color:"#0f0" });
+  this.coq.entities.create(Person, { pos:{ x:74, y:110 }, color:"#f00",
+    update: function() {
+      if (this.game.coq.inputter.state(this.game.coq.inputter.UP_ARROW)) {
+        this.pos.y -= 0.4;
+      }
+    },
+    collision: function(other) {
+      other.pos.y = this.pos.y; // follow the player
+    }
+  });
+};
+
+var Person = function(game, settings) {
+  this.game = game;
+  for (var i in settings) {
+    this[i] = settings[i];
+  }
+  this.size = { x:9, y:9 };
+  this.draw = function() {
+    game.coq.renderer.getCtx().fillStyle = settings.color;
+    game.coq.renderer.getCtx().fillRect(this.pos.x, this.pos.y,
+                                        this.size.x, this.size.y);
+  };
+};
+
+window.addEventListener('load', function() {
+  new Game("canvas", 150, 150);
+});
+</pre>
+
+    <h2>Get the code</h2>
+
+<pre class="prettyprint">
+  $ git clone git://github.com/maryrosecook/coquette.git
+</pre>
+
+    <h2>Demo game</h2>
+
+    <p><a href='demos/advanced/'><img src="resources/leftrightspace.png" width="500"/></a></p>
+
+    <h2>Reference</h2>
+
+    <h3>Getting started</h3>
+
+    <p>Instantiate Coquette, passing in:</p>
+
+    <ul>
+      <li>Your main game object.</li>
+      <li>The ID of the canvas element, e.g. <code>"canvas"</code>.</li>
+      <li>The desired width of the canvas element.</li>
+      <li>The desired height of the canvas element.</li>
+      <li>The background colour of your game, e.g. <code>"#000"</code>.</li>
+    </ul>
+
+<pre class="prettyprint">
+  var coquette = new Coquette(game, "canvas", 150, 150, "#000");
+</pre>
+
+    <h3>Modules</h3>
+
+    <p>When you instantiate Coquette, you get an object that has five modules. You can use these modules in your game.</p>
+
+    <h4>Inputter</h4>
+
+    Handles keyboard input from the player.
+
+    <h5>Find out if a certain key is pressed</h5>
+
+    Call <code>coquette.inputter.state()</code>, passing in the key's code, e.g.:
+
+<pre class="prettyprint">
+  var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
+</pre>
+
+    <h4>Updater</h4>
+
+    <p>Calls <code>update()</code> and <code>draw()</code> on every object added to it.</p>
+
+    <p>Objects are added to the <code>Updater</code> module.  Each tick - each sixtieth of a second or so - the module calls the <code>update()</code> function, if it exists, on each object, then calls the <code>draw()</code> function, if it exists, on each object.</p>
+
+    <p>The main game object is automatically added to the <code>Updater</code> module.  Its <code>update()</code> and <code>draw()</code> functions are called before any other entity's.</p>
+
+    <p>Any entity created with the <code>Entities</code> module is automatically added to the <code>Updater</code> module.</p>
+
+    <h4>Renderer</h4>
+
+    <h5>Get the canvas drawing context</h5>
+
+<pre class="prettyprint">
+  var ctx = coquette.renderer.getCtx();
+  ctx.fillStyle = "#f00";
+  ctx.fillRect(0, 0, 10, 10);
+</pre>
+
+    <h4>Entities</h4>
+
+    <p>Keeps track of all game entities: the player, enemies.</p>
+
+    <h5>Create an entity</h5>
+
+    <p>When you create an entity with the <code>Entities</code> module, the entity will not actually get created until the next tick.  This avoids logical and collision detection problems that arise from creating an entity mid-tick.</p>
+
+    <p>When you create an entity, it is automatically added to the <code>Updater</code> module.</p>
+
+    <p>Call <code>coquette.entities.create()</code> with:</p>
+
+    <ul>
+      <li>The constructor function of the object you want to create, e.g. <code>Bubble</code>.  When this constructor is called, it will get passed the main game object and a settings object.</li>
+      <li>An optional settings object, e.g. <code>{ radius: 60 }</code>.</li>
+      <li>An optional callback that will be called when the object is created.  This function will receive the created entity as an argument.</li>
+    </ul>
+
+<pre class="prettyprint">
+  var Bubble = function(game, settings) {
+    this.game = game;
+    this.radius = settings.radius;
+  };
+
+  var myBubble;
+  coquette.entities.create(Bubble, {
+    radius: 60
+  }, function(bubble) {
+    myBubble = bubble;
+  });
+</pre>
+
+
+
+
+    <h5>Destroy an entity</h5>
+
+    <p>When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids logical and collision detection problems that arise from destroying an entity mid-tick.</p>
+
+    <p>When you destroy an entity, it is automatically removed from to the <code>Updater</code> module.</p>
+
+    <p>Call <code>coquette.entities.destroy()</code> with:</p>
+
+    <ul>
+      <li>The entity you want to destroy, e.g. <code>bubble</code>.</li>
+      <li>An optional callback that will be called when the object is destroyed.</li>
+    </ul>
+
+<pre class="prettyprint">
+coquette.entities.destroy(bubble, function() {
+  console.log("boom");
+});
+</pre>
+
+
+
+    <h5>Get all the entities in the game</h5>
+
+<pre class="prettyprint">
+var all = coquette.entities.all();
+</pre>
+
+    <h5>Get all the entities of a certain type</h5>
+
+<pre class="prettyprint">
+var player = coquette.entities.all(Player)[0];
+</pre>
+
+
+    <h4>Collider</h4>
+
+    <p>Reports when two entities collide.</p>
+
+    <h5>Entity setup</h5>
+
+    <p>To make an entity support collisions, put these attributes on it:</p>
+
+    <ul>
+      <li><code>pos</code>: the top left of the entity, e.g.: <code>{ x: 10, y: 20 }</code>.</li>
+      <li><code>size</code>: the size of the entity, e.g.: <code>{ x: 50, y: 30 }</code>.</li>
+      <li><code>boundingBox</code>: the shape that best approximates the shape of the entity, either <code>coquette.collider.RECTANGLE</code> or <code>coquette.collider.CIRCLE</code>.</li>
+    </ul>
+
+    <p>And, optionally, these methods:</p>
+
+    <ul>
+      <li><code>collision(other, type)</code>: called when the entity collides with another entity.  Takes <code>other</code>, the other entity involved in the collision.  Takes <code>type</code>, which will be <code>coquette.collider.INITIAL</code> if the entities were not colliding in the previous tick, or <code>coquette.collider.SUSTAINED</code> if the entities were colliding in the previous tick.</li>
+      <li><code>uncollision(other)</code>: called when the entity was colliding with <code>other</code> in the last tick, but is no longer.</li>
+    </ul>
+
+    <p>e.g.:</p>
+
+<pre class="prettyprint">
+var Player = function() {
+  this.pos = { x: 10, y: 20 };
+  this.size = { x: 50, y: 30 };
+  this.boundingBox = coquette.collider.CIRCLE;
+
+  this.collision = function(other, type) {
+    if (type === coquette.collider.INITIAL) {
+      console.log("Ow,", other, "hit me.");
+    } else if (type === coquette.collider.SUSTAINED) {
+      console.log("Ow,", other, "is still hitting me.");
+    }
+  };
+
+  this.uncollision = function(other) {
+    console.log("Phew,", other, "has stopped hitting me.");
+  };
+};
+</pre>
+
+
+    <h2>Licence</h2>
+
+    <p>
+      The <a href='http://github.com/maryrosecook/glazz'>code</a> is open source, under the <a href='http://en.wikipedia.org/wiki/MIT_License'>MIT licence</a>.
+    </p>
+
+    <hr/>
+    <div class="footer">
+      <a href="http://maryrosecook.com">maryrosecook.com</a>
+    </div>
+   </body>
+ </html>
