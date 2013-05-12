@@ -75,7 +75,7 @@ Install the node dependencies and run the tests with:
     $ npm install --dev
     $ npm test
 
-## Documentation
+## Reference
 
 ### Getting started
 
