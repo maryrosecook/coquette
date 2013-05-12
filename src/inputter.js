@@ -1,15 +1,25 @@
  ;(function(exports) {
-  var Inputter = function() {
-		window.addEventListener('keydown', this.keydown.bind(this), false);
-		window.addEventListener('keyup', this.keyup.bind(this), false);
+  var Inputter = function(canvasId, autoFocus) {
+    if (autoFocus === undefined) {
+      autoFocus = true;
+    }
 
-    // suppress scrolling
-    window.addEventListener("keydown", function(e) {
-      // space and arrow keys
-      if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
-        e.preventDefault();
-      }
-    }, false);
+    var inputReceiverElement = window;
+    if (!autoFocus) {
+      inputReceiverElement = document.getElementById(canvasId)
+      inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
+    } else {
+      // suppress scrolling
+      window.addEventListener("keydown", function(e) {
+        // space and arrow keys
+        if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+          e.preventDefault();
+        }
+      }, false);
+    }
+
+		inputReceiverElement.addEventListener('keydown', this.keydown.bind(this), false);
+		inputReceiverElement.addEventListener('keyup', this.keyup.bind(this), false);
   };
 
   Inputter.prototype = {

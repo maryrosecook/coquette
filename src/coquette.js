@@ -1,8 +1,8 @@
 ;(function(exports) {
-  var Coquette = function(game, canvasId, width, height, backgroundColor) {
+  var Coquette = function(game, canvasId, width, height, backgroundColor, autoFocus) {
     coquette = this;
     this.renderer = new Coquette.Renderer(canvasId, width, height, backgroundColor);
-    this.inputter = new Coquette.Inputter();
+    this.inputter = new Coquette.Inputter(canvasId, autoFocus);
     this.updater = new Coquette.Updater();
     this.entities = new Coquette.Entities();
     this.runner = new Coquette.Runner();
@@ -245,17 +245,27 @@
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
  ;(function(exports) {
-  var Inputter = function() {
-		window.addEventListener('keydown', this.keydown.bind(this), false);
-		window.addEventListener('keyup', this.keyup.bind(this), false);
+  var Inputter = function(canvasId, autoFocus) {
+    if (autoFocus === undefined) {
+      autoFocus = true;
+    }
 
-    // suppress scrolling
-    window.addEventListener("keydown", function(e) {
-      // space and arrow keys
-      if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
-        e.preventDefault();
-      }
-    }, false);
+    var inputReceiverElement = window;
+    if (!autoFocus) {
+      inputReceiverElement = document.getElementById(canvasId)
+      inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
+    } else {
+      // suppress scrolling
+      window.addEventListener("keydown", function(e) {
+        // space and arrow keys
+        if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+          e.preventDefault();
+        }
+      }, false);
+    }
+
+		inputReceiverElement.addEventListener('keydown', this.keydown.bind(this), false);
+		inputReceiverElement.addEventListener('keyup', this.keyup.bind(this), false);
   };
 
   Inputter.prototype = {
@@ -400,6 +410,8 @@
 ;(function(exports) {
   var Renderer = function(canvasId, width, height, backgroundColor) {
     var canvas = document.getElementById(canvasId);
+    canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
+    canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
     this.ctx = canvas.getContext('2d');
     this.backgroundColor = backgroundColor;
     canvas.width = this.width = width;
