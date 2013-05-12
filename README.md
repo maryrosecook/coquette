@@ -2,7 +2,7 @@
 
 A JavaScript game micro framework.
 
-Handles collision detection, updating game entities and keyboard input.
+Handles collision detection, the game update loop, keyboard input and canvas rendering.
 
 http://github.com/maryrosecook/coquette
 
@@ -171,18 +171,18 @@ Call `coquette.entities.destroy()` with:
 * An optional callback that will be called when the object is destroyed.
 
 ```javascript
-coquette.entities.create(Bubble, function() {
+coquette.entities.destroy(bubble, function() {
   console.log("boom");
 });
 ```
 
-##### Get all the entities in the game:
+##### Get all the entities in the game
 
 ```javascript
 var all = coquette.entities.all();
 ```
 
-##### Get all the entities of a certain type:
+##### Get all the entities of a certain type
 
 ```javascript
 var player = coquette.entities.all(Player)[0];
