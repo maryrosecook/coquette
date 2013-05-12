@@ -3,6 +3,11 @@
   <head>
     <script type="text/javascript" src="../../src/coquette.js"></script>
     <script type="text/javascript" src="game.js"></script>
+    <script type="text/javascript">
+      window.addEventListener('load', function() {
+        new Game("canvas", 500, 150);
+      });
+    </script>
   </head>
   <body><canvas id="canvas"></canvas></body>
 

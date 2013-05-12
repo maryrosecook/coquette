@@ -1,4 +1,4 @@
-;(function() {
+;(function(exports) {
   var Game = function(canvasId, width, height, autoFocus) {
     this.coq = new Coquette(this, canvasId, width, height, "#000", autoFocus);
 
@@ -27,7 +27,5 @@
     };
   };
 
-  window.addEventListener('load', function() {
-    new Game("canvas", 150, 150);
-  });
-})();
+  exports.Game = Game;
+})(this);
