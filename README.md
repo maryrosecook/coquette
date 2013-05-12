@@ -1,6 +1,6 @@
 # Coquette
 
-A micro framework for JavaScript games.
+A micro JavaScript game framework.
 
 http://github.com/maryrosecook/coquette
 
@@ -77,20 +77,123 @@ Install the node dependencies and run the tests with:
 
 ## Documentation
 
-To begin, instantiate Coquette, passing in:
+### Getting started
 
-* Your main game object
-* The ID of the canvas element, e.g. "canvas"
-* Desired width of the canvas element.
-* Desired height of the canvas element.
-* The background colour of your game, e.g. "#000"
+Instantiate Coquette, passing in:
+
+* Your main game object.
+* The ID of the canvas element, e.g. "canvas".
+* The desired width of the canvas element.
+* The desired height of the canvas element.
+* The background colour of your game, e.g. "#000".
 
 ```javascript
 var coquette = new Coquette(game, "canvas", 150, 150, "#000");
 ```
 
-When you instantiate Coquette, you get an object that has six modules that you can use in your game.
+### Modules
 
-### Inputter
+When you instantiate Coquette, you get an object that has six modules. You can use these modules in your game.
 
-Handles keyboard input.  To find out if a certain key is pressed, call `coquette.inputter.state(keyCode)`, where `keyCode` is the key's code.  You can use the built-in keyCode constants, too: `coquette.inputter.state(coquette.inputter.LEFT_ARROW)`.
+#### Inputter
+
+Handles keyboard input from the player.
+
+##### Find out if a certain key is pressed
+
+Call `coquette.inputter.state()`, passing in the key's code, e.g.:
+
+```javascript
+var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
+```
+
+#### Updater
+
+Calls `update()` and `draw()` on every object added to it.
+
+Objects are added to the `Updater` module.  Each tick - each sixtieth of a second or so - the module calls the `update()` function, if it exists, of each object, then calls the `draw()` function, if it exists, of each object.
+
+The main game object is automatically added to the `Updater` module.  Its `update()` and `draw()` functions are called before any other entity's.
+
+Any object created with the `Entities` module is automatically added to the `Updater` module.
+
+#### Renderer
+
+##### Get the canvas drawing context
+
+```javascript
+var ctx = coquette.renderer.getCtx();
+ctx.fillStyle = "#f00";
+ctx.fillRect(0, 0, 10, 10);
+```
+
+#### Entities
+
+Keeps track of all the game entities: the player, enemies.
+
+##### Create an entity
+
+When you create an entity with `Entities`, it will not actually get created until the next tick.  This avoids logical and collision detection problems that might arise from creating an entity mid-tick.
+
+When you create an entity, it is automatically added to the `Updater` module.
+
+Call `coquette.entities.create()` with:
+
+* The constructor function of the object you want to create, e.g. `Bubble`.
+* An optional settings object, e.g. `{ size: 60 }`.
+* An optional callback that will be called when the object is created.  This function will receive the created entity as an argument.
+
+```javascript
+var myBubble;
+coquette.entities.create(Bubble, {
+  size: 60
+}, function(bubble) {
+  myBubble = bubble;
+});
+```
+
+##### Destroy an entity
+
+When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids logical and collision detection problems that might arise from destroying an entity mid-tick.
+
+When you destroy an entity, it is automatically removed from to the `Updater` module.
+
+Call `coquette.entities.destroy()` with:
+
+* The constructor entity you want to destroy, e.g. `bubble`.
+* An optional callback that will be called when the object is destroyed.
+
+```javascript
+coquette.entities.create(Bubble, function() {
+  console.log("boom");
+});
+```
+
+##### Get all the entities in the game:
+
+```javascript
+var all = coquette.entities.all();
+```
+
+##### Get all the entities of a certain type:
+
+```javascript
+var player = coquette.entities.all(Player)[0];
+```
+
+#### Collider
+
+Reports when two entities collide.
+
+##### Entity setup
+
+To support collisions, put these attributes on your entities:
+
+* `pos`: the top left coordinate of the entity, e.g.: `{ x: 10, y: 20 }`.
+* `size`: the entity's size, e.g.: `{ x: 50, y: 30 }`.
+* `boundingBox`: the shape that best approximates the shape of the entity, either `coquette.collider.RECTANGLE` or `coquette.collider.CIRCLE`.
+
+And, optionally, these methods:
+
+* `collision(other, type)`: called when an entity collides with another entity.  Takes `other`, the entity that has collided.  Takes `type`, which will be `coquette.collider.INITIAL`, if the entities began colliding in this tick, or `coquette.collider.SUSTAINED`, if the entities were colliding in the previous tick.
+* `uncollision(other)`: called when an entity stops colliding with another entity.  Takes `other`, the entity that has collided.
