@@ -4,7 +4,7 @@ A micro framework for JavaScript games.
 
 Handles collision detection, the game update loop, keyboard input and canvas rendering.
 
-http://github.com/maryrosecook/coquette
+http://coquette.maryrosecook.com
 
 * By Mary Rose Cook
 * http://maryrosecook.com
