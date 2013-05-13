@@ -9,6 +9,6 @@
   },
   "devDependencies": {
     "node.packer": "2.0.0",
-    "jasmine-node": "1.0.26"
+    "jasmine-node": "1.5.0"
   }
 }
