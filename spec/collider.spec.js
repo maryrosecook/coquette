@@ -75,22 +75,22 @@ describe('collider', function() {
       });
 
       it('should return false for two circles that are not colliding', function() {
-        var obj1 = mockObj(5, 5, 10, 10, Coquette.get().collider.CIRCLE);
-        var obj2 = mockObj(14, 14, 10, 10, Coquette.get().collider.CIRCLE);
+        var obj1 = mockObj(5, 5, 10, 10, Collider.CIRCLE);
+        var obj2 = mockObj(14, 14, 10, 10, Collider.CIRCLE);
         var intersecting = Maths.isIntersecting(obj1, obj2);
         expect(intersecting).toEqual(false);
       });
 
       it('should return true for circle+rect that are colliding (circle first)', function() {
-        var obj1 = mockObj(5, 5, 10, 10, Coquette.get().collider.CIRCLE);
-        var obj2 = mockObj(12, 12, 10, 10, Coquette.get().collider.RECTANGLE);
+        var obj1 = mockObj(5, 5, 10, 10, Collider.CIRCLE);
+        var obj2 = mockObj(12, 12, 10, 10, Collider.RECTANGLE);
         var intersecting = Maths.isIntersecting(obj1, obj2);
         expect(intersecting).toEqual(true);
       });
 
       it('should return true for circle+rect that are colliding (rect first)', function() {
-        var obj1 = mockObj(5, 5, 10, 10, Coquette.get().collider.RECTANGLE);
-        var obj2 = mockObj(12, 12, 10, 10, Coquette.get().collider.CIRCLE);
+        var obj1 = mockObj(5, 5, 10, 10, Collider.RECTANGLE);
+        var obj2 = mockObj(12, 12, 10, 10, Collider.CIRCLE);
         var intersecting = Maths.isIntersecting(obj1, obj2);
         expect(intersecting).toEqual(true);
       });
