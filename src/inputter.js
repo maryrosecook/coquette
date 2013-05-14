@@ -18,8 +18,8 @@
       }, false);
     }
 
-		inputReceiverElement.addEventListener('keydown', this.keydown.bind(this), false);
-		inputReceiverElement.addEventListener('keyup', this.keyup.bind(this), false);
+    inputReceiverElement.addEventListener('keydown', this.keydown.bind(this), false);
+    inputReceiverElement.addEventListener('keyup', this.keyup.bind(this), false);
   };
 
   Inputter.prototype = {
@@ -42,10 +42,10 @@
       this.state(e.keyCode, false);
     },
 
-	  LEFT_ARROW: 37,
-	  RIGHT_ARROW: 39,
-	  UP_ARROW: 38,
-	  DOWN_ARROW: 40,
+    LEFT_ARROW: 37,
+    RIGHT_ARROW: 39,
+    UP_ARROW: 38,
+    DOWN_ARROW: 40,
     SPACE: 32
   };
   exports.Inputter = Inputter;
