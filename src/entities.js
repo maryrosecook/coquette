@@ -21,7 +21,7 @@
 
     create: function(clazz, settings, callback) {
       Coquette.get().runner.add(this, function(entities) {
-	      var entity = new clazz(Coquette.get().game, settings || {});
+        var entity = new clazz(Coquette.get().game, settings || {});
         Coquette.get().updater.add(entity);
         entities._entities.push(entity);
         if (callback !== undefined) {

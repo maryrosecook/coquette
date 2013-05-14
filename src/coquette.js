@@ -264,8 +264,8 @@
       }, false);
     }
 
-		inputReceiverElement.addEventListener('keydown', this.keydown.bind(this), false);
-		inputReceiverElement.addEventListener('keyup', this.keyup.bind(this), false);
+    inputReceiverElement.addEventListener('keydown', this.keydown.bind(this), false);
+    inputReceiverElement.addEventListener('keyup', this.keyup.bind(this), false);
   };
 
   Inputter.prototype = {
@@ -288,10 +288,10 @@
       this.state(e.keyCode, false);
     },
 
-	  LEFT_ARROW: 37,
-	  RIGHT_ARROW: 39,
-	  UP_ARROW: 38,
-	  DOWN_ARROW: 40,
+    LEFT_ARROW: 37,
+    RIGHT_ARROW: 39,
+    UP_ARROW: 38,
+    DOWN_ARROW: 40,
     SPACE: 32
   };
   exports.Inputter = Inputter;
@@ -425,7 +425,7 @@
 
     update: function() {
       this.ctx.fillStyle = this.backgroundColor;
-		  this.ctx.fillRect(0, 0, this.width, this.height);
+      this.ctx.fillRect(0, 0, this.width, this.height);
     },
 
     center: function() {
@@ -467,7 +467,7 @@
 
     create: function(clazz, settings, callback) {
       Coquette.get().runner.add(this, function(entities) {
-	      var entity = new clazz(Coquette.get().game, settings || {});
+        var entity = new clazz(Coquette.get().game, settings || {});
         Coquette.get().updater.add(entity);
         entities._entities.push(entity);
         if (callback !== undefined) {
