@@ -61,37 +61,42 @@ describe('collider', function() {
 
     describe('isIntersecting', function() {
       it('should use rect as default bounding box', function() {
+        var collider = new Collider();
         var obj1 = mockObj(5, 5, 10, 10);
         var obj2 = mockObj(15, 15, 10, 10);
-        var intersecting = Maths.isIntersecting(obj1, obj2);
+        var intersecting = collider.isIntersecting(obj1, obj2);
         expect(intersecting).toEqual(true);
       });
 
       it('should return true for two rects that are colliding', function() {
+        var collider = new Collider();
         var obj1 = mockObj(5, 5, 10, 10);
         var obj2 = mockObj(15, 15, 10, 10);
-        var intersecting = Maths.isIntersecting(obj1, obj2);
+        var intersecting = collider.isIntersecting(obj1, obj2);
         expect(intersecting).toEqual(true);
       });
 
       it('should return false for two circles that are not colliding', function() {
         var obj1 = mockObj(5, 5, 10, 10, Coquette.get().collider.CIRCLE);
         var obj2 = mockObj(14, 14, 10, 10, Coquette.get().collider.CIRCLE);
-        var intersecting = Maths.isIntersecting(obj1, obj2);
+        var collider = new Collider();
+        var intersecting = collider.isIntersecting(obj1, obj2);
         expect(intersecting).toEqual(false);
       });
 
       it('should return true for circle+rect that are colliding (circle first)', function() {
         var obj1 = mockObj(5, 5, 10, 10, Coquette.get().collider.CIRCLE);
         var obj2 = mockObj(12, 12, 10, 10, Coquette.get().collider.RECTANGLE);
-        var intersecting = Maths.isIntersecting(obj1, obj2);
+        var collider = new Collider();
+        var intersecting = collider.isIntersecting(obj1, obj2);
         expect(intersecting).toEqual(true);
       });
 
       it('should return true for circle+rect that are colliding (rect first)', function() {
         var obj1 = mockObj(5, 5, 10, 10, Coquette.get().collider.RECTANGLE);
         var obj2 = mockObj(12, 12, 10, 10, Coquette.get().collider.CIRCLE);
-        var intersecting = Maths.isIntersecting(obj1, obj2);
+        var collider = new Collider();
+        var intersecting = collider.isIntersecting(obj1, obj2);
         expect(intersecting).toEqual(true);
       });
     });
