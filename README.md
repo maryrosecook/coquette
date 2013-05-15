@@ -163,7 +163,7 @@ coquette.entities.create(Bubble, {
 
 When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids logical and collision detection problems that arise from destroying an entity mid-tick.
 
-When you destroy an entity, it is automatically removed from to the `Updater` module.
+When you destroy an entity, it is automatically removed from the `Updater` module.
 
 Call `coquette.entities.destroy()` with:
 
