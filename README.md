@@ -196,7 +196,7 @@ Reports when two entities collide.
 
 To make an entity support collisions, put these attributes on it:
 
-* `pos`: the top left of the entity, e.g.: `{ x: 10, y: 20 }`.
+* `pos`: the top left position of the entity, e.g.: `{ x: 10, y: 20 }`.
 * `size`: the size of the entity, e.g.: `{ x: 50, y: 30 }`.
 * `boundingBox`: the shape that best approximates the shape of the entity, either `coquette.collider.RECTANGLE` or `coquette.collider.CIRCLE`.
 
