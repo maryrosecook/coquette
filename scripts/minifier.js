@@ -1,23 +1,25 @@
 // Produces the minified version.
 
 var packer = require( 'node.packer' ),
-    path   = __dirname + '/../src/';
+    path   = __dirname + '/../',
+    src    = path + 'src/',
+    out    = path;
 
 var input = [
-  path + 'main.js',
-  path + 'collider.js',
-  path + 'inputter.js',
-  path + 'runner.js',
-  path + 'updater.js',
-  path + 'renderer.js',
-  path + 'entities.js'
+  src + 'main.js',
+  src + 'collider.js',
+  src + 'inputter.js',
+  src + 'runner.js',
+  src + 'updater.js',
+  src + 'renderer.js',
+  src + 'entities.js'
 ];
 
 packer({
   log: true,
   input: input,
   minify: true,
-  output: path + 'coquette-min.js',
+  output: out + 'coquette-min.js',
   callback: function ( err, code ){
     err && console.log( err );
   }
@@ -27,7 +29,7 @@ packer({
   log: true,
   input: input,
   minify: false,
-  output: path + 'coquette.js',
+  output: out + 'coquette.js',
   callback: function ( err, code ){
     err && console.log( err );
   }
