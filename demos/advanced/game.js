@@ -28,7 +28,7 @@
       });
     },
 
-	  update: function() {
+    update: function() {
       if (this.state === this.STATE.PLAYING) {
         if (this.score() <= 0) {
           this.state = this.STATE.OVER;
@@ -52,9 +52,9 @@
           this.state = this.STATE.PLAYING;
         }
       }
-	  },
+    },
 
-	  draw: function() {
+    draw: function() {
       if (this.state === this.STATE.PLAYING) {
         for (var i = 0; i < this.maxScore; i++) {
           var rAngle = this.maths.degToRad(360 / this.maxScore * i);
@@ -74,7 +74,7 @@
                                                   this.coquette.renderer.width / 2 - 100,
                                                   this.coquette.renderer.height / 2 - 50);
       }
-	  },
+    },
 
     circle: function(pos, radius, color) {
       var ctx = this.coquette.renderer.getCtx();
