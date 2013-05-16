@@ -24,7 +24,7 @@ An HTML page that includes the Coquette library and the game code:
 <!DOCTYPE html>
 <html>
   <head>
-    <script type="text/javascript" src="../../src/coquette.js"></script>
+    <script type="text/javascript" src="../../coquette.js"></script>
     <script type="text/javascript" src="game.js"></script>
   </head>
   <body><canvas id="canvas"></canvas></body>
