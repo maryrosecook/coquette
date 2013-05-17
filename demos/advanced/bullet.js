@@ -6,15 +6,15 @@
   };
 
   Bullet.prototype = {
-	  size: { x:1, y:1 },
+    size: { x:1, y:1 },
     speed: 1000,
     zIndex: 1,
 
     update: function() {
       if (this.game.state !== this.game.STATE.PLAYING) return;
 
-		  var mx = this.vel.x * this.game.coquette.updater.tick;
-		  var my = this.vel.y * this.game.coquette.updater.tick;
+      var mx = this.vel.x * this.game.coquette.updater.tick;
+      var my = this.vel.y * this.game.coquette.updater.tick;
       this.pos.x += mx;
       this.pos.y += my;
 
