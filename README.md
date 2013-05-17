@@ -163,7 +163,7 @@ coquette.entities.create(Bubble, {
 
 When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids logical and collision detection problems that arise from destroying an entity mid-tick.
 
-When you destroy an entity, it is automatically removed from to the `Updater` module.
+When you destroy an entity, it is automatically removed from the `Updater` module.
 
 Call `coquette.entities.destroy()` with:
 
@@ -196,7 +196,7 @@ Reports when two entities collide.
 
 To make an entity support collisions, put these attributes on it:
 
-* `pos`: the top left of the entity, e.g.: `{ x: 10, y: 20 }`.
+* `pos`: the top left position of the entity, e.g.: `{ x: 10, y: 20 }`.
 * `size`: the size of the entity, e.g.: `{ x: 50, y: 30 }`.
 * `boundingBox`: the shape that best approximates the shape of the entity, either `coquette.collider.RECTANGLE` or `coquette.collider.CIRCLE`.
 
