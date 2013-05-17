@@ -33,7 +33,6 @@
     destroy: function(entity, callback) {
       Coquette.get().runner.add(this, function(entities) {
         Coquette.get().updater.remove(entity);
-        entity._killed = true;
         Coquette.get().updater.remove(entity);
         for(var i = 0; i < entities._entities.length; i++) {
           if(entities._entities[i] === entity) {
