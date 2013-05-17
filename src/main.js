@@ -1,12 +1,12 @@
 ;(function(exports) {
   var Coquette = function(game, canvasId, width, height, backgroundColor, autoFocus) {
     coquette = this;
-    this.renderer = new Coquette.Renderer(canvasId, width, height, backgroundColor);
-    this.inputter = new Coquette.Inputter(canvasId, autoFocus);
-    this.updater = new Coquette.Updater();
-    this.entities = new Coquette.Entities();
-    this.runner = new Coquette.Runner();
-    this.collider = new Coquette.Collider();
+    this.renderer = new Coquette.Renderer(this, canvasId, width, height, backgroundColor);
+    this.inputter = new Coquette.Inputter(this, canvasId, autoFocus);
+    this.updater = new Coquette.Updater(this);
+    this.entities = new Coquette.Entities(this);
+    this.runner = new Coquette.Runner(this);
+    this.collider = new Coquette.Collider(this);
 
     this.updater.add(this.collider);
     this.updater.add(this.runner);

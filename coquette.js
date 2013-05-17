@@ -1,12 +1,12 @@
 ;(function(exports) {
   var Coquette = function(game, canvasId, width, height, backgroundColor, autoFocus) {
     coquette = this;
-    this.renderer = new Coquette.Renderer(canvasId, width, height, backgroundColor);
-    this.inputter = new Coquette.Inputter(canvasId, autoFocus);
-    this.updater = new Coquette.Updater();
-    this.entities = new Coquette.Entities();
-    this.runner = new Coquette.Runner();
-    this.collider = new Coquette.Collider();
+    this.renderer = new Coquette.Renderer(this, canvasId, width, height, backgroundColor);
+    this.inputter = new Coquette.Inputter(this, canvasId, autoFocus);
+    this.updater = new Coquette.Updater(this);
+    this.entities = new Coquette.Entities(this);
+    this.runner = new Coquette.Runner(this);
+    this.collider = new Coquette.Collider(this);
 
     this.updater.add(this.collider);
     this.updater.add(this.runner);
@@ -24,13 +24,15 @@
 })(this);
 
 ;(function(exports) {
-  var Collider = function() {};
+  var Collider = function(coquette) {
+    this.coquette = coquette;
+  };
 
   Collider.prototype = {
     collideRecords: [],
 
     update: function() {
-      var ent = Coquette.get().entities.all();
+      var ent = this.coquette.entities.all();
       for (var i = 0, len = ent.length; i < len; i++) {
         for (var j = i; j < len; j++) {
           if (ent[i] !== ent[j]) {
@@ -245,7 +247,8 @@
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
  ;(function(exports) {
-  var Inputter = function(canvasId, autoFocus) {
+  var Inputter = function(coquette, canvasId, autoFocus) {
+    this.coquette = coquette;
     if (autoFocus === undefined) {
       autoFocus = true;
     }
@@ -298,7 +301,8 @@
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
 ;(function(exports) {
-  function Runner() {
+  function Runner(coquette) {
+    this.coquette = coquette;
     this.runs = [];
   };
 
@@ -328,7 +332,8 @@
 ;(function(exports) {
   var interval = 16;
 
-  function Updater() {
+  function Updater(coquette) {
+    this.coquette = coquette;
     setupRequestAnimationFrame();
     this.updatees = [];
     this.tick = interval;
@@ -408,7 +413,8 @@
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
 ;(function(exports) {
-  var Renderer = function(canvasId, width, height, backgroundColor) {
+  var Renderer = function(coquette, canvasId, width, height, backgroundColor) {
+    this.coquette = coquette;
     var canvas = document.getElementById(canvasId);
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
@@ -423,7 +429,7 @@
       return this.ctx;
     },
 
-    update: function() {
+    draw: function() {
       this.ctx.fillStyle = this.backgroundColor;
       this.ctx.fillRect(0, 0, this.width, this.height);
     },
@@ -436,8 +442,8 @@
     },
 
     onScreen: function(obj) {
-      return obj.pos.x > 0 && obj.pos.x < Coquette.get().renderer.width &&
-        obj.pos.y > 0 && obj.pos.y < Coquette.get().renderer.height;
+      return obj.pos.x > 0 && obj.pos.x < this.coquette.renderer.width &&
+        obj.pos.y > 0 && obj.pos.y < this.coquette.renderer.height;
     }
   };
 
@@ -445,7 +451,8 @@
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
 ;(function(exports) {
-  function Entities() {
+  function Entities(coquette) {
+    this.coquette = coquette;
     this._entities = [];
   };
 
@@ -466,9 +473,10 @@
     },
 
     create: function(clazz, settings, callback) {
-      Coquette.get().runner.add(this, function(entities) {
-        var entity = new clazz(Coquette.get().game, settings || {});
-        Coquette.get().updater.add(entity);
+      var self = this;
+      this.coquette.runner.add(this, function(entities) {
+        var entity = new clazz(self.coquette.game, settings || {});
+        self.coquette.updater.add(entity);
         entities._entities.push(entity);
         if (callback !== undefined) {
           callback(entity);
@@ -477,10 +485,9 @@
     },
 
     destroy: function(entity, callback) {
-      Coquette.get().runner.add(this, function(entities) {
-        Coquette.get().updater.remove(entity);
-        entity._killed = true;
-        Coquette.get().updater.remove(entity);
+      var self = this;
+      this.coquette.runner.add(this, function(entities) {
+        self.coquette.updater.remove(entity);
         for(var i = 0; i < entities._entities.length; i++) {
           if(entities._entities[i] === entity) {
             entities._entities.splice(i, 1);

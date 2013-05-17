@@ -1,11 +1,13 @@
 ;(function(exports) {
-  var Collider = function() {};
+  var Collider = function(coquette) {
+    this.coquette = coquette;
+  };
 
   Collider.prototype = {
     collideRecords: [],
 
     update: function() {
-      var ent = Coquette.get().entities.all();
+      var ent = this.coquette.entities.all();
       for (var i = 0, len = ent.length; i < len; i++) {
         for (var j = i; j < len; j++) {
           if (ent[i] !== ent[j]) {

@@ -1,7 +1,8 @@
 ;(function(exports) {
   var interval = 16;
 
-  function Updater() {
+  function Updater(coquette) {
+    this.coquette = coquette;
     setupRequestAnimationFrame();
     this.updatees = [];
     this.tick = interval;

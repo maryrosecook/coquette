@@ -1,5 +1,6 @@
 ;(function(exports) {
-  function Runner() {
+  function Runner(coquette) {
+    this.coquette = coquette;
     this.runs = [];
   };
 

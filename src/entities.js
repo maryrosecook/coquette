@@ -1,5 +1,6 @@
 ;(function(exports) {
-  function Entities() {
+  function Entities(coquette) {
+    this.coquette = coquette;
     this._entities = [];
   };
 
@@ -20,9 +21,10 @@
     },
 
     create: function(clazz, settings, callback) {
-      Coquette.get().runner.add(this, function(entities) {
-        var entity = new clazz(Coquette.get().game, settings || {});
-        Coquette.get().updater.add(entity);
+      var self = this;
+      this.coquette.runner.add(this, function(entities) {
+        var entity = new clazz(self.coquette.game, settings || {});
+        self.coquette.updater.add(entity);
         entities._entities.push(entity);
         if (callback !== undefined) {
           callback(entity);
@@ -31,8 +33,9 @@
     },
 
     destroy: function(entity, callback) {
-      Coquette.get().runner.add(this, function(entities) {
-        Coquette.get().updater.remove(entity);
+      var self = this;
+      this.coquette.runner.add(this, function(entities) {
+        self.coquette.updater.remove(entity);
         for(var i = 0; i < entities._entities.length; i++) {
           if(entities._entities[i] === entity) {
             entities._entities.splice(i, 1);

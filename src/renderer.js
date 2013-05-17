@@ -1,5 +1,6 @@
 ;(function(exports) {
-  var Renderer = function(canvasId, width, height, backgroundColor) {
+  var Renderer = function(coquette, canvasId, width, height, backgroundColor) {
+    this.coquette = coquette;
     var canvas = document.getElementById(canvasId);
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
@@ -27,8 +28,8 @@
     },
 
     onScreen: function(obj) {
-      return obj.pos.x > 0 && obj.pos.x < Coquette.get().renderer.width &&
-        obj.pos.y > 0 && obj.pos.y < Coquette.get().renderer.height;
+      return obj.pos.x > 0 && obj.pos.x < this.coquette.renderer.width &&
+        obj.pos.y > 0 && obj.pos.y < this.coquette.renderer.height;
     }
   };
 

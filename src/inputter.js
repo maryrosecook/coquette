@@ -1,5 +1,6 @@
  ;(function(exports) {
-  var Inputter = function(canvasId, autoFocus) {
+  var Inputter = function(coquette, canvasId, autoFocus) {
+    this.coquette = coquette;
     if (autoFocus === undefined) {
       autoFocus = true;
     }
