@@ -187,7 +187,7 @@ window.addEventListener('load', function() {
 
     <p>When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids logical and collision detection problems that arise from destroying an entity mid-tick.</p>
 
-    <p>When you destroy an entity, it is automatically removed from to the <code>Updater</code> module.</p>
+    <p>When you destroy an entity, it is automatically removed from the <code>Updater</code> module.</p>
 
     <p>Call <code>coquette.entities.destroy()</code> with:</p>
 
@@ -226,7 +226,7 @@ var player = coquette.entities.all(Player)[0];
     <p>To make an entity support collisions, put these attributes on it:</p>
 
     <ul>
-      <li><code>pos</code>: the top left of the entity, e.g.: <code>{ x: 10, y: 20 }</code>.</li>
+      <li><code>pos</code>: the top left corner of the entity, e.g.: <code>{ x: 10, y: 20 }</code>.</li>
       <li><code>size</code>: the size of the entity, e.g.: <code>{ x: 50, y: 30 }</code>.</li>
       <li><code>boundingBox</code>: the shape that best approximates the shape of the entity, either <code>coquette.collider.RECTANGLE</code> or <code>coquette.collider.CIRCLE</code>.</li>
     </ul>
