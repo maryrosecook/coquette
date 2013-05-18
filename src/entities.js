@@ -5,13 +5,13 @@
   };
 
   Entities.prototype = {
-    all: function(clazz) {
-      if (clazz === undefined) {
+    all: function(Constructor) {
+      if (Constructor === undefined) {
         return this._entities;
       } else {
         var entities = [];
         for (var i = 0; i < this._entities.length; i++) {
-          if (this._entities[i] instanceof clazz) {
+          if (this._entities[i] instanceof Constructor) {
             entities.push(this._entities[i]);
           }
         }
