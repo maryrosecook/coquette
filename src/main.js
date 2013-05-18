@@ -11,7 +11,6 @@
     this.updater.add(this.runner);
     this.updater.add(this.renderer);
     this.updater.add(game);
-    this.game = game;
   };
 
   exports.Coquette = Coquette;
