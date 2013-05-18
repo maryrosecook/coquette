@@ -23,7 +23,7 @@
     create: function(clazz, settings, callback) {
       var self = this;
       this.coquette.runner.add(this, function(entities) {
-        var entity = new clazz(self.coquette.game, settings || {});
+        var entity = new clazz(settings || {});
         self.coquette.updater.add(entity);
         entities._entities.push(entity);
         if (callback !== undefined) {
