@@ -1,11 +1,11 @@
 ;(function(exports) {
   var Game = function(canvasId, width, height, autoFocus) {
-    this.coq = new Coquette(this, canvasId, width, height, "#000", autoFocus);
+    var coq = new Coquette(this, canvasId, width, height, "#000", autoFocus);
 
-    this.coq.entities.create(Person, { pos:{ x:243, y:40 }, color:"#099" }); // paramour
-    this.coq.entities.create(Person, { pos:{ x:249, y:110 }, color:"#f07", // player
+    coq.entities.create(Person, { pos:{ x:243, y:40 }, color:"#099" }); // paramour
+    coq.entities.create(Person, { pos:{ x:249, y:110 }, color:"#f07", // player
       update: function() {
-        if (this.game.coq.inputter.state(this.game.coq.inputter.UP_ARROW)) {
+        if (coq.inputter.state(coq.inputter.UP_ARROW)) {
           this.pos.y -= 0.4;
         }
       },
