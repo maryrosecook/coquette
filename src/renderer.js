@@ -15,9 +15,9 @@
       return this.ctx;
     },
 
-    draw: function() {
-      this.ctx.fillStyle = this.backgroundColor;
-      this.ctx.fillRect(0, 0, this.width, this.height);
+    draw: function(ctx) {
+      ctx.fillStyle = this.backgroundColor;
+      ctx.fillRect(0, 0, this.width, this.height);
     },
 
     center: function() {

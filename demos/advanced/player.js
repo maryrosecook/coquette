@@ -36,11 +36,8 @@
       }
     },
 
-    draw: function() {
+    draw: function(ctx) {
       if (this.game.state !== this.game.STATE.PLAYING) return;
-
-      var ctx = this.game.coquette.renderer.getCtx();
-
       // path circle
       this.game.circle(this.pos, this.size.x / 2, "#222");
       ctx.strokeStyle = "#222";

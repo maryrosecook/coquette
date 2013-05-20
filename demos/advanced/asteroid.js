@@ -55,11 +55,10 @@
       }
     },
 
-    draw: function() {
+    draw: function(ctx) {
       if (this.game.state !== this.game.STATE.PLAYING) return;
-      var ctx = this.game.coquette.renderer.getCtx();
 
-      this.game.startClip();
+      this.game.startClip(ctx);
 
       var color = "#fff";
       if (this.collidingAsteroids.length === 0) {
@@ -67,7 +66,7 @@
       }
       this.game.circle(this.pos, this.size.x / 2, color);
 
-      this.game.endClip();
+      this.game.endClip(ctx);
     },
 
     destroy: function(other) {

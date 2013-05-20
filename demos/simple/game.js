@@ -21,9 +21,9 @@
       this[i] = settings[i];
     }
     this.size = { x:9, y:9 };
-    this.draw = function() {
-      game.coq.renderer.getCtx().fillStyle = settings.color;
-      game.coq.renderer.getCtx().fillRect(this.pos.x, this.pos.y, this.size.x, this.size.y);
+    this.draw = function(ctx) {
+      ctx.fillStyle = settings.color;
+      ctx.fillRect(this.pos.x, this.pos.y, this.size.x, this.size.y);
     };
   };
 

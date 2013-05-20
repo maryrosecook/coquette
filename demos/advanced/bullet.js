@@ -23,12 +23,12 @@
       }
     },
 
-    draw: function() {
+    draw: function(ctx) {
       if (this.game.state !== this.game.STATE.PLAYING) return;
 
-      this.game.startClip();
+      this.game.startClip(ctx);
       this.game.circle(this.pos, this.size.x / 2, "#fff");
-      this.game.endClip();
+      this.game.endClip(ctx);
     },
 
     collision: function(other) {

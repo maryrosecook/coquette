@@ -54,7 +54,7 @@
       }
     },
 
-    draw: function() {
+    draw: function(ctx) {
       if (this.state === this.STATE.PLAYING) {
         for (var i = 0; i < this.maxScore; i++) {
           var rAngle = this.maths.degToRad(360 / this.maxScore * i);
@@ -70,9 +70,9 @@
           }
         }
       } else {
-        this.coquette.renderer.getCtx().drawImage(this.introImage,
-                                                  this.coquette.renderer.width / 2 - 100,
-                                                  this.coquette.renderer.height / 2 - 50);
+        ctx.drawImage(this.introImage,
+                      this.coquette.renderer.width / 2 - 100,
+                      this.coquette.renderer.height / 2 - 50);
       }
     },
 
@@ -85,8 +85,7 @@
       ctx.stroke();
     },
 
-    startClip: function() {
-      var ctx = this.coquette.renderer.getCtx();
+    startClip: function(ctx) {
       ctx.save();
       ctx.beginPath();
       ctx.arc(this.coquette.renderer.width / 2, this.coquette.renderer.height / 2,
@@ -95,8 +94,8 @@
       ctx.clip();
     },
 
-    endClip: function() {
-      this.coquette.renderer.getCtx().restore();
+    endClip: function(ctx) {
+      ctx.restore();
     },
 
     score: function() {
