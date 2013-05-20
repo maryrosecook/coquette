@@ -85,7 +85,7 @@ window.addEventListener('load', function() {
     <h2>Get the code</h2>
 
 <pre class="prettyprint">
-  $ git clone git://github.com/maryrosecook/coquette.git
+$ git clone git://github.com/maryrosecook/coquette.git
 </pre>
 
     <h2>Demo game</h2>
@@ -107,7 +107,7 @@ window.addEventListener('load', function() {
     </ul>
 
 <pre class="prettyprint">
-  var coquette = new Coquette(game, "canvas", 150, 150, "#000");
+var coquette = new Coquette(game, "canvas", 150, 150, "#000");
 </pre>
 
     <h3>Modules</h3>
@@ -123,7 +123,7 @@ window.addEventListener('load', function() {
     Call <code>coquette.inputter.state()</code>, passing in the key's code, e.g.:
 
 <pre class="prettyprint">
-  var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
+var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
 </pre>
 
     <h4>Updater</h4>
@@ -184,21 +184,18 @@ ctx.fillRect(0, 0, 10, 10);
     </ul>
 
 <pre class="prettyprint">
-  var Bubble = function(game, settings) {
-    this.game = game;
-    this.radius = settings.radius;
-  };
+var Bubble = function(game, settings) {
+  this.game = game;
+  this.radius = settings.radius;
+};
 
-  var myBubble;
-  coquette.entities.create(Bubble, {
-    radius: 60
-  }, function(bubble) {
-    myBubble = bubble;
-  });
+var myBubble;
+coquette.entities.create(Bubble, {
+  radius: 60
+}, function(bubble) {
+  myBubble = bubble;
+});
 </pre>
-
-
-
 
     <h5>Destroy an entity</h5>
 
@@ -218,8 +215,6 @@ coquette.entities.destroy(bubble, function() {
   console.log("boom");
 });
 </pre>
-
-
 
     <h5>Get all the entities in the game</h5>
 
