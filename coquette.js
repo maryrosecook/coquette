@@ -3,7 +3,7 @@
     this.renderer = new Coquette.Renderer(this, canvasId, width, height, backgroundColor);
     this.inputter = new Coquette.Inputter(this, canvasId, autoFocus);
     this.updater = new Coquette.Updater(this);
-    this.entities = new Coquette.Entities(this);
+    this.entities = new Coquette.Entities(this, game);
     this.runner = new Coquette.Runner(this);
     this.collider = new Coquette.Collider(this);
 
@@ -11,7 +11,6 @@
     this.updater.add(this.runner);
     this.updater.add(this.renderer);
     this.updater.add(game);
-    this.game = game;
   };
 
   exports.Coquette = Coquette;
@@ -349,7 +348,7 @@
       // call draw fns
       for (var i = 0; i < self.updatees.length; i++) {
         if (self.updatees[i].draw !== undefined) {
-          self.updatees[i].draw();
+          self.updatees[i].draw(coquette.renderer.getCtx());
         }
       }
 
@@ -423,9 +422,9 @@
       return this.ctx;
     },
 
-    draw: function() {
-      this.ctx.fillStyle = this.backgroundColor;
-      this.ctx.fillRect(0, 0, this.width, this.height);
+    draw: function(ctx) {
+      ctx.fillStyle = this.backgroundColor;
+      ctx.fillRect(0, 0, this.width, this.height);
     },
 
     center: function() {
@@ -445,19 +444,20 @@
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
 ;(function(exports) {
-  function Entities(coquette) {
+  function Entities(coquette, game) {
     this.coquette = coquette;
+    this.game = game;
     this._entities = [];
   };
 
   Entities.prototype = {
-    all: function(clazz) {
-      if (clazz === undefined) {
+    all: function(Constructor) {
+      if (Constructor === undefined) {
         return this._entities;
       } else {
         var entities = [];
         for (var i = 0; i < this._entities.length; i++) {
-          if (this._entities[i] instanceof clazz) {
+          if (this._entities[i] instanceof Constructor) {
             entities.push(this._entities[i]);
           }
         }
@@ -469,7 +469,7 @@
     create: function(clazz, settings, callback) {
       var self = this;
       this.coquette.runner.add(this, function(entities) {
-        var entity = new clazz(self.coquette.game, settings || {});
+        var entity = new clazz(self.game, settings || {});
         self.coquette.updater.add(entity);
         entities._entities.push(entity);
         if (callback !== undefined) {
