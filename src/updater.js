@@ -24,7 +24,7 @@
       // call draw fns
       for (var i = 0; i < self.updatees.length; i++) {
         if (self.updatees[i].draw !== undefined) {
-          self.updatees[i].draw();
+          self.updatees[i].draw(coquette.renderer.getCtx());
         }
       }
 
