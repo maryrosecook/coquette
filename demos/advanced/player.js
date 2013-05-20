@@ -10,7 +10,7 @@
     this.angle = function(newValue) {
       if (newValue !== undefined) {
         angle = newValue;
-        var rAngle = game.maths.degToRad(angle);
+        var rAngle = this.game.maths.degToRad(angle);
         this.pos.x = this.pathInset + Math.sin(rAngle) * this.pathRadius;
         this.pos.y = this.pathInset + Math.cos(rAngle) * this.pathRadius;
       } else {

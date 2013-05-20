@@ -2,7 +2,7 @@
   var Asteroid = function(game, settings) {
     this.game = game;
     this.pos = settings.pos;
-    this.boundingBox = game.coquette.collider.CIRCLE;
+    this.boundingBox = this.game.coquette.collider.CIRCLE;
 
     if (settings.radius === undefined) {
       this.size = { x: 60, y: 60 };
