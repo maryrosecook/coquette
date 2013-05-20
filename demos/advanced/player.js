@@ -28,7 +28,6 @@
     update: function() {
       if (this.game.state !== this.game.STATE.PLAYING) return;
       this.handleKeyboard();
-      this.draw();
     },
 
     collision: function(other) {

@@ -21,8 +21,6 @@
       if (!this.game.coquette.renderer.onScreen(this)) {
         this.kill();
       }
-
-      this.draw();
     },
 
     draw: function() {
