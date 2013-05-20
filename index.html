@@ -130,7 +130,26 @@ window.addEventListener('load', function() {
 
     <p>Calls <code>update()</code> and <code>draw()</code> on every object added to it.</p>
 
-    <p>Objects are added to the <code>Updater</code> module.  Each tick - each sixtieth of a second or so - the module calls the <code>update()</code> function, if it exists, on each object, then calls the <code>draw()</code> function, if it exists, on each object.</p>
+    <p>Objects are added to the <code>Updater</code> module.</p>
+
+    <p>Each tick - each sixtieth of a second or so - the module calls the <code>update()</code> function, if it exists, on each object, passing in the number of milliseconds since the last call.</p>
+
+    <p>Next, the <code>Updater</code> module calls the <code>draw()</code> function, if it exists, on each object, passing the canvas drawing context.</p>
+
+    <p>An example implementation of <code>update()</code> and <code>draw()</code>:</p>
+
+<pre class="prettyprint">
+var Player = function() {
+  this.pos = { x:0, y:0 };
+  this.update = function(millisSinceLastTick) {
+    this.pos.x += 0.1 * millisSinceLastTick;
+  };
+
+  this.draw = function(ctx) {
+    ctx.fillRect(this.pos.x, this.pos.y, 1, 1);
+  };
+};
+</pre>
 
     <p>The main game object is automatically added to the <code>Updater</code> module.  Its <code>update()</code> and <code>draw()</code> functions are called before any other entity's.</p>
 
@@ -141,9 +160,9 @@ window.addEventListener('load', function() {
     <h5>Get the canvas drawing context</h5>
 
 <pre class="prettyprint">
-  var ctx = coquette.renderer.getCtx();
-  ctx.fillStyle = "#f00";
-  ctx.fillRect(0, 0, 10, 10);
+var ctx = coquette.renderer.getCtx();
+ctx.fillStyle = "#f00";
+ctx.fillRect(0, 0, 10, 10);
 </pre>
 
     <h4>Entities</h4>

@@ -112,7 +112,26 @@ var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
 
 Calls `update()` and `draw()` on every object added to it.
 
-Objects are added to the `Updater` module.  Each tick - each sixtieth of a second or so - the module calls the `update()` function, if it exists, on each object, then calls the `draw()` function, if it exists, on each object.
+Objects are added to the `Updater` module.
+
+Each tick - each sixtieth of a second or so - the module calls the `update()` function, if it exists, on each object, passing in the number of milliseconds since the last call.
+
+Next, the `Updater` module calls the `draw()` function, if it exists, on each object, passing the canvas drawing context.
+
+An example implementation of `update()` and `draw()`:
+
+```javascript
+var Player = function() {
+  this.pos = { x:0, y:0 };
+  this.update = function(millisSinceLastTick) {
+    this.pos.x += 0.1 * millisSinceLastTick;
+  };
+
+  this.draw = function(ctx) {
+    ctx.fillRect(this.pos.x, this.pos.y, 1, 1);
+  };
+};
+```
 
 The main game object is automatically added to the `Updater` module.  Its `update()` and `draw()` functions are called before any other entity's.
 
@@ -123,9 +142,9 @@ Any object created with the `Entities` module is automatically added to the `Upd
 ##### Get the canvas drawing context
 
 ```javascript
-var ctx = coquette.renderer.getCtx();
-ctx.fillStyle = "#f00";
-ctx.fillRect(0, 0, 10, 10);
+  var ctx = coquette.renderer.getCtx();
+  ctx.fillStyle = "#f00";
+  ctx.fillRect(0, 0, 10, 10);
 ```
 
 #### Entities
