@@ -19,6 +19,8 @@ h3 { font-size: 23px; font-weight:normal; margin-top:16px; margin-bottom:16px;  
 h4 { font-size: 19px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
 h5 { font-size: 14px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
 
+code { font-size:13px; }
+
 p { line-height:15px; margin:8px 0 8px 0; }
 
 hr { color: #aaa; background-color:#aaa; height:1px; border:0; }
