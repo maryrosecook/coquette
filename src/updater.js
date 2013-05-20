@@ -5,19 +5,18 @@
     this.coquette = coquette;
     setupRequestAnimationFrame();
     this.updatees = [];
-    this.tick = interval;
-    this.prev = new Date().getTime();
+    var prev = new Date().getTime();
 
     var self = this;
     var update = function() {
       var now = new Date().getTime();
-      self.tick = now - self.prev;
-      self.prev = now;
+      var tick = now - prev;
+      prev = now;
 
       // call update fns
       for (var i = 0; i < self.updatees.length; i++) {
         if (self.updatees[i].update !== undefined) {
-          self.updatees[i].update();
+          self.updatees[i].update(tick);
         }
       }
 
