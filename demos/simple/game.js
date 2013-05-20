@@ -15,8 +15,7 @@
     });
   };
 
-  var Person = function(game, settings) {
-    this.game = game;
+  var Person = function(_, settings) {
     for (var i in settings) {
       this[i] = settings[i];
     }

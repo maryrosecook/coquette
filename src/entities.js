@@ -1,6 +1,7 @@
 ;(function(exports) {
-  function Entities(coquette) {
+  function Entities(coquette, game) {
     this.coquette = coquette;
+    this.game = game;
     this._entities = [];
   };
 
@@ -23,7 +24,7 @@
     create: function(clazz, settings, callback) {
       var self = this;
       this.coquette.runner.add(this, function(entities) {
-        var entity = new clazz(settings || {});
+        var entity = new clazz(self.game, settings || {});
         self.coquette.updater.add(entity);
         entities._entities.push(entity);
         if (callback !== undefined) {
