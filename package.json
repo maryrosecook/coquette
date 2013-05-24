@@ -1,6 +1,6 @@
 {
-  "name": "coquette.js",
-  "description": "A micro game framework.",
+  "name": "coquette",
+  "description": "A micro framework for games.",
   "author": "Mary Rose Cook <maryrosecook@maryrosecook.com> (http://maryrosecook.com/)",
   "version": "0.1.0",
   "scripts": {
