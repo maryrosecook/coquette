@@ -1,6 +1,6 @@
 ;(function(exports) {
   var Coquette = function(game, canvasId, width, height, backgroundColor, autoFocus) {
-    this.renderer = new Coquette.Renderer(this, canvasId, width, height, backgroundColor);
+    this.renderer = new Coquette.Renderer(this, game, canvasId, width,height, backgroundColor);
     this.inputter = new Coquette.Inputter(this, canvasId, autoFocus);
     this.entities = new Coquette.Entities(this, game);
     this.runner = new Coquette.Runner(this);

@@ -1,6 +1,7 @@
 ;(function(exports) {
-  var Renderer = function(coquette, canvasId, width, height, backgroundColor) {
+  var Renderer = function(coquette, game, canvasId, width, height, backgroundColor) {
     this.coquette = coquette;
+    this.game = game;
     var canvas = document.getElementById(canvasId);
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
@@ -15,9 +16,20 @@
       return this.ctx;
     },
 
-    draw: function(ctx) {
+    update: function(interval) {
+      var ctx = this.getCtx();
+
+      // draw background
       ctx.fillStyle = this.backgroundColor;
       ctx.fillRect(0, 0, this.width, this.height);
+
+      // draw game and entities
+      var drawables = [this.game].concat(this.coquette.entities.all());
+      for (var i = 0, len = drawables.length; i < len; i++) {
+        if (drawables[i].draw !== undefined) {
+          drawables[i].draw(ctx);
+        }
+      }
     },
 
     center: function() {
