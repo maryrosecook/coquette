@@ -25,7 +25,6 @@
       var self = this;
       this.coquette.runner.add(this, function(entities) {
         var entity = new clazz(self.game, settings || {});
-        self.coquette.updater.add(entity);
         entities._entities.push(entity);
         if (callback !== undefined) {
           callback(entity);
@@ -36,7 +35,6 @@
     destroy: function(entity, callback) {
       var self = this;
       this.coquette.runner.add(this, function(entities) {
-        self.coquette.updater.remove(entity);
         for(var i = 0; i < entities._entities.length; i++) {
           if(entities._entities[i] === entity) {
             entities._entities.splice(i, 1);
