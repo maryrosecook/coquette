@@ -6,6 +6,7 @@
     this.runner = new Coquette.Runner(this);
     this.collider = new Coquette.Collider(this);
 
+    var self = this;
     new Coquette.Ticker(this, function(interval) {
       self.collider.update(interval);
       self.runner.update(interval);
