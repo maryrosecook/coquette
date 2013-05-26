@@ -1,16 +1,22 @@
 ;(function(exports) {
   var Coquette = function(game, canvasId, width, height, backgroundColor, autoFocus) {
-    this.renderer = new Coquette.Renderer(this, canvasId, width, height, backgroundColor);
+    this.renderer = new Coquette.Renderer(this, game, canvasId, width,height, backgroundColor);
     this.inputter = new Coquette.Inputter(this, canvasId, autoFocus);
-    this.updater = new Coquette.Updater(this);
     this.entities = new Coquette.Entities(this, game);
     this.runner = new Coquette.Runner(this);
     this.collider = new Coquette.Collider(this);
 
-    this.updater.add(this.collider);
-    this.updater.add(this.runner);
-    this.updater.add(this.renderer);
-    this.updater.add(game);
+    var self = this;
+    new Coquette.Ticker(this, function(interval) {
+      self.collider.update(interval);
+      self.runner.update(interval);
+      if (game.update !== undefined) {
+        game.update(interval);
+      }
+
+      self.entities.update(interval)
+      self.renderer.update(interval);
+    });
   };
 
   exports.Coquette = Coquette;
@@ -325,51 +331,20 @@
 ;(function(exports) {
   var interval = 16;
 
-  function Updater(coquette) {
-    this.coquette = coquette;
+  function Ticker(coquette, gameLoop) {
     setupRequestAnimationFrame();
-    this.updatees = [];
     var prev = new Date().getTime();
 
     var self = this;
-    var update = function() {
+    var tick = function() {
       var now = new Date().getTime();
-      var tick = now - prev;
+      var interval = now - prev;
       prev = now;
-
-      // call update fns
-      for (var i = 0; i < self.updatees.length; i++) {
-        if (self.updatees[i].update !== undefined) {
-          self.updatees[i].update(tick);
-        }
-      }
-
-      // call draw fns
-      for (var i = 0; i < self.updatees.length; i++) {
-        if (self.updatees[i].draw !== undefined) {
-          self.updatees[i].draw(coquette.renderer.getCtx());
-        }
-      }
-
-      requestAnimationFrame(update);
+      gameLoop(interval);
+      requestAnimationFrame(tick);
     };
 
-    requestAnimationFrame(update);
-  };
-
-  Updater.prototype = {
-    add: function(updatee) {
-      this.updatees.push(updatee);
-    },
-
-    remove: function(updatee) {
-      for(var i = 0; i < this.updatees.length; i++) {
-        if(this.updatees[i] === updatee) {
-          this.updatees.splice(i, 1);
-          break;
-        }
-      }
-    }
+    requestAnimationFrame(tick);
   };
 
   // From: https://gist.github.com/paulirish/1579671
@@ -401,12 +376,13 @@
     }
   };
 
-  exports.Updater = Updater;
+  exports.Ticker = Ticker;
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
 ;(function(exports) {
-  var Renderer = function(coquette, canvasId, width, height, backgroundColor) {
+  var Renderer = function(coquette, game, canvasId, width, height, backgroundColor) {
     this.coquette = coquette;
+    this.game = game;
     var canvas = document.getElementById(canvasId);
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
@@ -421,9 +397,20 @@
       return this.ctx;
     },
 
-    draw: function(ctx) {
+    update: function(interval) {
+      var ctx = this.getCtx();
+
+      // draw background
       ctx.fillStyle = this.backgroundColor;
       ctx.fillRect(0, 0, this.width, this.height);
+
+      // draw game and entities
+      var drawables = [this.game].concat(this.coquette.entities.all());
+      for (var i = 0, len = drawables.length; i < len; i++) {
+        if (drawables[i].draw !== undefined) {
+          drawables[i].draw(ctx);
+        }
+      }
     },
 
     center: function() {
@@ -450,6 +437,15 @@
   };
 
   Entities.prototype = {
+    update: function(interval) {
+      var entities = this.all();
+      for (var i = 0, len = entities.length; i < len; i++) {
+        if (entities[i].update !== undefined) {
+          entities[i].update(interval);
+        }
+      }
+    },
+
     all: function(Constructor) {
       if (Constructor === undefined) {
         return this._entities;
@@ -469,7 +465,6 @@
       var self = this;
       this.coquette.runner.add(this, function(entities) {
         var entity = new clazz(self.game, settings || {});
-        self.coquette.updater.add(entity);
         entities._entities.push(entity);
         if (callback !== undefined) {
           callback(entity);
@@ -480,7 +475,6 @@
     destroy: function(entity, callback) {
       var self = this;
       this.coquette.runner.add(this, function(entities) {
-        self.coquette.updater.remove(entity);
         for(var i = 0; i < entities._entities.length; i++) {
           if(entities._entities[i] === entity) {
             entities._entities.splice(i, 1);
