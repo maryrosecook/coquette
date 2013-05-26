@@ -6,6 +6,15 @@
   };
 
   Entities.prototype = {
+    update: function(interval) {
+      var entities = this.all();
+      for (var i = 0, len = entities.length; i < len; i++) {
+        if (entities[i].update !== undefined) {
+          entities[i].update(interval);
+        }
+      }
+    },
+
     all: function(Constructor) {
       if (Constructor === undefined) {
         return this._entities;
