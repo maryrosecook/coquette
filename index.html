@@ -84,6 +84,22 @@ window.addEventListener('load', function() {
 
     <h2>Get the code</h2>
 
+    <h3>npm</h3>
+
+    <p>To install npm, visit
+      <a href='github.com/isaacs/npm'>https://github.com/isaacs/npm</a>.
+    </p>
+
+    <p>Install Coquette</p>
+
+<pre class="prettyprint">
+$ npm install coquette
+</pre>
+
+    <p>NB: For now, Coquette only works in the browser.</p>
+
+    <h3>Git</h3>
+
 <pre class="prettyprint">
 $ git clone git://github.com/maryrosecook/coquette.git
 </pre>
@@ -126,34 +142,11 @@ var coquette = new Coquette(game, "canvas", 150, 150, "#000");
 var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
 </pre>
 
-    <h4>Updater</h4>
+    <h4>Ticker</h4>
 
-    <p>Calls <code>update()</code> and <code>draw()</code> on every object added to it.</p>
+    <p>Does a tick - the game update loop - sixty times a second.  If the main game object or a game entity has an <code>update()</code> function, it will get called on each tick.  If the main game object or a game entity has a <code>draw()</code> function, it will get called on each tick.
+    </p>
 
-    <p>Objects are added to the <code>Updater</code> module.</p>
-
-    <p>Each tick - each sixtieth of a second or so - the module calls the <code>update()</code> function, if it exists, on each object, passing in the number of milliseconds since the last call.</p>
-
-    <p>Next, the <code>Updater</code> module calls the <code>draw()</code> function, if it exists, on each object, passing the canvas drawing context.</p>
-
-    <p>An example implementation of <code>update()</code> and <code>draw()</code>:</p>
-
-<pre class="prettyprint">
-var Player = function() {
-  this.pos = { x:0, y:0 };
-  this.update = function(millisSinceLastTick) {
-    this.pos.x += 0.1 * millisSinceLastTick;
-  };
-
-  this.draw = function(ctx) {
-    ctx.fillRect(this.pos.x, this.pos.y, 1, 1);
-  };
-};
-</pre>
-
-    <p>The main game object is automatically added to the <code>Updater</code> module.  Its <code>update()</code> and <code>draw()</code> functions are called before any other entity's.</p>
-
-    <p>Any entity created with the <code>Entities</code> module is automatically added to the <code>Updater</code> module.</p>
 
     <h4>Renderer</h4>
 
@@ -170,10 +163,6 @@ ctx.fillRect(0, 0, 10, 10);
     <p>Keeps track of all game entities: the player, enemies.</p>
 
     <h5>Create an entity</h5>
-
-    <p>When you create an entity with the <code>Entities</code> module, the entity will not actually get created until the next tick.  This avoids logical and collision detection problems that arise from creating an entity mid-tick.</p>
-
-    <p>When you create an entity, it is automatically added to the <code>Updater</code> module.</p>
 
     <p>Call <code>coquette.entities.create()</code> with:</p>
 
@@ -197,11 +186,9 @@ coquette.entities.create(Bubble, {
 });
 </pre>
 
+    <p>When you create an entity with the <code>Entities</code> module, the entity will not actually get created until the next tick.  This avoids logical and collision detection problems that arise from creating an entity mid-tick.</p>
+
     <h5>Destroy an entity</h5>
-
-    <p>When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids logical and collision detection problems that arise from destroying an entity mid-tick.</p>
-
-    <p>When you destroy an entity, it is automatically removed from the <code>Updater</code> module.</p>
 
     <p>Call <code>coquette.entities.destroy()</code> with:</p>
 
@@ -215,6 +202,8 @@ coquette.entities.destroy(bubble, function() {
   console.log("boom");
 });
 </pre>
+
+    <p>When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids logical and collision detection problems that arise from destroying an entity mid-tick.</p>
 
     <h5>Get all the entities in the game</h5>
 
