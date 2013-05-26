@@ -10,21 +10,12 @@ http://coquette.maryrosecook.com
 * http://maryrosecook.com
 * maryrosecook@maryrosecook.com
 
-## Get the code
+## Get Coquette
 
-### npm
-
-To install npm, visit https://github.com/isaacs/npm
-
-Install Coquette
-
-    $ npm install coquette
-
-NB: For now, Coquette only works in the browser.
-
-### Git
-
-    $ git clone git://github.com/maryrosecook/coquette.git
+* Minified: `coquette_root/coquette-min.js`
+* Single file: `coquette_root/coquette.js`
+* github: http://github.com/maryrosecook/coquette
+* npm: `$ npm install coquette`
 
 ## Example
 
