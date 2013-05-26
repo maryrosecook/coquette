@@ -7,10 +7,16 @@
     this.runner = new Coquette.Runner(this);
     this.collider = new Coquette.Collider(this);
 
-    this.updater.add(this.collider);
-    this.updater.add(this.runner);
-    this.updater.add(this.renderer);
-    this.updater.add(game);
+    new Coquette.Ticker(this, function(interval) {
+      self.collider.update(interval);
+      self.runner.update(interval);
+      if (game.update !== undefined) {
+        game.update(interval);
+      }
+
+      self.entities.update(interval)
+      self.renderer.update(interval);
+    });
   };
 
   exports.Coquette = Coquette;
