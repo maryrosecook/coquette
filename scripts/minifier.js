@@ -10,7 +10,7 @@ var input = [
   src + 'collider.js',
   src + 'inputter.js',
   src + 'runner.js',
-  src + 'updater.js',
+  src + 'ticker.js',
   src + 'renderer.js',
   src + 'entities.js'
 ];
