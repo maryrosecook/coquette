@@ -15,7 +15,7 @@ http://coquette.maryrosecook.com
 * Minified: `coquette_root/coquette-min.js`
 * Single file: `coquette_root/coquette.js`
 * github: http://github.com/maryrosecook/coquette
-* npm: `$ npm install coquette`
+* `$ npm install coquette`
 
 ## Example
 
