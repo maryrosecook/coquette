@@ -10,7 +10,7 @@ http://coquette.maryrosecook.com
 * http://maryrosecook.com
 * maryrosecook@maryrosecook.com
 
-## Get Coquette
+## Get the code
 
 * Minified: `coquette_root/coquette-min.js`
 * Single file: `coquette_root/coquette.js`
