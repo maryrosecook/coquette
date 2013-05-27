@@ -107,6 +107,8 @@ Does a tick - an iteration of the game update loop - sixty times a second.  If t
 
 #### Renderer
 
+Draws to the canvas element.
+
 ##### Get the canvas drawing context
 
 ```javascript
