@@ -8,7 +8,6 @@
   Bullet.prototype = {
     size: { x:1, y:1 },
     speed: 1000,
-    zIndex: 1,
 
     update: function(tick) {
       if (this.game.state !== this.game.STATE.PLAYING) return;

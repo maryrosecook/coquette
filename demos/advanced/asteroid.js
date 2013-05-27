@@ -23,7 +23,6 @@
   };
 
   Asteroid.prototype = {
-    zIndex: 0,
     destroyed: false,
 
     update: function(tick) {

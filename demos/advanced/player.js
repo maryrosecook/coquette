@@ -23,7 +23,6 @@
 
   Player.prototype = {
     size: { x:1, y:1 },
-    zIndex: 2,
 
     update: function() {
       if (this.game.state !== this.game.STATE.PLAYING) return;
