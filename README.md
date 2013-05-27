@@ -69,16 +69,6 @@ window.addEventListener('load', function() {
 });
 ```
 
-## Run the tests
-
-Install Node.js and npm: https://github.com/isaacs/npm
-
-Install the node dependencies and run the tests with:
-
-    $ cd path/to/coquette
-    $ npm install --dev
-    $ npm test
-
 ## Reference
 
 ### Getting started
@@ -218,3 +208,13 @@ var Player = function() {
   };
 };
 ```
+
+## Run the tests
+
+Install Node.js and npm: https://github.com/isaacs/npm
+
+Install the node dependencies and run the tests with:
+
+    $ cd path/to/coquette
+    $ npm install --dev
+    $ npm test
