@@ -113,7 +113,7 @@ var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
 
 #### Ticker
 
-Does a tick - the game update loop - sixty times a second.  If the main game object or a game entity has an `update()` function, it will get called on each tick.  If the main game object or a game entity has a `draw()` function, it will get called on each tick.
+Does a tick - an iteration of the game update loop - sixty times a second.  If the main game object or a game entity has an `update()` function, it will get called on each tick.  If the main game object or a game entity has a `draw()` function, it will get called on each tick.
 
 #### Renderer
 
