@@ -1,8 +1,7 @@
 ;(function(exports) {
-  var Renderer = function(coquette, game, canvasId, width, height, backgroundColor) {
+  var Renderer = function(coquette, game, canvas, width, height, backgroundColor) {
     this.coquette = coquette;
     this.game = game;
-    var canvas = document.getElementById(canvasId);
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
     this.ctx = canvas.getContext('2d');
