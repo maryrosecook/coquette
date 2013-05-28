@@ -1,7 +1,8 @@
 ;(function(exports) {
   var Coquette = function(game, canvasId, width, height, backgroundColor, autoFocus) {
-    this.renderer = new Coquette.Renderer(this, game, canvasId, width,height, backgroundColor);
-    this.inputter = new Coquette.Inputter(this, canvasId, autoFocus);
+    var canvas = document.getElementById(canvasId);
+    this.renderer = new Coquette.Renderer(this, game, canvas, width,height, backgroundColor);
+    this.inputter = new Coquette.Inputter(this, canvas, autoFocus);
     this.entities = new Coquette.Entities(this, game);
     this.runner = new Coquette.Runner(this);
     this.collider = new Coquette.Collider(this);

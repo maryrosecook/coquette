@@ -1,5 +1,5 @@
  ;(function(exports) {
-  var Inputter = function(coquette, canvasId, autoFocus) {
+  var Inputter = function(coquette, canvas, autoFocus) {
     this.coquette = coquette;
     if (autoFocus === undefined) {
       autoFocus = true;
@@ -7,7 +7,7 @@
 
     var inputReceiverElement = window;
     if (!autoFocus) {
-      inputReceiverElement = document.getElementById(canvasId)
+      inputReceiverElement = canvas;
       inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
     } else {
       // suppress scrolling
