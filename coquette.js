@@ -1,7 +1,8 @@
 ;(function(exports) {
   var Coquette = function(game, canvasId, width, height, backgroundColor, autoFocus) {
-    this.renderer = new Coquette.Renderer(this, game, canvasId, width,height, backgroundColor);
-    this.inputter = new Coquette.Inputter(this, canvasId, autoFocus);
+    var canvas = document.getElementById(canvasId);
+    this.renderer = new Coquette.Renderer(this, game, canvas, width,height, backgroundColor);
+    this.inputter = new Coquette.Inputter(this, canvas, autoFocus);
     this.entities = new Coquette.Entities(this, game);
     this.runner = new Coquette.Runner(this);
     this.collider = new Coquette.Collider(this);
@@ -246,7 +247,7 @@
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
  ;(function(exports) {
-  var Inputter = function(coquette, canvasId, autoFocus) {
+  var Inputter = function(coquette, canvas, autoFocus) {
     this.coquette = coquette;
     if (autoFocus === undefined) {
       autoFocus = true;
@@ -254,7 +255,7 @@
 
     var inputReceiverElement = window;
     if (!autoFocus) {
-      inputReceiverElement = document.getElementById(canvasId)
+      inputReceiverElement = canvas;
       inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
     } else {
       // suppress scrolling
@@ -380,10 +381,9 @@
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
 ;(function(exports) {
-  var Renderer = function(coquette, game, canvasId, width, height, backgroundColor) {
+  var Renderer = function(coquette, game, canvas, width, height, backgroundColor) {
     this.coquette = coquette;
     this.game = game;
-    var canvas = document.getElementById(canvasId);
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
     this.ctx = canvas.getContext('2d');
@@ -466,6 +466,7 @@
       this.coquette.runner.add(this, function(entities) {
         var entity = new clazz(self.game, settings || {});
         entities._entities.push(entity);
+        zindexSort(self.all());
         if (callback !== undefined) {
           callback(entity);
         }
@@ -486,6 +487,16 @@
         }
       });
     }
+  };
+
+  // sorts passed array by zindex
+  // elements with a higher zindex are drawn on top of those with a lower zindex
+  var zindexSort = function(arr) {
+    arr.sort(function(a, b) {
+      var aSort = (a.zindex || 0);
+      var bSort = (b.zindex || 0);
+      return aSort < bSort ? -1 : 1;
+    });
   };
 
   exports.Entities = Entities;
