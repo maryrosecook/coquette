@@ -107,7 +107,7 @@ Does a tick - an iteration of the game update loop - sixty times a second.  If t
 
 #### Renderer
 
-Draws to the canvas element.
+Holds the canvas drawing context.  Calls `draw()` on the main game object and all game entities.
 
 ##### Get the canvas drawing context
 
@@ -115,6 +115,15 @@ Draws to the canvas element.
   var ctx = coquette.renderer.getCtx();
   ctx.fillStyle = "#f00";
   ctx.fillRect(0, 0, 10, 10);
+```
+
+##### Set the order that entities are drawn
+
+When you create your entities, include some integer `zindex` attribute in the `settings` object.  An entity with a higher `zindex` will get drawn on top of an entity with a lower `zindex`.  The default `zindex` is `0`.
+
+```javascript
+  coquette.entities.create(BackgroundTile, { zindex: -1 });
+  coquette.entities.create(Player, { zindex: 1 }); // drawn on top
 ```
 
 #### Entities

@@ -140,7 +140,7 @@ var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
 
     <h4>Renderer</h4>
 
-    <p>Draws to the canvas element.</p>
+    <p>Holds the canvas drawing context.  Calls <code>draw()</code> on the main game object and all game entities.</p>
 
     <h5>Get the canvas drawing context</h5>
 
@@ -148,6 +148,17 @@ var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
 var ctx = coquette.renderer.getCtx();
 ctx.fillStyle = "#f00";
 ctx.fillRect(0, 0, 10, 10);
+</pre>
+
+    <h5>Set the order that entities are drawn</h5>
+
+    <p>
+      When you create your entities, include some integer <code>zindex</code> attribute in the <code>settings</code> object.  An entity with a higher <code>zindex</code> will get drawn on top of an entity with a lower <code>zindex</code>.  The default <code>zindex</code> is <code>0</code>.
+    </p>
+
+<pre class="prettyprint">
+coquette.entities.create(BackgroundTile, { zindex: -1 });
+coquette.entities.create(Player, { zindex: 1 }); // drawn on top
 </pre>
 
     <h4>Entities</h4>
