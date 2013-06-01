@@ -116,7 +116,7 @@
     NUM_LOCK: 144,
     SCROLL_LOCK: 145,
     SEMI_COLON: 186,
-    EQUAL: 187,
+    EQUALS: 187,
     COMMA: 188,
     DASH: 189,
     PERIOD: 190,
