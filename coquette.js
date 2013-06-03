@@ -258,10 +258,18 @@
     if (!autoFocus) {
       inputReceiverElement = canvas;
       inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
+      this.suppressedKeys = [];
     } else {
+      this.supressedKeys = [
+        this.SPACE,
+        this.LEFT_ARROW,
+        this.UP_ARROW,
+        this.RIGHT_ARROW,
+        this.DOWN_ARROW
+      ];
+
       // suppress scrolling
       window.addEventListener("keydown", function(e) {
-        // space and arrow keys
         if(self.supressedKeys.indexOf(e.keyCode) > -1) {
           e.preventDefault();
         }
@@ -275,7 +283,6 @@
   Inputter.prototype = {
     _state: {},
     bindings: {},
-    supressedKeys: [32, 37, 38, 39, 40],
 
     state: function(keyCode, state) {
       if (state !== undefined) {
@@ -364,15 +371,15 @@
     NUM_LOCK: 144,
     SCROLL_LOCK: 145,
     SEMI_COLON: 186,
-    EQUAL: 187,
+    EQUALS: 187,
     COMMA: 188,
     DASH: 189,
     PERIOD: 190,
     FORWARD_SLASH: 191,
     GRAVE_ACCENT: 192,
-    OPEN_BRACKET: 219,
+    OPEN_SQUARE_BRACKET: 219,
     BACK_SLASH: 220,
-    CLOSE_BRACKET: 221,
+    CLOSE_SQUARE_BRACKET: 221,
     SINGLE_QUOTE: 222
 
   };
