@@ -10,10 +10,18 @@
     if (!autoFocus) {
       inputReceiverElement = canvas;
       inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
+      this.suppressedKeys = [];
     } else {
+      this.supressedKeys = [
+        this.SPACE,
+        this.LEFT_ARROW,
+        this.UP_ARROW,
+        this.RIGHT_ARROW,
+        this.DOWN_ARROW
+      ];
+
       // suppress scrolling
       window.addEventListener("keydown", function(e) {
-        // space and arrow keys
         if(self.supressedKeys.indexOf(e.keyCode) > -1) {
           e.preventDefault();
         }
@@ -27,7 +35,6 @@
   Inputter.prototype = {
     _state: {},
     bindings: {},
-    supressedKeys: [32, 37, 38, 39, 40],
 
     state: function(keyCode, state) {
       if (state !== undefined) {
