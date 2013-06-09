@@ -1,18 +1,25 @@
 ;(function(exports) {
-  var Renderer = function(coquette, game, canvas, width, height, backgroundColor) {
+  var Renderer = function(coquette, game, canvas, wView, hView, backgroundColor) {
     this.coquette = coquette;
     this.game = game;
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
     this.ctx = canvas.getContext('2d');
     this.backgroundColor = backgroundColor;
-    canvas.width = this.width = width;
-    canvas.height = this.height = height;
+
+    canvas.width = wView;
+    canvas.height = hView;
+    this.viewSize = { x:wView, y:hView };
+    this.worldSize = { x:wView, y:hView };
   };
 
   Renderer.prototype = {
     getCtx: function() {
       return this.ctx;
+    },
+
+    setWorldSize: function(size) {
+      this.world = { x:size.x, y:size.y };
     },
 
     update: function(interval) {
@@ -33,14 +40,19 @@
 
     center: function() {
       return {
-        x: this.width / 2,
-        y: this.height / 2
+        x: this.worldSize.x / 2,
+        y: this.worldSize.y / 2
       };
     },
 
     onScreen: function(obj) {
-      return obj.pos.x > 0 && obj.pos.x < this.coquette.renderer.width &&
-        obj.pos.y > 0 && obj.pos.y < this.coquette.renderer.height;
+      return obj.pos.x >= this.viewCenter.x - this.viewSize.x / 2 &&
+        obj.pos.x <= this.viewCenter.x + this.viewSize.x / 2 &&
+        obj.pos.y >= this.viewCenter.y - this.viewSize.y / 2 &&
+        obj.pos.y <= this.viewCenter.y + this.viewSize.y / 2;
+    }
+  };
+
     }
   };
 
