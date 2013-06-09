@@ -1,7 +1,7 @@
 ;(function(exports) {
   var Coquette = function(game, canvasId, width, height, backgroundColor, autoFocus) {
     var canvas = document.getElementById(canvasId);
-    this.renderer = new Coquette.Renderer(this, game, canvas, width,height, backgroundColor);
+    this.renderer = new Coquette.Renderer(this, game, canvas, width, height, backgroundColor);
     this.inputter = new Coquette.Inputter(this, canvas, autoFocus);
     this.entities = new Coquette.Entities(this, game);
     this.runner = new Coquette.Runner(this);
@@ -90,16 +90,25 @@
     isIntersecting: function(obj1, obj2) {
       var obj1BoundingBox = obj1.boundingBox || this.RECTANGLE;
       var obj2BoundingBox = obj2.boundingBox || this.RECTANGLE;
-      if (obj1BoundingBox === this.RECTANGLE &&
-          obj2BoundingBox === this.RECTANGLE) {
+
+      if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.RECTANGLE) {
         return Maths.rectanglesIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.CIRCLE &&
-                 obj2BoundingBox === this.CIRCLE) {
-        return Maths.circlesIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.CIRCLE) {
+      } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.RECTANGLE) {
         return Maths.circleAndRectangleIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.RECTANGLE) {
+      } else if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.CIRCLE) {
         return Maths.circleAndRectangleIntersecting(obj2, obj1);
+      } else if (obj1BoundingBox === this.POINT && obj2BoundingBox === this.RECTANGLE) {
+        return Maths.pointAndRectangleIntersecting(obj1, obj2);
+      } else if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.POINT) {
+        return Maths.pointAndRectangleIntersecting(obj2, obj1);
+      } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.CIRCLE) {
+        return Maths.circlesIntersecting(obj1, obj2);
+      } else if (obj1BoundingBox === this.POINT && obj2BoundingBox === this.CIRCLE) {
+        return Maths.pointAndCircleIntersecting(obj1, obj2);
+      } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.POINT) {
+        return Maths.pointAndCircleIntersecting(obj2, obj1);
+      } else if (obj1BoundingBox === this.POINT && obj2BoundingBox === this.POINT) {
+        return Maths.pointsIntersecting(obj1, obj2);
       } else {
         throw "Objects being collision tested have unsupported bounding box types."
       }
@@ -109,8 +118,14 @@
     SUSTAINED: 1,
 
     RECTANGLE: 0,
-    CIRCLE: 1
+    CIRCLE: 1,
+    POINT:2
   };
+
+  var orEqual = function(obj1BB, obj2BB, bBType1, bBType2) {
+    return (obj1BB === bBType1 && obj2BB === bBType2) ||
+      (obj1BB === bBType2 && obj2BB === bBType1);
+  }
 
   var notifyEntityOfCollision = function(entity, other, type) {
     if (entity.collision !== undefined) {
@@ -137,6 +152,18 @@
     circlesIntersecting: function(obj1, obj2) {
       return Maths.distance(Maths.center(obj1), Maths.center(obj2)) <
         obj1.size.x / 2 + obj2.size.x / 2;
+    },
+
+    pointAndCircleIntersecting: function(obj1, obj2) {
+      return this.distance(obj1.pos, this.center(obj2)) < obj2.size.x / 2;
+    },
+
+    pointAndRectangleIntersecting: function(obj1, obj2) {
+      return this.pointInsideObj(obj1.pos, obj2);
+    },
+
+    pointsIntersecting: function(obj1, obj2) {
+      return obj1.x === obj2.x && obj1.y === obj2.y;
     },
 
     pointInsideObj: function(point, obj) {
@@ -467,15 +494,19 @@
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
 ;(function(exports) {
-  var Renderer = function(coquette, game, canvas, width, height, backgroundColor) {
+  var Renderer = function(coquette, game, canvas, wView, hView, backgroundColor) {
     this.coquette = coquette;
     this.game = game;
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
     this.ctx = canvas.getContext('2d');
     this.backgroundColor = backgroundColor;
-    canvas.width = this.width = width;
-    canvas.height = this.height = height;
+
+    canvas.width = wView;
+    canvas.height = hView;
+    this.viewSize = { x:wView, y:hView };
+    this.worldSize = { x:wView, y:hView };
+    this.viewCenter = { x:wView / 2, y:hView / 2 };
   };
 
   Renderer.prototype = {
@@ -483,12 +514,28 @@
       return this.ctx;
     },
 
+    setViewCenter: function(pos) {
+      this.viewCenter = { x:pos.x, y:pos.y };
+    },
+
+    setWorldSize: function(size) {
+      this.world = { x:size.x, y:size.y };
+    },
+
     update: function(interval) {
       var ctx = this.getCtx();
 
       // draw background
       ctx.fillStyle = this.backgroundColor;
-      ctx.fillRect(0, 0, this.width, this.height);
+      ctx.fillRect(-this.viewSize.x / 2,
+                   -this.viewSize.y / 2,
+                   this.worldSize.x + this.viewSize.x / 2,
+                   this.worldSize.y + this.viewSize.y / 2);
+
+      var viewTranslate = viewOffset(this.viewCenter, this.viewSize);
+
+      // translate so all objs placed relative to viewport
+      ctx.translate(-viewTranslate.x, -viewTranslate.y);
 
       // draw game and entities
       var drawables = [this.game].concat(this.coquette.entities.all());
@@ -497,18 +544,30 @@
           drawables[i].draw(ctx);
         }
       }
+
+      // translate back
+      ctx.translate(viewTranslate.x, viewTranslate.y);
     },
 
     center: function() {
       return {
-        x: this.width / 2,
-        y: this.height / 2
+        x: this.worldSize.x / 2,
+        y: this.worldSize.y / 2
       };
     },
 
     onScreen: function(obj) {
-      return obj.pos.x > 0 && obj.pos.x < this.coquette.renderer.width &&
-        obj.pos.y > 0 && obj.pos.y < this.coquette.renderer.height;
+      return obj.pos.x >= this.viewCenter.x - this.viewSize.x / 2 &&
+        obj.pos.x <= this.viewCenter.x + this.viewSize.x / 2 &&
+        obj.pos.y >= this.viewCenter.y - this.viewSize.y / 2 &&
+        obj.pos.y <= this.viewCenter.y + this.viewSize.y / 2;
+    }
+  };
+
+  var viewOffset = function(viewCenter, viewSize) {
+    return {
+      x:viewCenter.x - viewSize.x / 2,
+      y:viewCenter.y - viewSize.y / 2
     }
   };
 
