@@ -11,11 +11,16 @@
     canvas.height = hView;
     this.viewSize = { x:wView, y:hView };
     this.worldSize = { x:wView, y:hView };
+    this.viewCenter = { x:wView / 2, y:hView / 2 };
   };
 
   Renderer.prototype = {
     getCtx: function() {
       return this.ctx;
+    },
+
+    setViewCenter: function(pos) {
+      this.viewCenter = { x:pos.x, y:pos.y };
     },
 
     setWorldSize: function(size) {
@@ -27,7 +32,15 @@
 
       // draw background
       ctx.fillStyle = this.backgroundColor;
-      ctx.fillRect(0, 0, this.width, this.height);
+      ctx.fillRect(-this.viewSize.x / 2,
+                   -this.viewSize.y / 2,
+                   this.worldSize.x + this.viewSize.x / 2,
+                   this.worldSize.y + this.viewSize.y / 2);
+
+      var viewTranslate = viewOffset(this.viewCenter, this.viewSize);
+
+      // translate so all objs placed relative to viewport
+      ctx.translate(-viewTranslate.x, -viewTranslate.y);
 
       // draw game and entities
       var drawables = [this.game].concat(this.coquette.entities.all());
@@ -36,6 +49,9 @@
           drawables[i].draw(ctx);
         }
       }
+
+      // translate back
+      ctx.translate(viewTranslate.x, viewTranslate.y);
     },
 
     center: function() {
@@ -53,6 +69,10 @@
     }
   };
 
+  var viewOffset = function(viewCenter, viewSize) {
+    return {
+      x:viewCenter.x - viewSize.x / 2,
+      y:viewCenter.y - viewSize.y / 2
     }
   };
 

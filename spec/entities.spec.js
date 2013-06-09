@@ -17,7 +17,8 @@ var MockCanvas = function() {
       lineTo: function() {},
       fill: function() {},
       arc: function() {},
-      moveTo: function() {}
+      moveTo: function() {},
+      translate: function() {}
     }
   };
 };
