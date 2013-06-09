@@ -65,16 +65,25 @@
     isIntersecting: function(obj1, obj2) {
       var obj1BoundingBox = obj1.boundingBox || this.RECTANGLE;
       var obj2BoundingBox = obj2.boundingBox || this.RECTANGLE;
-      if (obj1BoundingBox === this.RECTANGLE &&
-          obj2BoundingBox === this.RECTANGLE) {
+
+      if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.RECTANGLE) {
         return Maths.rectanglesIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.CIRCLE &&
-                 obj2BoundingBox === this.CIRCLE) {
-        return Maths.circlesIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.CIRCLE) {
+      } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.RECTANGLE) {
         return Maths.circleAndRectangleIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.RECTANGLE) {
+      } else if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.CIRCLE) {
         return Maths.circleAndRectangleIntersecting(obj2, obj1);
+      } else if (obj1BoundingBox === this.POINT && obj2BoundingBox === this.RECTANGLE) {
+        return Maths.pointAndRectangleIntersecting(obj1, obj2);
+      } else if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.POINT) {
+        return Maths.pointAndRectangleIntersecting(obj2, obj1);
+      } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.CIRCLE) {
+        return Maths.circlesIntersecting(obj1, obj2);
+      } else if (obj1BoundingBox === this.POINT && obj2BoundingBox === this.CIRCLE) {
+        return Maths.pointAndCircleIntersecting(obj1, obj2);
+      } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.POINT) {
+        return Maths.pointAndCircleIntersecting(obj2, obj1);
+      } else if (obj1BoundingBox === this.POINT && obj2BoundingBox === this.POINT) {
+        return Maths.pointsIntersecting(obj1, obj2);
       } else {
         throw "Objects being collision tested have unsupported bounding box types."
       }
@@ -84,8 +93,14 @@
     SUSTAINED: 1,
 
     RECTANGLE: 0,
-    CIRCLE: 1
+    CIRCLE: 1,
+    POINT:2
   };
+
+  var orEqual = function(obj1BB, obj2BB, bBType1, bBType2) {
+    return (obj1BB === bBType1 && obj2BB === bBType2) ||
+      (obj1BB === bBType2 && obj2BB === bBType1);
+  }
 
   var notifyEntityOfCollision = function(entity, other, type) {
     if (entity.collision !== undefined) {
@@ -112,6 +127,18 @@
     circlesIntersecting: function(obj1, obj2) {
       return Maths.distance(Maths.center(obj1), Maths.center(obj2)) <
         obj1.size.x / 2 + obj2.size.x / 2;
+    },
+
+    pointAndCircleIntersecting: function(obj1, obj2) {
+      return this.distance(obj1.pos, this.center(obj2)) < obj2.size.x / 2;
+    },
+
+    pointAndRectangleIntersecting: function(obj1, obj2) {
+      return this.pointInsideObj(obj1.pos, obj2);
+    },
+
+    pointsIntersecting: function(obj1, obj2) {
+      return obj1.x === obj2.x && obj1.y === obj2.y;
     },
 
     pointInsideObj: function(point, obj) {
