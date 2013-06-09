@@ -138,7 +138,7 @@
     },
 
     pointsIntersecting: function(obj1, obj2) {
-      return obj1.x === obj2.x && obj1.y === obj2.y;
+      return obj1.pos.x === obj2.pos.x && obj1.pos.y === obj2.pos.y;
     },
 
     pointInsideObj: function(point, obj) {
