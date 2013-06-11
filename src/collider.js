@@ -63,14 +63,8 @@
 
     getCollideRecord: function(entity1, entity2) {
       for (var i = 0, len = this.collideRecords.length; i < len; i++) {
-        // looking for coll where one entity appears
-        if (entity2 === undefined &&
-            (this.collideRecords[i][0] === entity1 ||
-             this.collideRecords[i][1] === entity1)) {
-          return i;
-        // looking for coll between two specific entities
-        } else if (this.collideRecords[i][0] === entity1 &&
-                   this.collideRecords[i][1] === entity2) {
+        if (this.collideRecords[i][0] === entity1 &&
+            this.collideRecords[i][1] === entity2) {
           return i;
         }
       }
