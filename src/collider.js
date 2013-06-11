@@ -3,6 +3,16 @@
     this.coquette = coquette;
   };
 
+  // if no entities have uncollision(), skip expensive record keeping for uncollisions
+  var isUncollisionOn = function(entities) {
+    for (var i = 0, len = entities.length; i < len; i++) {
+      if (entities[i].uncollision !== undefined) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   Collider.prototype = {
     collideRecords: [],
 
@@ -22,14 +32,18 @@
     },
 
     collision: function(entity1, entity2) {
-      if (this.getCollideRecord(entity1, entity2) === undefined) {
+      var collisionType;
+      if (!isUncollisionOn(this.coquette.entities.all())) {
+        collisionType = this.INITIAL;
+      } else if (this.getCollideRecord(entity1, entity2) === undefined) {
         this.collideRecords.push([entity1, entity2]);
-        notifyEntityOfCollision(entity1, entity2, this.INITIAL);
-        notifyEntityOfCollision(entity2, entity1, this.INITIAL);
+        collisionType = this.INITIAL;
       } else {
-        notifyEntityOfCollision(entity1, entity2, this.SUSTAINED);
-        notifyEntityOfCollision(entity2, entity1, this.SUSTAINED);
+        collisionType = this.SUSTAINED;
       }
+
+      notifyEntityOfCollision(entity1, entity2, collisionType);
+      notifyEntityOfCollision(entity2, entity1, collisionType);
     },
 
     removeEntity: function(entity) {
