@@ -19,13 +19,11 @@
     update: function() {
       var ent = this.coquette.entities.all();
       for (var i = 0, len = ent.length; i < len; i++) {
-        for (var j = i; j < len; j++) {
-          if (ent[i] !== ent[j]) {
-            if (this.isIntersecting(ent[i], ent[j])) {
-              this.collision(ent[i], ent[j]);
-            } else {
-              this.removeOldCollision(ent[i], ent[j]);
-            }
+        for (var j = i + 1; j < len; j++) {
+          if (this.isIntersecting(ent[i], ent[j])) {
+            this.collision(ent[i], ent[j]);
+          } else {
+            this.removeOldCollision(ent[i], ent[j]);
           }
         }
       }
