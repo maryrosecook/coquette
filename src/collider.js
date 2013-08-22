@@ -11,10 +11,13 @@
       for (var i = 0, len = ent.length; i < len; i++) {
         for (var j = i; j < len; j++) {
           if (ent[i] !== ent[j]) {
-            if (this.isIntersecting(ent[i], ent[j])) {
-              this.collision(ent[i], ent[j]);
-            } else {
-              this.removeOldCollision(ent[i], ent[j]);
+            if (ent[i].boundingBox !== this.NONE &&
+                ent[j].boundingBox !== this.NONE) {
+              if (this.isIntersecting(ent[i], ent[j])) {
+                this.collision(ent[i], ent[j]);
+              } else {
+                this.removeOldCollision(ent[i], ent[j]);
+              }
             }
           }
         }
@@ -84,7 +87,8 @@
     SUSTAINED: 1,
 
     RECTANGLE: 0,
-    CIRCLE: 1
+    CIRCLE: 1,
+    NONE: 2
   };
 
   var notifyEntityOfCollision = function(entity, other, type) {
