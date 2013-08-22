@@ -21,6 +21,13 @@
         obj: obj,
         fn: fn
       });
+    },
+
+    enqueue: function(obj, fn) {
+      this.runs.splice(0, 0, {
+        obj: obj,
+        fn: fn
+      });
     }
   };
 
