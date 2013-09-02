@@ -5,6 +5,7 @@
   "version": "0.1.5",
   "scripts": {
     "test": "node_modules/jasmine-node/bin/jasmine-node spec/",
+    "minify": "node scripts/minifier.js",
     "prepublish": "node scripts/minifier.js"
   },
   "devDependencies": {
