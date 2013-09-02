@@ -12,9 +12,9 @@ http://coquette.maryrosecook.com
 
 ## Get the code
 
-* Minified: `coquette_root/coquette-min.js`
-* Single file: `coquette_root/coquette.js`
-* github: http://github.com/maryrosecook/coquette
+* Minified: https://github.com/maryrosecook/coquette/coquette-min.js
+* Single file: https://github.com/maryrosecook/coquette/coquette.js
+* GitHub: https://github.com/maryrosecook/coquette
 * `$ npm install coquette`
 
 ## Example
