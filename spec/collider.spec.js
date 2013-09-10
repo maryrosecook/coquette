@@ -68,12 +68,50 @@ describe('collider', function() {
         expect(intersecting).toEqual(true);
       });
 
-      it('should return true for two rects that are colliding', function() {
-        var collider = new Collider();
-        var obj1 = mockObj(5, 5, 10, 10);
-        var obj2 = mockObj(15, 15, 10, 10);
-        var intersecting = collider.isIntersecting(obj1, obj2);
-        expect(intersecting).toEqual(true);
+      describe('two rects', function() {
+        describe('collisions', function() {
+          it('should return true: bottom right corner over top left corner', function() {
+            expect(new Collider().isIntersecting(mockObj(10, 10, 2, 4),
+                                                 mockObj(12, 14, 4, 2))).toEqual(true);
+          });
+
+          it('should return true: bottom left corner over top right corner', function() {
+            expect(new Collider().isIntersecting(mockObj(10, 10, 2, 4),
+                                                 mockObj(6, 14, 4, 2))).toEqual(true);
+          });
+
+          it('should return true: top left corner over bottom right corner', function() {
+            expect(new Collider().isIntersecting(mockObj(12, 14, 4, 2),
+                                                 mockObj(10, 10, 2, 4))).toEqual(true);
+          });
+
+          it('should return true: top right corner over bottom left corner', function() {
+            expect(new Collider().isIntersecting(mockObj(6, 14, 4, 2),
+                                                 mockObj(10, 10, 2, 4))).toEqual(true);
+          });
+        });
+
+        describe('non-collisions', function() {
+          it('should return true: bottom right corner over top left corner', function() {
+            expect(new Collider().isIntersecting(mockObj(10, 10, 2, 4),
+                                                 mockObj(13, 14, 4, 2))).toEqual(false);
+          });
+
+          it('should return true: bottom left corner over top right corner', function() {
+            expect(new Collider().isIntersecting(mockObj(10, 10, 2, 4),
+                                                 mockObj(5, 14, 4, 2))).toEqual(false);
+          });
+
+          it('should return true: top left corner over bottom right corner', function() {
+            expect(new Collider().isIntersecting(mockObj(13, 14, 4, 2),
+                                                 mockObj(10, 10, 2, 4))).toEqual(false);
+          });
+
+          it('should return true: top right corner over bottom left corner', function() {
+            expect(new Collider().isIntersecting(mockObj(5, 14, 4, 2),
+                                                 mockObj(10, 10, 2, 4))).toEqual(false);
+          });
+        });
       });
 
       it('should return false for two circles that are not colliding', function() {
