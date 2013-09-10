@@ -10,7 +10,7 @@
     canvas.width = wView;
     canvas.height = hView;
     this.viewSize = { x:wView, y:hView };
-    this.viewCenter = { x:wView / 2, y:hView / 2 };
+    this.viewCenterPos = { x: 0, y: 0 };
   };
 
   Renderer.prototype = {
@@ -18,10 +18,10 @@
       return this.ctx;
     },
 
-    setViewCenter: function(pos) {
-      this.viewCenter = { x:pos.x, y:pos.y };
     },
 
+    setViewCenterPos: function(pos) {
+      this.viewCenterPos = { x:pos.x, y:pos.y };
     },
 
     update: function(interval) {
@@ -34,7 +34,7 @@
                    this.worldSize.x + this.viewSize.x / 2,
                    this.worldSize.y + this.viewSize.y / 2);
 
-      var viewTranslate = viewOffset(this.viewCenter, this.viewSize);
+      var viewTranslate = viewOffset(this.viewCenterPos, this.viewSize);
 
       // translate so all objs placed relative to viewport
       ctx.translate(-viewTranslate.x, -viewTranslate.y);
