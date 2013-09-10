@@ -9,7 +9,6 @@
 
     var self = this;
     new Coquette.Ticker(this, function(interval) {
-      self.collider.update(interval);
       self.runner.update(interval);
       if (game.update !== undefined) {
         game.update(interval);
@@ -17,6 +16,7 @@
 
       self.entities.update(interval)
       self.renderer.update(interval);
+      self.inputter.update();
     });
   };
 
@@ -28,33 +28,45 @@
     this.coquette = coquette;
   };
 
+  // if no entities have uncollision(), skip expensive record keeping for uncollisions
+  var isUncollisionOn = function(entities) {
+    for (var i = 0, len = entities.length; i < len; i++) {
+      if (entities[i].uncollision !== undefined) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   Collider.prototype = {
     collideRecords: [],
 
     update: function() {
       var ent = this.coquette.entities.all();
       for (var i = 0, len = ent.length; i < len; i++) {
-        for (var j = i; j < len; j++) {
-          if (ent[i] !== ent[j]) {
-            if (this.isIntersecting(ent[i], ent[j])) {
-              this.collision(ent[i], ent[j]);
-            } else {
-              this.removeOldCollision(ent[i], ent[j]);
-            }
+        for (var j = i + 1; j < len; j++) {
+          if (this.isIntersecting(ent[i], ent[j])) {
+            this.collision(ent[i], ent[j]);
+          } else {
+            this.removeOldCollision(ent[i], ent[j]);
           }
         }
       }
     },
 
     collision: function(entity1, entity2) {
-      if (this.getCollideRecord(entity1, entity2) === undefined) {
+      var collisionType;
+      if (!isUncollisionOn(this.coquette.entities.all())) {
+        collisionType = this.INITIAL;
+      } else if (this.getCollideRecord(entity1, entity2) === undefined) {
         this.collideRecords.push([entity1, entity2]);
-        notifyEntityOfCollision(entity1, entity2, this.INITIAL);
-        notifyEntityOfCollision(entity2, entity1, this.INITIAL);
+        collisionType = this.INITIAL;
       } else {
-        notifyEntityOfCollision(entity1, entity2, this.SUSTAINED);
-        notifyEntityOfCollision(entity2, entity1, this.SUSTAINED);
+        collisionType = this.SUSTAINED;
       }
+
+      notifyEntityOfCollision(entity1, entity2, collisionType);
+      notifyEntityOfCollision(entity2, entity1, collisionType);
     },
 
     removeEntity: function(entity) {
@@ -74,14 +86,8 @@
 
     getCollideRecord: function(entity1, entity2) {
       for (var i = 0, len = this.collideRecords.length; i < len; i++) {
-        // looking for coll where one entity appears
-        if (entity2 === undefined &&
-            (this.collideRecords[i][0] === entity1 ||
-             this.collideRecords[i][1] === entity1)) {
-          return i;
-        // looking for coll between two specific entities
-        } else if (this.collideRecords[i][0] === entity1 &&
-                   this.collideRecords[i][1] === entity2) {
+        if (this.collideRecords[i][0] === entity1 &&
+            this.collideRecords[i][1] === entity2) {
           return i;
         }
       }
@@ -163,7 +169,7 @@
     },
 
     pointsIntersecting: function(obj1, obj2) {
-      return obj1.x === obj2.x && obj1.y === obj2.y;
+      return obj1.pos.x === obj2.pos.x && obj1.pos.y === obj2.pos.y;
     },
 
     pointInsideObj: function(point, obj) {
@@ -276,13 +282,14 @@
  ;(function(exports) {
   var Inputter = function(coquette, canvas, autoFocus) {
     this.coquette = coquette;
-    if (autoFocus === undefined) {
-      autoFocus = true;
-    }
-
+    this._keyDownState = {};
+    this._keyPressedState = {};
     var self = this;
+
+    // handle whether to autofocus on canvas, or not
+
     var inputReceiverElement = window;
-    if (!autoFocus) {
+    if (autoFocus === true) {
       inputReceiverElement = canvas;
       inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
       this.suppressedKeys = [];
@@ -297,34 +304,41 @@
 
       // suppress scrolling
       window.addEventListener("keydown", function(e) {
-        if(self.supressedKeys.indexOf(e.keyCode) > -1) {
-          e.preventDefault();
+        for (var i = 0; i < self.supressedKeys.length; i++) {
+          if(self.supressedKeys[i] === e.keyCode) {
+            e.preventDefault();
+            return;
+          }
         }
       }, false);
     }
 
-    inputReceiverElement.addEventListener('keydown', this.keydown.bind(this), false);
-    inputReceiverElement.addEventListener('keyup', this.keyup.bind(this), false);
+    // set up key listeners
+
+    inputReceiverElement.addEventListener('keydown', function(e) {
+      self._keyDownState[e.keyCode] = true;
+    }, false);
+
+    inputReceiverElement.addEventListener('keyup', function(e) {
+      if (self._keyDownState[e.keyCode] === true) {
+        self._keyPressedState[e.keyCode] = true;
+      }
+
+      self._keyDownState[e.keyCode] = false;
+    }, false);
   };
 
   Inputter.prototype = {
-    _state: {},
-    bindings: {},
-
-    state: function(keyCode, state) {
-      if (state !== undefined) {
-        this._state[keyCode] = state;
-      } else {
-        return this._state[keyCode] || false;
-      }
+    update: function() {
+      this._keyPressedState = {}; // key presses only registered for one tick
     },
 
-    keydown: function(e) {
-      this.state(e.keyCode, true);
+    down: function(keyCode) {
+      return this._keyDownState[keyCode] || false;
     },
 
-    keyup: function(e) {
-      this.state(e.keyCode, false);
+    pressed: function(keyCode) {
+      return this._keyPressedState[keyCode] || false;
     },
 
     BACKSPACE: 8,
@@ -494,6 +508,13 @@
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
 ;(function(exports) {
+  var Maths;
+  if(typeof module !== 'undefined' && module.exports) { // node
+    Maths = require('./collider').Collider.Maths;
+  } else { // browser
+    Maths = Coquette.Collider.Maths;
+  }
+
   var Renderer = function(coquette, game, canvas, wView, hView, backgroundColor) {
     this.coquette = coquette;
     this.game = game;
@@ -505,8 +526,7 @@
     canvas.width = wView;
     canvas.height = hView;
     this.viewSize = { x:wView, y:hView };
-    this.worldSize = { x:wView, y:hView };
-    this.viewCenter = { x:wView / 2, y:hView / 2 };
+    this.viewCenterPos = { x: 0, y: 0 };
   };
 
   Renderer.prototype = {
@@ -514,28 +534,32 @@
       return this.ctx;
     },
 
-    setViewCenter: function(pos) {
-      this.viewCenter = { x:pos.x, y:pos.y };
+    getViewSize: function() {
+      return this.viewSize;
     },
 
-    setWorldSize: function(size) {
-      this.world = { x:size.x, y:size.y };
+    getViewCenterPos: function() {
+      return this.viewCenterPos;
+    },
+
+    setViewCenterPos: function(pos) {
+      this.viewCenterPos = { x:pos.x, y:pos.y };
     },
 
     update: function(interval) {
       var ctx = this.getCtx();
 
-      // draw background
-      ctx.fillStyle = this.backgroundColor;
-      ctx.fillRect(-this.viewSize.x / 2,
-                   -this.viewSize.y / 2,
-                   this.worldSize.x + this.viewSize.x / 2,
-                   this.worldSize.y + this.viewSize.y / 2);
-
-      var viewTranslate = viewOffset(this.viewCenter, this.viewSize);
+      var viewTranslate = viewOffset(this.viewCenterPos, this.viewSize);
 
       // translate so all objs placed relative to viewport
       ctx.translate(-viewTranslate.x, -viewTranslate.y);
+
+      // draw background
+      ctx.fillStyle = this.backgroundColor;
+      ctx.fillRect(this.viewCenterPos.x - this.viewSize.x / 2,
+                   this.viewCenterPos.y - this.viewSize.y / 2,
+                   this.viewSize.x,
+                   this.viewSize.y);
 
       // draw game and entities
       var drawables = [this.game].concat(this.coquette.entities.all());
@@ -549,25 +573,18 @@
       ctx.translate(viewTranslate.x, viewTranslate.y);
     },
 
-    center: function() {
-      return {
-        x: this.worldSize.x / 2,
-        y: this.worldSize.y / 2
-      };
-    },
-
     onScreen: function(obj) {
-      return obj.pos.x >= this.viewCenter.x - this.viewSize.x / 2 &&
-        obj.pos.x <= this.viewCenter.x + this.viewSize.x / 2 &&
-        obj.pos.y >= this.viewCenter.y - this.viewSize.y / 2 &&
-        obj.pos.y <= this.viewCenter.y + this.viewSize.y / 2;
+      return Maths.rectanglesIntersecting(obj, {
+        size: this.viewSize,
+        pos: this.viewCenterPos
+      });
     }
   };
 
-  var viewOffset = function(viewCenter, viewSize) {
+  var viewOffset = function(viewCenterPos, viewSize) {
     return {
-      x:viewCenter.x - viewSize.x / 2,
-      y:viewCenter.y - viewSize.y / 2
+      x:viewCenterPos.x - viewSize.x / 2,
+      y:viewCenterPos.y - viewSize.y / 2
     }
   };
 
