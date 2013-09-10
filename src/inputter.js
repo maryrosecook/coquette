@@ -1,13 +1,9 @@
  ;(function(exports) {
   var Inputter = function(coquette, canvas, autoFocus) {
     this.coquette = coquette;
-    if (autoFocus === undefined) {
-      autoFocus = true;
-    }
-
     var self = this;
     var inputReceiverElement = window;
-    if (!autoFocus) {
+    if (autoFocus === true) {
       inputReceiverElement = canvas;
       inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
       this.suppressedKeys = [];
