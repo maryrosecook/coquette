@@ -1,7 +1,12 @@
  ;(function(exports) {
   var Inputter = function(coquette, canvas, autoFocus) {
     this.coquette = coquette;
+    this._keyDownState = {};
+    this._keyPressedState = {};
     var self = this;
+
+    // handle whether to autofocus on canvas, or not
+
     var inputReceiverElement = window;
     if (autoFocus === true) {
       inputReceiverElement = canvas;
@@ -24,27 +29,32 @@
       }, false);
     }
 
-    inputReceiverElement.addEventListener('keydown', this.keydown.bind(this), false);
-    inputReceiverElement.addEventListener('keyup', this.keyup.bind(this), false);
+    // set up key listeners
+
+    inputReceiverElement.addEventListener('keydown', function(e) {
+      self._keyDownState[e.keyCode] = true;
+    }, false);
+
+    inputReceiverElement.addEventListener('keyup', function(e) {
+      if (self._keyDownState[e.keyCode] === true) {
+        self._keyPressedState[e.keyCode] = true;
+      }
+
+      self._keyDownState[e.keyCode] = false;
+    }, false);
   };
 
   Inputter.prototype = {
-    _state: {},
-
-    state: function(keyCode, state) {
-      if (state !== undefined) {
-        this._state[keyCode] = state;
-      } else {
-        return this._state[keyCode] || false;
-      }
+    update: function() {
+      this._keyPressedState = {}; // key presses only registered for one tick
     },
 
-    keydown: function(e) {
-      this.state(e.keyCode, true);
+    down: function(keyCode) {
+      return this._keyDownState[keyCode] || false;
     },
 
-    keyup: function(e) {
-      this.state(e.keyCode, false);
+    pressed: function(keyCode) {
+      return this._keyPressedState[keyCode] || false;
     },
 
     BACKSPACE: 8,
