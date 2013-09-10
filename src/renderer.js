@@ -1,4 +1,11 @@
 ;(function(exports) {
+  var Maths;
+  if(typeof module !== 'undefined' && module.exports) { // node
+    Maths = require('./collider').Collider.Maths;
+  } else { // browser
+    Maths = Coquette.Collider.Maths;
+  }
+
   var Renderer = function(coquette, game, canvas, wView, hView, backgroundColor) {
     this.coquette = coquette;
     this.game = game;
@@ -58,17 +65,17 @@
     },
 
     onScreen: function(obj) {
-      return obj.pos.x >= this.viewCenter.x - this.viewSize.x / 2 &&
-        obj.pos.x <= this.viewCenter.x + this.viewSize.x / 2 &&
-        obj.pos.y >= this.viewCenter.y - this.viewSize.y / 2 &&
-        obj.pos.y <= this.viewCenter.y + this.viewSize.y / 2;
+      return Maths.rectanglesIntersecting(obj, {
+        size: this.viewSize,
+        pos: this.viewCenterPos
+      });
     }
   };
 
-  var viewOffset = function(viewCenter, viewSize) {
+  var viewOffset = function(viewCenterPos, viewSize) {
     return {
-      x:viewCenter.x - viewSize.x / 2,
-      y:viewCenter.y - viewSize.y / 2
+      x:viewCenterPos.x - viewSize.x / 2,
+      y:viewCenterPos.y - viewSize.y / 2
     }
   };
 
