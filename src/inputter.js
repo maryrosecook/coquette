@@ -23,8 +23,11 @@
 
       // suppress scrolling
       window.addEventListener("keydown", function(e) {
-        if(self.supressedKeys.indexOf(e.keyCode) > -1) {
-          e.preventDefault();
+        for (var i = 0; i < self.supressedKeys.length; i++) {
+          if(self.supressedKeys[i] === e.keyCode) {
+            e.preventDefault();
+            return;
+          }
         }
       }, false);
     }
