@@ -33,17 +33,17 @@
     update: function(interval) {
       var ctx = this.getCtx();
 
-      // draw background
-      ctx.fillStyle = this.backgroundColor;
-      ctx.fillRect(-this.viewSize.x / 2,
-                   -this.viewSize.y / 2,
-                   this.worldSize.x + this.viewSize.x / 2,
-                   this.worldSize.y + this.viewSize.y / 2);
-
       var viewTranslate = viewOffset(this.viewCenterPos, this.viewSize);
 
       // translate so all objs placed relative to viewport
       ctx.translate(-viewTranslate.x, -viewTranslate.y);
+
+      // draw background
+      ctx.fillStyle = this.backgroundColor;
+      ctx.fillRect(this.viewCenterPos.x - this.viewSize.x / 2,
+                   this.viewCenterPos.y - this.viewSize.y / 2,
+                   this.viewSize.x,
+                   this.viewSize.y);
 
       // draw game and entities
       var drawables = [this.game].concat(this.coquette.entities.all());
