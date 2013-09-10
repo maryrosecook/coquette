@@ -10,7 +10,6 @@
     canvas.width = wView;
     canvas.height = hView;
     this.viewSize = { x:wView, y:hView };
-    this.worldSize = { x:wView, y:hView };
     this.viewCenter = { x:wView / 2, y:hView / 2 };
   };
 
@@ -23,8 +22,6 @@
       this.viewCenter = { x:pos.x, y:pos.y };
     },
 
-    setWorldSize: function(size) {
-      this.world = { x:size.x, y:size.y };
     },
 
     update: function(interval) {
@@ -52,13 +49,6 @@
 
       // translate back
       ctx.translate(viewTranslate.x, viewTranslate.y);
-    },
-
-    center: function() {
-      return {
-        x: this.worldSize.x / 2,
-        y: this.worldSize.y / 2
-      };
     },
 
     onScreen: function(obj) {
