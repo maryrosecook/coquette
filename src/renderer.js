@@ -18,6 +18,12 @@
       return this.ctx;
     },
 
+    getViewSize: function() {
+      return this.viewSize;
+    },
+
+    getViewCenterPos: function() {
+      return this.viewCenterPos;
     },
 
     setViewCenterPos: function(pos) {
