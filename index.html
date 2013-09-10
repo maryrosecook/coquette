@@ -66,7 +66,7 @@ var Game = function(canvasId, width, height) {
   coq.entities.create(Person, { pos:{ x:243, y:40 }, color:"#099" }); // paramour
   coq.entities.create(Person, { pos:{ x:249, y:110 }, color:"#f07", // player
     update: function() {
-      if (coq.inputter.state(coq.inputter.UP_ARROW)) {
+      if (coq.inputter.down(coq.inputter.UP_ARROW)) {
         this.pos.y -= 0.4;
       }
     },
@@ -126,10 +126,18 @@ var coquette = new Coquette(game, "canvas", 150, 150, "#000");
 
     <h5>Find out if a certain key is pressed</h5>
 
-    Call <code>coquette.inputter.state()</code>, passing in the key's code, e.g.:
+    Call <code>coquette.inputter.down()</code>, passing in the key's code, e.g.:
 
 <pre class="prettyprint">
-var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
+var down = coquette.inputter.down(coquette.inputter.LEFT_ARROW);
+</pre>
+
+    <h5>Find out if a certain key was pressed down and then released</h5>
+
+    Call <code>coquette.inputter.pressed()</code>, passing in the key's code, e.g.:
+
+<pre class="prettyprint">
+var pressed = coquette.inputter.pressed(coquette.inputter.LEFT_ARROW);
 </pre>
 
     <h4>Ticker</h4>

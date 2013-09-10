@@ -43,7 +43,7 @@ var Game = function(canvasId, width, height) {
   coq.entities.create(Person, { pos:{ x:243, y:40 }, color:"#099" }); // paramour
   coq.entities.create(Person, { pos:{ x:249, y:110 }, color:"#f07", // player
     update: function() {
-      if (coq.inputter.state(coq.inputter.UP_ARROW)) {
+      if (coq.inputter.down(coq.inputter.UP_ARROW)) {
         this.pos.y -= 0.4;
       }
     },
@@ -93,12 +93,20 @@ When you instantiate Coquette, you get an object that has five modules. You can 
 
 Handles keyboard input from the player.
 
-##### Find out if a certain key is pressed
+##### Find out if a certain key is down
 
-Call `coquette.inputter.state()`, passing in the key's code, e.g.:
+Call `coquette.inputter.down()`, passing in the key's code, e.g.:
 
 ```javascript
-var pressed = coquette.inputter.state(coquette.inputter.LEFT_ARROW);
+var down = coquette.inputter.down(coquette.inputter.LEFT_ARROW);
+```
+
+##### Find out if a certain key was pressed down and then released
+
+Call `coquette.inputter.pressed()`, passing in the key's code, e.g.:
+
+```javascript
+var pressed = coquette.inputter.pressed(coquette.inputter.LEFT_ARROW);
 ```
 
 #### Ticker
