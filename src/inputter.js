@@ -30,7 +30,6 @@
 
   Inputter.prototype = {
     _state: {},
-    bindings: {},
 
     state: function(keyCode, state) {
       if (state !== undefined) {
