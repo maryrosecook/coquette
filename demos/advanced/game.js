@@ -34,7 +34,7 @@
           this.state = this.STATE.OVER;
         }
       } else if (this.state === this.STATE.INTRO || this.state === this.STATE.OVER) {
-        if(this.coquette.inputter.state(this.coquette.inputter.SPACE)) {
+        if(this.coquette.inputter.down(this.coquette.inputter.SPACE)) {
           var asteroids = this.coquette.entities.all(Asteroid);
           for (var i = 0; i < asteroids.length; i++) {
             asteroids[i].kill();
@@ -43,8 +43,8 @@
           for (var i = 0; i < 3; i++) {
             this.coquette.entities.create(Asteroid, {
               pos: {
-                x: Math.random() * this.coquette.renderer.width,
-                y: Math.random() * this.coquette.renderer.height
+                x: Math.random() * this.coquette.renderer.getViewSize().x,
+                y: Math.random() * this.coquette.renderer.getViewSize().y
               }
             });
           }
@@ -59,8 +59,8 @@
         for (var i = 0; i < this.maxScore; i++) {
           var rAngle = this.maths.degToRad(360 / this.maxScore * i);
           var pos = {
-            x: this.coquette.renderer.width / 2 + Math.sin(rAngle) * 30,
-            y: this.coquette.renderer.height / 2 + Math.cos(rAngle) * 30
+            x: this.coquette.renderer.getViewSize().x / 2 + Math.sin(rAngle) * 30,
+            y: this.coquette.renderer.getViewSize().y / 2 + Math.cos(rAngle) * 30
           };
 
           if (i > this.score() - 1) {
@@ -71,8 +71,8 @@
         }
       } else {
         ctx.drawImage(this.introImage,
-                      this.coquette.renderer.width / 2 - 100,
-                      this.coquette.renderer.height / 2 - 50);
+                      this.coquette.renderer.getViewSize().x / 2 - 100,
+                      this.coquette.renderer.getViewSize().y / 2 - 50);
       }
     },
 
@@ -88,8 +88,9 @@
     startClip: function(ctx) {
       ctx.save();
       ctx.beginPath();
-      ctx.arc(this.coquette.renderer.width / 2, this.coquette.renderer.height / 2,
-              this.coquette.renderer.width / 2 , 0, Math.PI * 2, true);
+      ctx.arc(this.coquette.renderer.getViewSize().x / 2,
+              this.coquette.renderer.getViewSize().y / 2,
+              this.coquette.renderer.getViewSize().x / 2 , 0, Math.PI * 2, true);
       ctx.closePath();
       ctx.clip();
     },

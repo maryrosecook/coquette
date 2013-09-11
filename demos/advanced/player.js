@@ -3,8 +3,8 @@
     this.game = game;
     this.pos = settings.pos;
     this.vel = { x:0, y:0 }; // bullshit
-    this.pathInset = this.game.coquette.renderer.width / 2;
-    this.pathRadius = this.game.coquette.renderer.width / 2 - 100;
+    this.pathInset = this.game.coquette.renderer.getViewSize().x / 2;
+    this.pathRadius = this.game.coquette.renderer.getViewSize().x / 2 - 100;
 
     var angle;
     this.angle = function(newValue) {
@@ -42,7 +42,7 @@
       ctx.strokeStyle = "#222";
       ctx.lineWidth = 1;
       ctx.beginPath();
-      var center = this.game.coquette.renderer.center();
+      var center = this.game.coquette.renderer.getViewCenterPos();
       ctx.arc(center.x + this.size.x / 2, center.y + this.size.x / 2,
               this.pathRadius, 0, Math.PI * 2, true);
       ctx.closePath();
@@ -61,37 +61,32 @@
       ctx.fill();
     },
 
-    SHOOT_DELAY: 300,
-    lastShot: 0,
     shootBullet: function(direction) {
-      if(this.game.maths.timePassed(this.lastShot, this.SHOOT_DELAY)) {
-        var center = this.game.maths.center(this);
-        var v = this.game.maths.vectorTo(center, this.game.coquette.renderer.center());
-        v.x *= 0.7;
-        v.y *= 0.7;
-        this.game.coquette.entities.create(Bullet, {
-          pos: { x:center.x, y:center.y },
-          vector: v,
-          owner: this,
-        });
+      var center = this.game.maths.center(this);
+      var v = this.game.maths.vectorTo(center,
+                                       this.game.coquette.renderer.getViewCenterPos());
+      v.x *= 0.7;
+      v.y *= 0.7;
+      this.game.coquette.entities.create(Bullet, {
+        pos: { x:center.x, y:center.y },
+        vector: v,
+        owner: this,
+      });
 
-        this.lastShot = new Date().getTime();
+      // spawn new asteroid
 
-        // spawn new asteroid
+      var rAngle = this.game.maths.degToRad(this.angle());
+      var pos = {
+        x: this.game.coquette.renderer.getViewSize().x / 2 - 30 + Math.sin(rAngle) * 250,
+        y: this.game.coquette.renderer.getViewSize().y / 2 - 30 + Math.cos(rAngle) * 250
+      };
 
-        var rAngle = this.game.maths.degToRad(this.angle());
-        var pos = {
-          x: this.game.coquette.renderer.width / 2 - 30 + Math.sin(rAngle) * 250,
-          y: this.game.coquette.renderer.height / 2 - 30 + Math.cos(rAngle) * 250
-        };
+      var vel = this.game.maths.normalise(this.game.maths.vectorTo(
+        this.game.coquette.renderer.getViewCenterPos(), pos));
+      vel.x /= 10;
+      vel.y /= 10;
 
-        var vel = this.game.maths.normalise(this.game.maths.vectorTo(
-          this.game.coquette.renderer.center(), pos));
-        vel.x /= 10;
-        vel.y /= 10;
-
-        this.game.coquette.entities.create(Asteroid, { pos: pos, vel: vel });
-      }
+      this.game.coquette.entities.create(Asteroid, { pos: pos, vel: vel });
     },
 
     move: function(direction) {
@@ -100,15 +95,15 @@
     },
 
     handleKeyboard: function() {
-      if(this.game.coquette.inputter.state(this.game.coquette.inputter.LEFT_ARROW)) {
+      if(this.game.coquette.inputter.down(this.game.coquette.inputter.LEFT_ARROW)) {
         this.move("left");
       }
 
-      if(this.game.coquette.inputter.state(this.game.coquette.inputter.RIGHT_ARROW)) {
+      if(this.game.coquette.inputter.down(this.game.coquette.inputter.RIGHT_ARROW)) {
         this.move("right");
       }
 
-      if(this.game.coquette.inputter.state(this.game.coquette.inputter.SPACE)) {
+      if(this.game.coquette.inputter.pressed(this.game.coquette.inputter.SPACE)) {
         this.shootBullet();
       }
     },
