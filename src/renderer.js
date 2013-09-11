@@ -17,7 +17,7 @@
     canvas.width = wView;
     canvas.height = hView;
     this.viewSize = { x:wView, y:hView };
-    this.viewCenterPos = { x: 0, y: 0 };
+    this.viewCenterPos = { x: this.viewSize.x / 2, y: this.viewSize.y / 2 };
   };
 
   Renderer.prototype = {
@@ -67,7 +67,10 @@
     onScreen: function(obj) {
       return Maths.rectanglesIntersecting(obj, {
         size: this.viewSize,
-        pos: this.viewCenterPos
+        pos: {
+          x: this.viewCenterPos.x - this.viewSize.x / 2,
+          y: this.viewCenterPos.y - this.viewSize.y / 2
+        }
       });
     }
   };
