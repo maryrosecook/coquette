@@ -11,14 +11,20 @@ var MockCanvas = function() {
 
 describe('renderer', function() {
   describe('view center position', function() {
-    it('should default view center to 0 0', function() {
-      var r = new Renderer(null, null, new MockCanvas());
-      expect(r.getViewCenterPos()).toEqual({ x: 0, y: 0 });
+    it('should default view top left to 0 0', function() {
+      var r = new Renderer(null, null, new MockCanvas(), 200, 100);
+      expect({
+        x: r.getViewCenterPos().x - r.getViewSize().x / 2,
+        y: r.getViewCenterPos().y - r.getViewSize().y / 2
+      }).toEqual({ x: 0, y: 0 });
     });
 
     it('should be able to get view center with getViewCenterPos()', function() {
-      var r = new Renderer(null, null, new MockCanvas());
-      expect(r.getViewCenterPos()).toEqual({ x: 0, y: 0 });
+      var r = new Renderer(null, null, new MockCanvas(), 200, 100);
+      expect({
+        x: r.getViewCenterPos().x - r.getViewSize().x / 2,
+        y: r.getViewCenterPos().y - r.getViewSize().y / 2
+      }).toEqual({ x: 0, y: 0 });
     });
 
     describe('setViewCenterPos()', function() {
