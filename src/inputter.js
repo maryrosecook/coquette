@@ -36,20 +36,26 @@
 
     inputReceiverElement.addEventListener('keydown', function(e) {
       self._keyDownState[e.keyCode] = true;
+      if (self._keyPressedState[e.keyCode] === undefined) { // start of new keypress
+        self._keyPressedState[e.keyCode] = true; // register keypress in progress
+      }
     }, false);
 
     inputReceiverElement.addEventListener('keyup', function(e) {
-      if (self._keyDownState[e.keyCode] === true) {
-        self._keyPressedState[e.keyCode] = true;
-      }
-
       self._keyDownState[e.keyCode] = false;
+      if (self._keyPressedState[e.keyCode] === false) { // prev keypress over
+        self._keyPressedState[e.keyCode] = undefined; // prep for keydown to start next press
+      }
     }, false);
   };
 
   Inputter.prototype = {
     update: function() {
-      this._keyPressedState = {}; // key presses only registered for one tick
+      for (var i in this._keyPressedState) {
+        if (this._keyPressedState[i] === true) { // tick passed and press event in progress
+          this._keyPressedState[i] = false; // end key press
+        }
+      }
     },
 
     down: function(keyCode) {
