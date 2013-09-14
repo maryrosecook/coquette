@@ -8,7 +8,7 @@
     this.collider = new Coquette.Collider(this);
 
     var self = this;
-    new Coquette.Ticker(this, function(interval) {
+    this.ticker = new Coquette.Ticker(this, function(interval) {
       self.collider.update(interval);
       self.runner.update(interval);
       if (game.update !== undefined) {
@@ -49,7 +49,7 @@
           if (this.isIntersecting(ent[i], ent[j])) {
             this.collision(ent[i], ent[j]);
           } else {
-            this.removeOldCollision(ent[i], ent[j]);
+            this.removeOldCollision(this.getCollideRecordIds(ent[i], ent[j])[0]);
           }
         }
       }
@@ -59,7 +59,7 @@
       var collisionType;
       if (!isUncollisionOn(this.coquette.entities.all())) {
         collisionType = this.INITIAL;
-      } else if (this.getCollideRecord(entity1, entity2) === undefined) {
+      } else if (this.getCollideRecordIds(entity1, entity2).length === 0) {
         this.collideRecords.push([entity1, entity2]);
         collisionType = this.INITIAL;
       } else {
@@ -70,27 +70,41 @@
       notifyEntityOfCollision(entity2, entity1, collisionType);
     },
 
-    removeEntity: function(entity) {
-      this.removeOldCollision(entity);
+    destroyEntity: function(entity) {
+      var recordIds = this.getCollideRecordIds(entity);
+      for (var i = 0; i < recordIds.length; i++) {
+        this.removeOldCollision(recordIds[i]);
+      }
     },
 
-    // if passed entities recorded as colliding in history record, remove that record
-    removeOldCollision: function(entity1, entity2) {
-      var recordId = this.getCollideRecord(entity1, entity2);
-      if (recordId !== undefined) {
-        var record = this.collideRecords[recordId];
+    // remove collision at passed index
+    removeOldCollision: function(recordId) {
+      var record = this.collideRecords[recordId];
+      if (record !== undefined) {
         notifyEntityOfUncollision(record[0], record[1])
         notifyEntityOfUncollision(record[1], record[0])
         this.collideRecords.splice(recordId, 1);
       }
     },
 
-    getCollideRecord: function(entity1, entity2) {
-      for (var i = 0, len = this.collideRecords.length; i < len; i++) {
-        if (this.collideRecords[i][0] === entity1 &&
-            this.collideRecords[i][1] === entity2) {
-          return i;
+    getCollideRecordIds: function(entity1, entity2) {
+      if (entity1 !== undefined && entity2 !== undefined) {
+        var recordIds = [];
+        for (var i = 0, len = this.collideRecords.length; i < len; i++) {
+          if (this.collideRecords[i][0] === entity1 && this.collideRecords[i][1] === entity2) {
+            recordIds.push(i);
+          }
         }
+        return recordIds;
+      } else if (entity1 !== undefined) {
+        for (var i = 0, len = this.collideRecords.length; i < len; i++) {
+          if (this.collideRecords[i][0] === entity1 || this.collideRecords[i][1] === entity1) {
+            return [i];
+          }
+        }
+        return [];
+      } else {
+        throw "You must pass at least one entity when searching collision records."
       }
     },
 
@@ -290,7 +304,7 @@
     // handle whether to autofocus on canvas, or not
 
     var inputReceiverElement = window;
-    if (autoFocus === true) {
+    if (autoFocus === false) {
       inputReceiverElement = canvas;
       inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
       this.suppressedKeys = [];
@@ -447,7 +461,7 @@
 
     run: function() {
       while(this.runs.length > 0) {
-        var run = this.runs.pop();
+        var run = this.runs.shift();
         run.fn(run.obj);
       }
     },
@@ -468,18 +482,27 @@
 
   function Ticker(coquette, gameLoop) {
     setupRequestAnimationFrame();
-    var prev = new Date().getTime();
 
-    var self = this;
-    var tick = function() {
-      var now = new Date().getTime();
-      var interval = now - prev;
-      prev = now;
-      gameLoop(interval);
-      requestAnimationFrame(tick);
+    var nextTickFn;
+    this.stop = function() {
+      nextTickFn = function() {};
     };
 
-    requestAnimationFrame(tick);
+    this.start = function() {
+      var prev = new Date().getTime();
+      var tick = function() {
+        var now = new Date().getTime();
+        var interval = now - prev;
+        prev = now;
+        gameLoop(interval);
+        requestAnimationFrame(nextTickFn);
+      };
+
+      nextTickFn = tick;
+      requestAnimationFrame(nextTickFn);
+    };
+
+    this.start();
   };
 
   // From: https://gist.github.com/paulirish/1579671
@@ -569,7 +592,8 @@
                    this.viewSize.y);
 
       // draw game and entities
-      var drawables = [this.game].concat(this.coquette.entities.all());
+      var drawables = [this.game]
+        .concat(this.coquette.entities.all().concat().sort(zindexSort));
       for (var i = 0, len = drawables.length; i < len; i++) {
         if (drawables[i].draw !== undefined) {
           drawables[i].draw(ctx);
@@ -596,6 +620,12 @@
       x:viewCenterPos.x - viewSize.x / 2,
       y:viewCenterPos.y - viewSize.y / 2
     }
+  };
+
+  // sorts passed array by zindex
+  // elements with a higher zindex are drawn on top of those with a lower zindex
+  var zindexSort = function(a, b) {
+    return (a.zindex || 0) < (b.zindex || 0) ? -1 : 1;
   };
 
   exports.Renderer = Renderer;
@@ -638,7 +668,6 @@
       this.coquette.runner.add(this, function(entities) {
         var entity = new clazz(self.game, settings || {});
         entities._entities.push(entity);
-        zindexSort(self.all());
         if (callback !== undefined) {
           callback(entity);
         }
@@ -650,6 +679,7 @@
       this.coquette.runner.add(this, function(entities) {
         for(var i = 0; i < entities._entities.length; i++) {
           if(entities._entities[i] === entity) {
+            self.coquette.collider.destroyEntity(entity);
             entities._entities.splice(i, 1);
             if (callback !== undefined) {
               callback();
@@ -659,16 +689,6 @@
         }
       });
     }
-  };
-
-  // sorts passed array by zindex
-  // elements with a higher zindex are drawn on top of those with a lower zindex
-  var zindexSort = function(arr) {
-    arr.sort(function(a, b) {
-      var aSort = (a.zindex || 0);
-      var bSort = (b.zindex || 0);
-      return aSort < bSort ? -1 : 1;
-    });
   };
 
   exports.Entities = Entities;
