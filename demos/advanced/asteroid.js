@@ -41,16 +41,12 @@
           (this.game.coquette.renderer.getViewSize().x / 2 + this.size.x) + 100) {
         if (this.pos.x < 0) {
           this.pos.x = this.game.coquette.renderer.getViewSize().x;
-          this.game.coquette.collider.removeEntity(this);
         } else if (this.pos.x > this.game.coquette.renderer.getViewSize().x) {
           this.pos.x = -this.size.x;
-          this.game.coquette.collider.removeEntity(this);
         } else if (this.pos.y < 0) {
           this.pos.y = this.game.coquette.renderer.getViewSize().y + 1;
-          this.game.coquette.collider.removeEntity(this);
         } else if (this.pos.y > this.game.coquette.renderer.getViewSize().y) {
           this.pos.y = 0;
-          this.game.coquette.collider.removeEntity(this);
         }
       }
     },
