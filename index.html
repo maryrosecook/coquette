@@ -12,7 +12,7 @@
     <script type="text/javascript" src="demos/simple/game.js"></script>
     <script type="text/javascript">
       window.addEventListener('load', function() {
-        new Game("canvas", 500, 150, false);
+        new Game(false);
       });
     </script>
 
@@ -60,8 +60,8 @@
     The game code:
 
 <pre class="prettyprint">
-var Game = function(canvasId, width, height) {
-  var coq = new Coquette(this, canvasId, width, height, "#000");
+var Game = function() {
+  var coq = new Coquette(this, "canvas", 500, 150, "#000");
 
   coq.entities.create(Person, { pos:{ x:243, y:40 }, color:"#099" }); // paramour
   coq.entities.create(Person, { pos:{ x:249, y:110 }, color:"#f07", // player
@@ -88,7 +88,7 @@ var Person = function(_, settings) {
 };
 
 window.addEventListener('load', function() {
-  new Game("canvas", 500, 150);
+  new Game();
 });
 </pre>
 

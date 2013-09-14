@@ -1,6 +1,6 @@
 ;(function(exports) {
-  var Game = function(canvasId, width, height, autoFocus) {
-    var coq = new Coquette(this, canvasId, width, height, "#000", autoFocus);
+  var Game = function(autoFocus) {
+    var coq = new Coquette(this, "canvas", 500, 150, "#000", autoFocus);
 
     coq.entities.create(Person, { pos:{ x:250, y:40 }, color:"#099" }); // paramour
     coq.entities.create(Person, { pos:{ x:256, y:110 }, color:"#f07", // player
