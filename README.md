@@ -134,6 +134,24 @@ When you create your entities, include some integer `zindex` attribute in the `s
   coquette.entities.create(Player, { zindex: 1 }); // drawn on top
 ```
 
+##### Move the view
+
+You can use `coquette.renderer.setViewCenterPos()` to move the position of the view around the world.  For example, to make the view follow a specific object, you could call `setViewCenterPos(specificObj.pos)` in the `update()` function of your game:
+
+```javascript
+  var Game = function() {
+    var coquette = new Coquette(this, "canvas", 500, 500, "#000");
+    var specialObject;
+    coquette.entities.create(SpecialObject, {}, function(obj) {
+      specialObject = obj;
+    });
+
+    this.update = function() {
+      coquette.renderer.setViewCenterPos(specialObject.pos);
+    };
+  };
+```
+
 #### Entities
 
 Keeps track of all game entities: the player, enemies.
