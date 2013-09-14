@@ -294,7 +294,7 @@
   exports.Collider.Maths = Maths;
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
- ;(function(exports) {
+;(function(exports) {
   var Inputter = function(coquette, canvas, autoFocus) {
     this.coquette = coquette;
     this._keyDownState = {};
@@ -445,6 +445,9 @@
     SINGLE_QUOTE: 222
 
   };
+
+  Inputter.prototype.state = Inputter.prototype.down;
+
   exports.Inputter = Inputter;
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
