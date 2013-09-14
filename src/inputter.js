@@ -8,7 +8,7 @@
     // handle whether to autofocus on canvas, or not
 
     var inputReceiverElement = window;
-    if (autoFocus === true) {
+    if (autoFocus === false) {
       inputReceiverElement = canvas;
       inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
       this.suppressedKeys = [];
