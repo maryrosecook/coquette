@@ -1,7 +1,12 @@
 var Renderer = require('../src/renderer').Renderer;
 var Collider = require('../src/collider').Collider;
+var Entities = require('../src/entities').Entities;
+var Runner = require('../src/runner').Runner;
 
-var MockContext = function() {};
+var MockContext = function() {
+  this.translate = function() {};
+  this.fillRect = function() {};
+};
 
 var MockCanvas = function() {
   this.style = {};
@@ -9,7 +14,70 @@ var MockCanvas = function() {
   this.getContext = function() { return this.ctx; };
 };
 
-describe('renderer', function() {
+var MockCoquette = function() {
+  this.entities = new Entities(this);
+  this.runner = new Runner(this);
+  this.renderer = new Renderer(this, {}, new MockCanvas());
+};
+
+describe('entities', function() {
+  describe('zindex', function() {
+    var Entity = function(_, settings) {
+      for (var i in settings) {
+        this[i] = settings[i];
+      }
+    };
+
+    var coquette;
+    beforeEach(function() {
+      coquette = new MockCoquette();
+    });
+
+    it('should sort entities with zindex vars lowest to highest', function() {
+      var callOrder = 0;
+      var recordDrawCall = function() {
+        this.callOrder = callOrder++;
+      };
+
+      coquette.entities.create(Entity, { zindex: -1, draw: recordDrawCall });
+      coquette.entities.create(Entity, { zindex: -20, draw: recordDrawCall });
+      coquette.entities.create(Entity, { zindex: 0, draw: recordDrawCall });
+      coquette.entities.create(Entity, { zindex: 21, draw: recordDrawCall });
+      coquette.entities.create(Entity, { zindex: 9, draw: recordDrawCall });
+
+      coquette.runner.update();
+      coquette.renderer.update();
+
+      expect(coquette.entities.all()[0].callOrder).toEqual(1);
+      expect(coquette.entities.all()[1].callOrder).toEqual(0);
+      expect(coquette.entities.all()[2].callOrder).toEqual(2);
+      expect(coquette.entities.all()[3].callOrder).toEqual(4);
+      expect(coquette.entities.all()[4].callOrder).toEqual(3);
+    });
+
+    it('should sort entities w/o zindex as 0', function() {
+      var callOrder = 0;
+      var recordDrawCall = function() {
+        this.callOrder = callOrder++;
+      };
+
+      coquette.entities.create(Entity, { zindex: -1, draw: recordDrawCall });
+      coquette.entities.create(Entity, { draw: recordDrawCall });
+      coquette.entities.create(Entity, { zindex: 21, draw: recordDrawCall });
+      coquette.entities.create(Entity, { draw: recordDrawCall });
+      coquette.entities.create(Entity, { zindex: 0, draw: recordDrawCall });
+
+      coquette.runner.update();
+      coquette.renderer.update();
+
+      expect(coquette.entities.all()[0].callOrder).toEqual(0);
+      expect(coquette.entities.all()[1].callOrder).toEqual(3);
+      expect(coquette.entities.all()[2].callOrder).toEqual(4);
+      expect(coquette.entities.all()[3].callOrder).toEqual(2);
+      expect(coquette.entities.all()[4].callOrder).toEqual(1);
+    });
+  });
+
   describe('view center position', function() {
     it('should default view top left to 0 0', function() {
       var r = new Renderer(null, null, new MockCanvas(), 200, 100);
