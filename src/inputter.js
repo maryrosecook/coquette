@@ -149,5 +149,8 @@
     SINGLE_QUOTE: 222
 
   };
+
+  Inputter.prototype.state = Inputter.prototype.down;
+
   exports.Inputter = Inputter;
 })(typeof exports === 'undefined' ? this.Coquette : exports);
