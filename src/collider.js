@@ -23,7 +23,7 @@
           if (this.isIntersecting(ent[i], ent[j])) {
             this.collision(ent[i], ent[j]);
           } else {
-            this.removeOldCollision(ent[i], ent[j]);
+            this.removeOldCollision(this.getCollideRecordIds(ent[i], ent[j])[0]);
           }
         }
       }
@@ -33,7 +33,7 @@
       var collisionType;
       if (!isUncollisionOn(this.coquette.entities.all())) {
         collisionType = this.INITIAL;
-      } else if (this.getCollideRecord(entity1, entity2) === undefined) {
+      } else if (this.getCollideRecordIds(entity1, entity2).length === 0) {
         this.collideRecords.push([entity1, entity2]);
         collisionType = this.INITIAL;
       } else {
@@ -51,23 +51,34 @@
       }
     },
 
-    // if passed entities recorded as colliding in history record, remove that record
-    removeOldCollision: function(entity1, entity2) {
-      var recordId = this.getCollideRecord(entity1, entity2);
-      if (recordId !== undefined) {
-        var record = this.collideRecords[recordId];
+    // remove collision at passed index
+    removeOldCollision: function(recordId) {
+      var record = this.collideRecords[recordId];
+      if (record !== undefined) {
         notifyEntityOfUncollision(record[0], record[1])
         notifyEntityOfUncollision(record[1], record[0])
         this.collideRecords.splice(recordId, 1);
       }
     },
 
-      for (var i = 0, len = this.collideRecords.length; i < len; i++) {
-        if (this.collideRecords[i][0] === entity1 &&
-            this.collideRecords[i][1] === entity2) {
-          return i;
     getCollideRecordIds: function(entity1, entity2) {
+      if (entity1 !== undefined && entity2 !== undefined) {
+        var recordIds = [];
+        for (var i = 0, len = this.collideRecords.length; i < len; i++) {
+          if (this.collideRecords[i][0] === entity1 && this.collideRecords[i][1] === entity2) {
+            recordIds.push(i);
+          }
         }
+        return recordIds;
+      } else if (entity1 !== undefined) {
+        for (var i = 0, len = this.collideRecords.length; i < len; i++) {
+          if (this.collideRecords[i][0] === entity1 || this.collideRecords[i][1] === entity1) {
+            return [i];
+          }
+        }
+        return [];
+      } else {
+        throw "You must pass at least one entity when searching collision records."
       }
     },
 
