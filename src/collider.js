@@ -44,8 +44,11 @@
       notifyEntityOfCollision(entity2, entity1, collisionType);
     },
 
-      this.removeOldCollision(entity);
     destroyEntity: function(entity) {
+      var recordIds = this.getCollideRecordIds(entity);
+      for (var i = 0; i < recordIds.length; i++) {
+        this.removeOldCollision(recordIds[i]);
+      }
     },
 
     // if passed entities recorded as colliding in history record, remove that record
