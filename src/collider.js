@@ -62,11 +62,11 @@
       }
     },
 
-    getCollideRecord: function(entity1, entity2) {
       for (var i = 0, len = this.collideRecords.length; i < len; i++) {
         if (this.collideRecords[i][0] === entity1 &&
             this.collideRecords[i][1] === entity2) {
           return i;
+    getCollideRecordIds: function(entity1, entity2) {
         }
       }
     },
