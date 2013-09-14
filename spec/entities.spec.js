@@ -1,93 +1,127 @@
 var Entities = require('../src/entities').Entities;
-var Renderer = require('../src/renderer').Renderer;
 var Runner = require('../src/runner').Runner;
+var Collider = require('../src/collider').Collider;
 
 var MockCoquette = function() {
-  this.entities = new Entities(this);
+  this.game = "woo";
+  this.entities = new Entities(this, this.game);
   this.runner = new Runner(this);
+  this.collider = new Collider(this);
 };
 
-var MockCanvas = function() {
-  this.style = {};
-  this.getContext = function() {
-    return {
-      fillRect: function() {},
-      beginPath: function() {},
-      closePath: function() {},
-      lineTo: function() {},
-      fill: function() {},
-      arc: function() {},
-      moveTo: function() {},
-      translate: function() {}
-    }
-  };
-};
+var Thing = function() {};
 
-describe('entities', function() {
-  describe('zindex', function() {
-    var Entity = function(_, settings) {
-      for (var i in settings) {
-        this[i] = settings[i];
-      }
-    };
-
-    var coquette;
-    beforeEach(function() {
-      coquette = new MockCoquette();
+describe('Entities', function() {
+  describe('update()', function() {
+    it('should call update all entities', function() {
+      var update = function() { this.updateCalled = true; };
+      var c = new MockCoquette();
+      c.entities.all().push({ update: update}, { update: update });
+      c.entities.update();
+      expect(c.entities.all()[0].updateCalled).toEqual(true);
+      expect(c.entities.all()[1].updateCalled).toEqual(true);
     });
 
-    it('should sort entities with zindex vars lowest to highest', function() {
-      coquette.entities.create(Entity, { zindex: -1 });
-      coquette.entities.create(Entity, { zindex: -20 });
-      coquette.entities.create(Entity, { zindex: 0 });
-      coquette.entities.create(Entity, { zindex: 21 });
-      coquette.entities.create(Entity, { zindex: 9 });
+    it('should pass interval when call update on entity', function() {
+      var c = new MockCoquette();
+      c.entities.all().push({ update: function(interval) { this.interval = interval; }});
+      c.entities.update(5);
+      expect(c.entities.all()[0].interval).toEqual(5);
+    });
+  });
 
-      coquette.runner.update();
-
-      expect(coquette.entities.all()[0].zindex).toEqual(-20);
-      expect(coquette.entities.all()[1].zindex).toEqual(-1);
-      expect(coquette.entities.all()[2].zindex).toEqual(0);
-      expect(coquette.entities.all()[3].zindex).toEqual(9);
-      expect(coquette.entities.all()[4].zindex).toEqual(21);
-
-
+  describe('all()', function() {
+    it('should return all entities when no constructor passed', function() {
+      var c = new MockCoquette();
+      c.entities.all().push({ }, { });
+      expect(c.entities.all().length).toEqual(2);
     });
 
-    it('should sort entities w/o zindex as 0', function() {
-      coquette.entities.create(Entity, { zindex: -1 });
-      coquette.entities.create(Entity);
-      coquette.entities.create(Entity, { zindex: 21 });
-      coquette.entities.create(Entity);
-      coquette.entities.create(Entity, { zindex: 0 });
+    it('should return only entities made w constructor when constructor passed', function() {
+      var c = new MockCoquette();
+      c.entities.all().push({}, new Thing(), new Thing(), {});
+      expect(c.entities.all().length).toEqual(4);
+      expect(c.entities.all(Thing).length).toEqual(2);
+    });
+  });
 
-      coquette.runner.update();
-
-      expect(coquette.entities.all()[0].zindex).toEqual(-1);
-      expect(coquette.entities.all()[1].zindex).toEqual(0);
-      expect(coquette.entities.all()[2].zindex).toEqual(undefined);
-      expect(coquette.entities.all()[3].zindex).toEqual(undefined);
-      expect(coquette.entities.all()[4].zindex).toEqual(21);
+  describe('create()', function() {
+    it('should create the thing you ask it to create', function() {
+      var c = new MockCoquette();
+      c.entities.create(Thing);
+      c.runner.update();
+      expect(c.entities.all()[0] instanceof Thing).toEqual(true);
     });
 
-    it('should draw entities in zindex sort order', function() {
-      var callOrder = 0;
-      var recordDrawCall = function() {
-        this.callOrder = callOrder++;
+    it('should be ok without passed settings ', function() {
+      var c = new MockCoquette();
+      c.entities.create(Thing);
+      c.runner.update();
+      expect(c.entities.all().length).toEqual(1);
+    });
+
+    it('should be ok without passed callback', function() {
+      var c = new MockCoquette();
+      c.entities.create(Thing);
+      c.runner.update();
+      expect(c.entities.all().length).toEqual(1);
+    });
+
+    it('should pass game to obj constructor', function() {
+      var c = new MockCoquette();
+      var Thing = function(game) {
+        this.called = true;
+        expect(game).toEqual(c.game);
       };
+      c.entities.create(Thing, { a:1 });
+      c.runner.update();
+      expect(c.entities.all()[0].called).toEqual(true);
+    });
 
-      coquette.renderer = new Renderer(coquette, {}, new MockCanvas());
+    it('should pass settings to obj constructor', function() {
+      var c = new MockCoquette();
+      var Thing = function(__, settings) {
+        this.called = true;
+        expect(settings).toEqual({ a:1 });
+      };
+      c.entities.create(Thing, { a:1 });
+      c.runner.update();
+      expect(c.entities.all()[0].called).toEqual(true);
+    });
 
-      coquette.entities.create(Entity, { zindex: 1, draw:recordDrawCall });
-      coquette.entities.create(Entity, { zindex: 0, draw:recordDrawCall });
-      coquette.entities.create(Entity, { zindex: -1, draw:recordDrawCall });
+    it('should call callback after obj has been created', function() {
+      var c = new MockCoquette();
+      var called = false;
+      c.entities.create(Thing, { a:1 }, function() {
+        called = true;
+      });
+      c.runner.update();
+      expect(called).toEqual(true);
+    });
+  });
 
-      coquette.runner.update();
-      coquette.renderer.update();
+  describe('destroy()', function() {
+    it('should destroy the thing you ask it to destroy', function() {
+      var c = new MockCoquette();
+      c.entities.create(Thing);
+      c.runner.update();
+      expect(c.entities.all()[0] instanceof Thing).toEqual(true);
+      c.entities.destroy(c.entities.all()[0]);
+      c.runner.update();
+      expect(c.entities.all()[0]).toBeUndefined();
+    });
 
-      expect(coquette.entities.all()[0].callOrder).toEqual(0);
-      expect(coquette.entities.all()[1].callOrder).toEqual(1);
-      expect(coquette.entities.all()[2].callOrder).toEqual(2);
+    it('should call callback after obj has been destroyed', function() {
+      var c = new MockCoquette();
+      var called = false;
+      c.entities.create(Thing);
+      c.runner.update();
+      expect(c.entities.all()[0] instanceof Thing).toEqual(true);
+      c.entities.destroy(c.entities.all()[0], function() {
+        called = true;
+      });
+      c.runner.update();
+      expect(called).toEqual(true);
     });
   });
 });
