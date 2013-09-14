@@ -47,6 +47,7 @@
       this.coquette.runner.add(this, function(entities) {
         for(var i = 0; i < entities._entities.length; i++) {
           if(entities._entities[i] === entity) {
+            self.coquette.collider.destroyEntity(entity);
             entities._entities.splice(i, 1);
             if (callback !== undefined) {
               callback();
