@@ -1,4 +1,7 @@
 var Collider = require('../src/collider').Collider;
+var Renderer = require('../src/renderer').Renderer;
+var Entities = require('../src/entities').Entities;
+var Runner = require('../src/runner').Runner;
 var Maths = Collider.Maths;
 
 var mockObj = function(posX, posY, sizeX, sizeY, boundingBox) {
@@ -9,7 +12,190 @@ var mockObj = function(posX, posY, sizeX, sizeY, boundingBox) {
   };
 };
 
+var mock = function(thingToMockHost, thingToMockAttribute, mock) {
+  var originalThingToMock = thingToMockHost[thingToMockAttribute];
+  thingToMockHost[thingToMockAttribute] = mock;
+  return function() {
+    thingToMockHost[thingToMockAttribute] = originalThingToMock;
+  };
+};
+
 describe('collider', function() {
+  describe('main collider obj', function() {
+    var MockCoquette = function() {
+      this.entities = new Entities(this);
+      this.runner = new Runner(this);
+      this.collider = new Collider(this);
+    };
+
+    var Thing = function(__, settings) {
+      for (var i in settings) {
+        this[i] = settings[i];
+      }
+    };
+
+    describe('update()', function() {
+      it('should test all entities against all other entities once', function() {
+        var c = new MockCoquette();
+        var comparisons = [];
+        var unmock = mock(c.collider, "isIntersecting", function(a, b) {
+          comparisons.push([a.id, b.id]);
+        });
+
+        c.entities.create(Thing, { id: 0 });
+        c.entities.create(Thing, { id: 1 });
+        c.entities.create(Thing, { id: 2 });
+        c.entities.create(Thing, { id: 3 });
+        c.runner.update();
+        c.collider.update();
+        expect(comparisons.length).toEqual(6);
+        expect(comparisons[0][0] === 0 && comparisons[0][1] === 1).toEqual(true);
+        expect(comparisons[1][0] === 0 && comparisons[1][1] === 2).toEqual(true);
+        expect(comparisons[2][0] === 0 && comparisons[2][1] === 3).toEqual(true);
+        expect(comparisons[3][0] === 1 && comparisons[3][1] === 2).toEqual(true);
+        expect(comparisons[4][0] === 1 && comparisons[4][1] === 3).toEqual(true);
+        expect(comparisons[5][0] === 2 && comparisons[5][1] === 3).toEqual(true);
+        unmock();
+      });
+
+      it('should do no comparisons when only one entity', function() {
+        var c = new MockCoquette();
+        var unmock = mock(c.collider, "isIntersecting", function(a, b) {
+          throw "arg";
+        });
+
+        c.entities.create(Thing, { id: 0 });
+        c.runner.update();
+        c.collider.update();
+        unmock();
+      });
+
+      it('should fire uncollision on uncollision', function() {
+        var c = new MockCoquette();
+        var uncollisions = 0;
+        var unmock = mock(c.collider, "isIntersecting", function() { return true; });
+        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
+        c.entities.create(Thing);
+        c.runner.update();
+        c.collider.update();
+        mock(c.collider, "isIntersecting", function() { return false; })
+        c.collider.update();
+        expect(uncollisions).toEqual(1);
+        unmock();
+      });
+
+      it('should not fire uncollision on sustained non coll', function() {
+        var c = new MockCoquette();
+        var uncollisions = 0;
+        var unmock = mock(c.collider, "isIntersecting", function() { return true; });
+        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
+        c.entities.create(Thing);
+        c.runner.update();
+        c.collider.update();
+        mock(c.collider, "isIntersecting", function() { return false; })
+        c.collider.update();
+        expect(uncollisions).toEqual(1);
+        c.collider.update();
+        expect(uncollisions).toEqual(1);
+        unmock();
+      });
+    });
+
+    describe('destroyEntity()', function() {
+      it('should fire uncollision if colliding', function() {
+        var c = new MockCoquette();
+        var uncollisions = 0;
+        var unmock = mock(c.collider, "isIntersecting", function() { return true; });
+        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
+        c.entities.create(Thing);
+        c.runner.update();
+        c.collider.update();
+        expect(uncollisions).toEqual(0);
+        c.collider.destroyEntity(c.entities._entities[0]);
+        expect(uncollisions).toEqual(1);
+        unmock();
+      });
+
+      it('should not fire uncollision if not colliding', function() {
+        var c = new MockCoquette();
+        var uncollisions = 0;
+        var unmock = mock(c.collider, "isIntersecting", function() { return false; });
+        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
+        c.runner.update();
+        c.collider.update();
+        c.collider.destroyEntity(c.entities._entities[0]);
+        expect(uncollisions).toEqual(0);
+        unmock();
+      });
+    });
+
+    describe('collision()', function() {
+      it('should keep on banging out INITIAL colls if no uncollision fns', function() {
+        var c = new MockCoquette();
+
+        var unmock = mock(c.collider, "isIntersecting", function() { return true });
+        var collisions = 0;
+        c.entities.create(Thing, {
+          collision: function(__, type) {
+            collisions++;
+            if (type !== c.collider.INITIAL) {
+              throw "arg";
+            }
+          }
+        });
+        c.entities.create(Thing);
+        c.runner.update();
+        c.collider.update();
+        c.collider.update();
+        c.collider.update();
+        expect(collisions).toEqual(3);
+        unmock();
+      });
+
+      it('should do initial INITIAL coll if entity uncollision fn', function() {
+        var c = new MockCoquette();
+
+        var unmock = mock(c.collider, "isIntersecting", function() { return true });
+        var initial = 0;
+        c.entities.create(Thing, {
+          uncollision: function() {},
+          collision: function(__, type) {
+            if (type === c.collider.INITIAL) {
+              initial++;
+            }
+          }
+        });
+        c.entities.create(Thing);
+        c.runner.update();
+        c.collider.update();
+        expect(initial).toEqual(1);
+        unmock();
+      });
+
+      it('should bang out sustained colls if colls are sustained and entity has uncollision fn', function() {
+        var c = new MockCoquette();
+
+        var unmock = mock(c.collider, "isIntersecting", function() { return true });
+        var sustained = 0;
+        c.entities.create(Thing, {
+          uncollision: function() {},
+          collision: function(__, type) {
+            if (type === c.collider.SUSTAINED) {
+              sustained++;
+            }
+          }
+        });
+        c.entities.create(Thing);
+        c.runner.update();
+        c.collider.update();
+        c.collider.update();
+        c.collider.update();
+        expect(sustained).toEqual(2);
+        unmock();
+      });
+    });
+  });
+
   describe('maths', function() {
     describe('rectangleCorners', function() {
       it('should get corners of rect', function() {
