@@ -3,18 +3,27 @@
 
   function Ticker(coquette, gameLoop) {
     setupRequestAnimationFrame();
-    var prev = new Date().getTime();
 
-    var self = this;
-    var tick = function() {
-      var now = new Date().getTime();
-      var interval = now - prev;
-      prev = now;
-      gameLoop(interval);
-      requestAnimationFrame(tick);
+    var nextTickFn;
+    this.stop = function() {
+      nextTickFn = function() {};
     };
 
-    requestAnimationFrame(tick);
+    this.start = function() {
+      var prev = new Date().getTime();
+      var tick = function() {
+        var now = new Date().getTime();
+        var interval = now - prev;
+        prev = now;
+        gameLoop(interval);
+        requestAnimationFrame(nextTickFn);
+      };
+
+      nextTickFn = tick;
+      requestAnimationFrame(nextTickFn);
+    };
+
+    this.start();
   };
 
   // From: https://gist.github.com/paulirish/1579671
