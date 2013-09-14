@@ -11,7 +11,7 @@
 
     run: function() {
       while(this.runs.length > 0) {
-        var run = this.runs.pop();
+        var run = this.runs.shift();
         run.fn(run.obj);
       }
     },
