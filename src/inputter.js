@@ -1,4 +1,4 @@
- ;(function(exports) {
+;(function(exports) {
   var Inputter = function(coquette, canvas, autoFocus) {
     this.coquette = coquette;
     this._keyDownState = {};
