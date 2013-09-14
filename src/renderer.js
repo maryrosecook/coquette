@@ -53,7 +53,8 @@
                    this.viewSize.y);
 
       // draw game and entities
-      var drawables = [this.game].concat(this.coquette.entities.all());
+      var drawables = [this.game]
+        .concat(this.coquette.entities.all().concat().sort(zindexSort));
       for (var i = 0, len = drawables.length; i < len; i++) {
         if (drawables[i].draw !== undefined) {
           drawables[i].draw(ctx);
@@ -80,6 +81,12 @@
       x:viewCenterPos.x - viewSize.x / 2,
       y:viewCenterPos.y - viewSize.y / 2
     }
+  };
+
+  // sorts passed array by zindex
+  // elements with a higher zindex are drawn on top of those with a lower zindex
+  var zindexSort = function(a, b) {
+    return (a.zindex || 0) < (b.zindex || 0) ? -1 : 1;
   };
 
   exports.Renderer = Renderer;

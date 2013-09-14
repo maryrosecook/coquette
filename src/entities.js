@@ -35,7 +35,6 @@
       this.coquette.runner.add(this, function(entities) {
         var entity = new clazz(self.game, settings || {});
         entities._entities.push(entity);
-        zindexSort(self.all());
         if (callback !== undefined) {
           callback(entity);
         }
@@ -57,16 +56,6 @@
         }
       });
     }
-  };
-
-  // sorts passed array by zindex
-  // elements with a higher zindex are drawn on top of those with a lower zindex
-  var zindexSort = function(arr) {
-    arr.sort(function(a, b) {
-      var aSort = (a.zindex || 0);
-      var bSort = (b.zindex || 0);
-      return aSort < bSort ? -1 : 1;
-    });
   };
 
   exports.Entities = Entities;
