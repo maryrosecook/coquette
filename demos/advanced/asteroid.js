@@ -92,7 +92,7 @@
             });
           }
         } else if (other instanceof Player) {
-        this.spawnTwin(other);
+          this.spawnTwin(other);
         } else if (other instanceof Asteroid) {
           this.collidingAsteroids.push(other);
         }
