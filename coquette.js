@@ -5,11 +5,11 @@
     this.inputter = new Coquette.Inputter(this, canvas, autoFocus);
     this.entities = new Coquette.Entities(this, game);
     this.runner = new Coquette.Runner(this);
-    this.collider = new Coquette.Collider(this);
+    // this.collider = new Coquette.Collider(this);
 
     var self = this;
     this.ticker = new Coquette.Ticker(this, function(interval) {
-      self.collider.update(interval);
+      // self.collider.update(interval);
       self.runner.update(interval);
       if (game.update !== undefined) {
         game.update(interval);
@@ -39,6 +39,11 @@
     return false;
   };
 
+  var isSetupForCollisions = function(obj) {
+    return obj.pos !== undefined && obj.pos.x !== undefined && obj.pos.y !== undefined &&
+      obj.size !== undefined && obj.size.x !== undefined && obj.size.y !== undefined;
+  };
+
   Collider.prototype = {
     collideRecords: [],
 
@@ -46,7 +51,7 @@
       var ent = this.coquette.entities.all();
       for (var i = 0, len = ent.length; i < len; i++) {
         for (var j = i + 1; j < len; j++) {
-          if (this.isIntersecting(ent[i], ent[j])) {
+          if (this.isColliding(ent[i], ent[j])) {
             this.collision(ent[i], ent[j]);
           } else {
             this.removeOldCollision(this.getCollideRecordIds(ent[i], ent[j])[0]);
@@ -106,6 +111,11 @@
       } else {
         throw "You must pass at least one entity when searching collision records."
       }
+    },
+
+    isColliding: function(obj1, obj2) {
+      return isSetupForCollisions(obj1) && isSetupForCollisions(obj2) &&
+        this.isIntersecting(obj1, obj2);
     },
 
     isIntersecting: function(obj1, obj2) {
@@ -682,7 +692,7 @@
       this.coquette.runner.add(this, function(entities) {
         for(var i = 0; i < entities._entities.length; i++) {
           if(entities._entities[i] === entity) {
-            self.coquette.collider.destroyEntity(entity);
+            // self.coquette.collider.destroyEntity(entity);
             entities._entities.splice(i, 1);
             if (callback !== undefined) {
               callback();
