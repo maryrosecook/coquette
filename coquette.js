@@ -40,8 +40,7 @@
   };
 
   var isSetupForCollisions = function(obj) {
-    return obj.pos !== undefined && obj.pos.x !== undefined && obj.pos.y !== undefined &&
-      obj.size !== undefined && obj.size.x !== undefined && obj.size.y !== undefined;
+    return obj.pos !== undefined && obj.size !== undefined;
   };
 
   Collider.prototype = {
