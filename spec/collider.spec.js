@@ -247,34 +247,20 @@ describe('collider', function() {
 
     describe('isColliding', function() {
       describe('objects not set up for collisions', function() {
-        var setUpObj = mockObj(5, 5, 10, 10);
+        var correctObj = mockObj(5, 5, 10, 10);
         var c = new Collider();
         it('should return true for two objects with pos and size', function() {
-          expect(c.isColliding(setUpObj, setUpObj)).toEqual(true);
-        });
-
-        it('should return false when part of size missing', function() {
-          expect(c.isColliding(setUpObj, mockObj(1, 1, undefined, 1))).toEqual(false);
-          expect(c.isColliding(setUpObj, mockObj(1, 1, 1, undefined))).toEqual(false);
-          expect(c.isColliding(mockObj(1, 1, undefined, 1), setUpObj)).toEqual(false);
-          expect(c.isColliding(mockObj(1, 1, 1, undefined), setUpObj)).toEqual(false);
-        });
-
-        it('should return false when part of pos missing', function() {
-          expect(c.isColliding(setUpObj, mockObj(undefined, 1, 1, 1))).toEqual(false);
-          expect(c.isColliding(setUpObj, mockObj(1, undefined, 1, 1))).toEqual(false);
-          expect(c.isColliding(mockObj(undefined, 1, 1, 1), setUpObj)).toEqual(false);
-          expect(c.isColliding(mockObj(1, undefined, 1, 1), setUpObj)).toEqual(false);
+          expect(c.isColliding(correctObj, correctObj)).toEqual(true);
         });
 
         it('should return false when pos missing', function() {
-          expect(c.isColliding(setUpObj, { size: { x:1, y: 1 }})).toEqual(false);
-          expect(c.isColliding({ size: { x:1, y: 1 }}, setUpObj)).toEqual(false);
+          expect(c.isColliding(correctObj, { size: { x:1, y: 1 }})).toEqual(false);
+          expect(c.isColliding({ size: { x:1, y: 1 }}, correctObj)).toEqual(false);
         });
 
         it('should return false when size missing', function() {
-          expect(c.isColliding(setUpObj, { pos: { x:1, y: 1 }})).toEqual(false);
-          expect(c.isColliding({ pos: { x:1, y: 1 }}, setUpObj)).toEqual(false);
+          expect(c.isColliding(correctObj, { pos: { x:1, y: 1 }})).toEqual(false);
+          expect(c.isColliding({ pos: { x:1, y: 1 }}, correctObj)).toEqual(false);
         });
       });
     });
