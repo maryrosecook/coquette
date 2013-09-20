@@ -13,6 +13,11 @@
     return false;
   };
 
+  var isSetupForCollisions = function(obj) {
+    return obj.pos !== undefined && obj.pos.x !== undefined && obj.pos.y !== undefined &&
+      obj.size !== undefined && obj.size.x !== undefined && obj.size.y !== undefined;
+  };
+
   Collider.prototype = {
     collideRecords: [],
 
@@ -20,7 +25,7 @@
       var ent = this.coquette.entities.all();
       for (var i = 0, len = ent.length; i < len; i++) {
         for (var j = i + 1; j < len; j++) {
-          if (this.isIntersecting(ent[i], ent[j])) {
+          if (this.isColliding(ent[i], ent[j])) {
             this.collision(ent[i], ent[j]);
           } else {
             this.removeOldCollision(this.getCollideRecordIds(ent[i], ent[j])[0]);
@@ -80,6 +85,11 @@
       } else {
         throw "You must pass at least one entity when searching collision records."
       }
+    },
+
+    isColliding: function(obj1, obj2) {
+      return isSetupForCollisions(obj1) && isSetupForCollisions(obj2) &&
+        this.isIntersecting(obj1, obj2);
     },
 
     isIntersecting: function(obj1, obj2) {

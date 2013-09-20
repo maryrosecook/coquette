@@ -38,7 +38,7 @@ describe('collider', function() {
       it('should test all entities against all other entities once', function() {
         var c = new MockCoquette();
         var comparisons = [];
-        var unmock = mock(c.collider, "isIntersecting", function(a, b) {
+        var unmock = mock(c.collider, "isColliding", function(a, b) {
           comparisons.push([a.id, b.id]);
         });
 
@@ -60,7 +60,7 @@ describe('collider', function() {
 
       it('should do no comparisons when only one entity', function() {
         var c = new MockCoquette();
-        var unmock = mock(c.collider, "isIntersecting", function(a, b) {
+        var unmock = mock(c.collider, "isColliding", function(a, b) {
           throw "arg";
         });
 
@@ -73,12 +73,12 @@ describe('collider', function() {
       it('should fire uncollision on uncollision', function() {
         var c = new MockCoquette();
         var uncollisions = 0;
-        var unmock = mock(c.collider, "isIntersecting", function() { return true; });
+        var unmock = mock(c.collider, "isColliding", function() { return true; });
         c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
         c.entities.create(Thing);
         c.runner.update();
         c.collider.update();
-        mock(c.collider, "isIntersecting", function() { return false; })
+        mock(c.collider, "isColliding", function() { return false; })
         c.collider.update();
         expect(uncollisions).toEqual(1);
         unmock();
@@ -87,12 +87,12 @@ describe('collider', function() {
       it('should not fire uncollision on sustained non coll', function() {
         var c = new MockCoquette();
         var uncollisions = 0;
-        var unmock = mock(c.collider, "isIntersecting", function() { return true; });
+        var unmock = mock(c.collider, "isColliding", function() { return true; });
         c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
         c.entities.create(Thing);
         c.runner.update();
         c.collider.update();
-        mock(c.collider, "isIntersecting", function() { return false; })
+        mock(c.collider, "isColliding", function() { return false; })
         c.collider.update();
         expect(uncollisions).toEqual(1);
         c.collider.update();
@@ -105,7 +105,7 @@ describe('collider', function() {
       it('should fire uncollision if colliding', function() {
         var c = new MockCoquette();
         var uncollisions = 0;
-        var unmock = mock(c.collider, "isIntersecting", function() { return true; });
+        var unmock = mock(c.collider, "isColliding", function() { return true; });
         c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
         c.entities.create(Thing);
         c.runner.update();
@@ -119,7 +119,7 @@ describe('collider', function() {
       it('should not fire uncollision if not colliding', function() {
         var c = new MockCoquette();
         var uncollisions = 0;
-        var unmock = mock(c.collider, "isIntersecting", function() { return false; });
+        var unmock = mock(c.collider, "isColliding", function() { return false; });
         c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
         c.runner.update();
         c.collider.update();
@@ -133,7 +133,7 @@ describe('collider', function() {
       it('should keep on banging out INITIAL colls if no uncollision fns', function() {
         var c = new MockCoquette();
 
-        var unmock = mock(c.collider, "isIntersecting", function() { return true });
+        var unmock = mock(c.collider, "isColliding", function() { return true });
         var collisions = 0;
         c.entities.create(Thing, {
           collision: function(__, type) {
@@ -155,7 +155,7 @@ describe('collider', function() {
       it('should do initial INITIAL coll if entity uncollision fn', function() {
         var c = new MockCoquette();
 
-        var unmock = mock(c.collider, "isIntersecting", function() { return true });
+        var unmock = mock(c.collider, "isColliding", function() { return true });
         var initial = 0;
         c.entities.create(Thing, {
           uncollision: function() {},
@@ -175,7 +175,7 @@ describe('collider', function() {
       it('should bang out sustained colls if colls are sustained and entity has uncollision fn', function() {
         var c = new MockCoquette();
 
-        var unmock = mock(c.collider, "isIntersecting", function() { return true });
+        var unmock = mock(c.collider, "isColliding", function() { return true });
         var sustained = 0;
         c.entities.create(Thing, {
           uncollision: function() {},
@@ -242,6 +242,40 @@ describe('collider', function() {
         var rectangle = mockObj(16, 16, 10, 10);
         var intersecting = Maths.circleAndRectangleIntersecting(circle, rectangle);
         expect(intersecting).toEqual(false);
+      });
+    });
+
+    describe('isColliding', function() {
+      describe('objects not set up for collisions', function() {
+        var setUpObj = mockObj(5, 5, 10, 10);
+        var c = new Collider();
+        it('should return true for two objects with pos and size', function() {
+          expect(c.isColliding(setUpObj, setUpObj)).toEqual(true);
+        });
+
+        it('should return false when part of size missing', function() {
+          expect(c.isColliding(setUpObj, mockObj(1, 1, undefined, 1))).toEqual(false);
+          expect(c.isColliding(setUpObj, mockObj(1, 1, 1, undefined))).toEqual(false);
+          expect(c.isColliding(mockObj(1, 1, undefined, 1), setUpObj)).toEqual(false);
+          expect(c.isColliding(mockObj(1, 1, 1, undefined), setUpObj)).toEqual(false);
+        });
+
+        it('should return false when part of pos missing', function() {
+          expect(c.isColliding(setUpObj, mockObj(undefined, 1, 1, 1))).toEqual(false);
+          expect(c.isColliding(setUpObj, mockObj(1, undefined, 1, 1))).toEqual(false);
+          expect(c.isColliding(mockObj(undefined, 1, 1, 1), setUpObj)).toEqual(false);
+          expect(c.isColliding(mockObj(1, undefined, 1, 1), setUpObj)).toEqual(false);
+        });
+
+        it('should return false when pos missing', function() {
+          expect(c.isColliding(setUpObj, { size: { x:1, y: 1 }})).toEqual(false);
+          expect(c.isColliding({ size: { x:1, y: 1 }}, setUpObj)).toEqual(false);
+        });
+
+        it('should return false when size missing', function() {
+          expect(c.isColliding(setUpObj, { pos: { x:1, y: 1 }})).toEqual(false);
+          expect(c.isColliding({ pos: { x:1, y: 1 }}, setUpObj)).toEqual(false);
+        });
       });
     });
 
@@ -456,7 +490,7 @@ describe('collider', function() {
 
       c.runner.update();
 
-      var restoreIsIntersecting = mock(c.collider, 'isIntersecting', function() {
+      var restoreIsIntersecting = mock(c.collider, 'isColliding', function() {
         return true;
       });
 
