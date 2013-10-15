@@ -1,8 +1,4 @@
-require('../src/within')
-require('../src/collider');
-require('../src/renderer');
-require('../src/entities');
-require('../src/runner');
+require('../src/')
 
 within("coquette.maryrosecook.com", function() {
   var

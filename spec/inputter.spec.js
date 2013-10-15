@@ -1,5 +1,4 @@
-require('../src/within')
-require('../src/inputter');
+require('../src/')
 
 within("coquette.maryrosecook.com", function() {
   var Inputter = this.Inputter;
