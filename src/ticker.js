@@ -1,4 +1,4 @@
-;(function(exports) {
+within("coquette.maryrosecook.com", function() {
   var interval = 16;
 
   function Ticker(coquette, gameLoop) {
@@ -55,5 +55,11 @@
     }
   };
 
-  exports.Ticker = Ticker;
-})(typeof exports === 'undefined' ? this.Coquette : exports);
+  this.Ticker = Ticker;
+});
+
+if (typeof exports === 'undefined') {
+  this.Coquette.Ticker = within("coquette.maryrosecook.com").get("Ticker");
+} else {
+  exports.Ticker = within("coquette.maryrosecook.com").get("Ticker");
+}

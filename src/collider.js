@@ -1,4 +1,4 @@
-;(function(exports) {
+within("coquette.maryrosecook.com", function() {
   var Collider = function(coquette) {
     this.coquette = coquette;
   };
@@ -273,6 +273,12 @@
     },
   };
 
-  exports.Collider = Collider;
-  exports.Collider.Maths = Maths;
-})(typeof exports === 'undefined' ? this.Coquette : exports);
+  this.Collider = Collider;
+  this.Collider.Maths = Maths;
+});
+
+if (typeof exports === 'undefined') {
+  this.Collider = within("coquette.maryrosecook.com").get("Collider");
+} else {
+  exports.Collider = within("coquette.maryrosecook.com").get("Collider");
+}

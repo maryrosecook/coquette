@@ -1,4 +1,4 @@
-;(function(exports) {
+within("coquette.maryrosecook.com", function() {
   var Inputter = function(coquette, canvas, autoFocus) {
     this.coquette = coquette;
     this._keyDownState = {};
@@ -152,5 +152,11 @@
 
   Inputter.prototype.state = Inputter.prototype.down;
 
-  exports.Inputter = Inputter;
-})(typeof exports === 'undefined' ? this.Coquette : exports);
+  this.Inputter = Inputter;
+});
+
+if (typeof exports === 'undefined') {
+  this.Coquette.Inputter = within("coquette.maryrosecook.com").get("Inputter");
+} else {
+  exports.Inputter = within("coquette.maryrosecook.com").get("Inputter");
+};

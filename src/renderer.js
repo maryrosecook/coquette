@@ -1,4 +1,4 @@
-;(function(exports) {
+within("coquette.maryrosecook.com", function() {
   var Maths;
   if(typeof module !== 'undefined' && module.exports) { // node
     Maths = require('./collider').Collider.Maths;
@@ -89,5 +89,11 @@
     return (a.zindex || 0) < (b.zindex || 0) ? -1 : 1;
   };
 
-  exports.Renderer = Renderer;
-})(typeof exports === 'undefined' ? this.Coquette : exports);
+  this.Renderer = Renderer;
+});
+
+if (typeof exports === 'undefined') {
+  this.Coquette.Renderer = within("coquette.maryrosecook.com").get("Renderer");
+} else {
+  exports.Renderer = within("coquette.maryrosecook.com").get("Renderer");
+}
