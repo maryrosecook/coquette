@@ -7,13 +7,13 @@ var packer = require( 'node.packer' ),
 
 var input = [
   src + 'within.js',
-  src + 'main.js',
   src + 'collider.js',
   src + 'inputter.js',
   src + 'runner.js',
   src + 'ticker.js',
   src + 'renderer.js',
-  src + 'entities.js'
+  src + 'entities.js',
+  src + 'main.js'
 ];
 
 packer({
