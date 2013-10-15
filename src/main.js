@@ -1,4 +1,4 @@
-;(function(exports) {
+this.Coquette = within( "coquette.maryrosecook.com", function() {
   var Coquette = function(game, canvasId, width, height, backgroundColor, autoFocus) {
     var canvas = document.getElementById(canvasId);
     this.renderer = new Coquette.Renderer(this, game, canvas, width, height, backgroundColor);
@@ -21,5 +21,5 @@
     });
   };
 
-  exports.Coquette = Coquette;
-})(this);
+  return Coquette;
+});
