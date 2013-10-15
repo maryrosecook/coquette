@@ -1,0 +1,8 @@
+require('./within')
+require('./collider')
+require('./inputter')
+require('./runner')
+require('./ticker')
+require('./renderer')
+require('./entities')
+require('./main')

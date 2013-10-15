@@ -1,4 +1,4 @@
-;(function(exports) {
+within("coquette.maryrosecook.com", function() {
   function Entities(coquette, game) {
     this.coquette = coquette;
     this.game = game;
@@ -58,5 +58,5 @@
     }
   };
 
-  exports.Entities = Entities;
-})(typeof exports === 'undefined' ? this.Coquette : exports);
+  this.Entities = Entities;
+});

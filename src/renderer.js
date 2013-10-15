@@ -1,10 +1,5 @@
-;(function(exports) {
-  var Maths;
-  if(typeof module !== 'undefined' && module.exports) { // node
-    Maths = require('./collider').Collider.Maths;
-  } else { // browser
-    Maths = Coquette.Collider.Maths;
-  }
+within("coquette.maryrosecook.com", function() {
+  var Maths = this.Collider.Maths;
 
   var Renderer = function(coquette, game, canvas, wView, hView, backgroundColor) {
     this.coquette = coquette;
@@ -89,5 +84,5 @@
     return (a.zindex || 0) < (b.zindex || 0) ? -1 : 1;
   };
 
-  exports.Renderer = Renderer;
-})(typeof exports === 'undefined' ? this.Coquette : exports);
+  this.Renderer = Renderer;
+});

@@ -1,4 +1,4 @@
-;(function(exports) {
+within("coquette.maryrosecook.com", function() {
   function Runner(coquette) {
     this.coquette = coquette;
     this.runs = [];
@@ -24,5 +24,5 @@
     }
   };
 
-  exports.Runner = Runner;
-})(typeof exports === 'undefined' ? this.Coquette : exports);
+  this.Runner = Runner;
+});

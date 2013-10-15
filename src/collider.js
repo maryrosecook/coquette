@@ -1,4 +1,4 @@
-;(function(exports) {
+within("coquette.maryrosecook.com", function() {
   var Collider = function(coquette) {
     this.coquette = coquette;
   };
@@ -273,6 +273,6 @@
     },
   };
 
-  exports.Collider = Collider;
-  exports.Collider.Maths = Maths;
-})(typeof exports === 'undefined' ? this.Coquette : exports);
+  this.Collider = Collider;
+  this.Collider.Maths = Maths;
+});
