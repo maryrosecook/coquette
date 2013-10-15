@@ -57,9 +57,3 @@ within("coquette.maryrosecook.com", function() {
 
   this.Ticker = Ticker;
 });
-
-if (typeof exports === 'undefined') {
-  this.Coquette.Ticker = within("coquette.maryrosecook.com").get("Ticker");
-} else {
-  exports.Ticker = within("coquette.maryrosecook.com").get("Ticker");
-}

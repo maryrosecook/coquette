@@ -86,9 +86,3 @@ within("coquette.maryrosecook.com", function() {
 
   this.Renderer = Renderer;
 });
-
-if (typeof exports === 'undefined') {
-  this.Coquette.Renderer = within("coquette.maryrosecook.com").get("Renderer");
-} else {
-  exports.Renderer = within("coquette.maryrosecook.com").get("Renderer");
-}

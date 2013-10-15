@@ -26,9 +26,3 @@ within("coquette.maryrosecook.com", function() {
 
   this.Runner = Runner;
 });
-
-if (typeof exports === 'undefined') {
-  this.Coquette.Runner = within("coquette.maryrosecook.com").get("Runner");
-} else {
-  exports.Runner = within("coquette.maryrosecook.com").get("Runner");
-}

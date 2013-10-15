@@ -276,9 +276,3 @@ within("coquette.maryrosecook.com", function() {
   this.Collider = Collider;
   this.Collider.Maths = Maths;
 });
-
-if (typeof exports === 'undefined') {
-  this.Collider = within("coquette.maryrosecook.com").get("Collider");
-} else {
-  exports.Collider = within("coquette.maryrosecook.com").get("Collider");
-}

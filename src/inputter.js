@@ -154,9 +154,3 @@ within("coquette.maryrosecook.com", function() {
 
   this.Inputter = Inputter;
 });
-
-if (typeof exports === 'undefined') {
-  this.Coquette.Inputter = within("coquette.maryrosecook.com").get("Inputter");
-} else {
-  exports.Inputter = within("coquette.maryrosecook.com").get("Inputter");
-};

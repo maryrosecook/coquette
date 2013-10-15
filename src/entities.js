@@ -60,9 +60,3 @@ within("coquette.maryrosecook.com", function() {
 
   this.Entities = Entities;
 });
-
-if (typeof exports === 'undefined') {
-  this.Coquette.Entities = within("coquette.maryrosecook.com").get("Entities");
-} else {
-  exports.Entities = within("coquette.maryrosecook.com").get("Entities");
-}
