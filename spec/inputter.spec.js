@@ -1,3 +1,4 @@
+require('../src/within')
 var Inputter = require('../src/inputter').Inputter;
 
 var mockWindowInputReceiver = function() {

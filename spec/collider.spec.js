@@ -1,3 +1,4 @@
+require('../src/within')
 var Collider = require('../src/collider').Collider;
 var Renderer = require('../src/renderer').Renderer;
 var Entities = require('../src/entities').Entities;
