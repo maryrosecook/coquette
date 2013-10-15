@@ -1,10 +1,5 @@
 within("coquette.maryrosecook.com", function() {
-  var Maths;
-  if(typeof module !== 'undefined' && module.exports) { // node
-    Maths = require('./collider').Collider.Maths;
-  } else { // browser
-    Maths = Coquette.Collider.Maths;
-  }
+  var Maths = this.Collider.Maths;
 
   var Renderer = function(coquette, game, canvas, wView, hView, backgroundColor) {
     this.coquette = coquette;
