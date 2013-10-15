@@ -6,6 +6,7 @@ var packer = require( 'node.packer' ),
     out    = path;
 
 var input = [
+  src + 'within.js',
   src + 'main.js',
   src + 'collider.js',
   src + 'inputter.js',
