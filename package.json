@@ -3,6 +3,10 @@
   "description": "A micro framework for JavaScript games.",
   "author": "Mary Rose Cook <maryrosecook@maryrosecook.com> (http://maryrosecook.com/)",
   "version": "0.2.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maryrosecook/coquette.git"
+  },
   "scripts": {
     "test": "node_modules/jasmine-node/bin/jasmine-node spec/",
     "minify": "node scripts/minifier.js",
