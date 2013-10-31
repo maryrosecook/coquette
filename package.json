@@ -2,7 +2,7 @@
   "name": "coquette",
   "description": "A micro framework for JavaScript games.",
   "author": "Mary Rose Cook <maryrosecook@maryrosecook.com> (http://maryrosecook.com/)",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/maryrosecook/coquette.git"
