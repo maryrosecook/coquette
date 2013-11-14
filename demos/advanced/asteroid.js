@@ -87,9 +87,7 @@
           if (this.collidingAsteroids.length === 0) {
             this.spawnTwin(other);
           } else if (this.collidingAsteroids.length > 0) {
-            this.game.coquette.runner.add(this, function(self) {
-              self.destroy(other);
-            });
+            this.destroy(other);
           }
         } else if (other instanceof Player) {
           this.spawnTwin(other);
