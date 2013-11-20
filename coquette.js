@@ -44,7 +44,7 @@
   };
 
   Collider.prototype = {
-    collideRecords: [],
+    _collideRecords: [],
 
     update: function() {
       var ent = this.coquette.entities.all();
@@ -64,7 +64,7 @@
       if (!isUncollisionOn(this.coquette.entities.all())) {
         collisionType = this.INITIAL;
       } else if (this.getCollideRecordIds(entity1, entity2).length === 0) {
-        this.collideRecords.push([entity1, entity2]);
+        this._collideRecords.push([entity1, entity2]);
         collisionType = this.INITIAL;
       } else {
         collisionType = this.SUSTAINED;
@@ -83,26 +83,28 @@
 
     // remove collision at passed index
     removeOldCollision: function(recordId) {
-      var record = this.collideRecords[recordId];
+      var record = this._collideRecords[recordId];
       if (record !== undefined) {
         notifyEntityOfUncollision(record[0], record[1])
         notifyEntityOfUncollision(record[1], record[0])
-        this.collideRecords.splice(recordId, 1);
+        this._collideRecords.splice(recordId, 1);
       }
     },
 
     getCollideRecordIds: function(entity1, entity2) {
       if (entity1 !== undefined && entity2 !== undefined) {
         var recordIds = [];
-        for (var i = 0, len = this.collideRecords.length; i < len; i++) {
-          if (this.collideRecords[i][0] === entity1 && this.collideRecords[i][1] === entity2) {
+        for (var i = 0, len = this._collideRecords.length; i < len; i++) {
+          if (this._collideRecords[i][0] === entity1 &&
+              this._collideRecords[i][1] === entity2) {
             recordIds.push(i);
           }
         }
         return recordIds;
       } else if (entity1 !== undefined) {
-        for (var i = 0, len = this.collideRecords.length; i < len; i++) {
-          if (this.collideRecords[i][0] === entity1 || this.collideRecords[i][1] === entity1) {
+        for (var i = 0, len = this._collideRecords.length; i < len; i++) {
+          if (this._collideRecords[i][0] === entity1 ||
+              this._collideRecords[i][1] === entity1) {
             return [i];
           }
         }
@@ -462,7 +464,7 @@
 ;(function(exports) {
   function Runner(coquette) {
     this.coquette = coquette;
-    this.runs = [];
+    this._runs = [];
   };
 
   Runner.prototype = {
@@ -471,14 +473,14 @@
     },
 
     run: function() {
-      while(this.runs.length > 0) {
-        var run = this.runs.shift();
+      while(this._runs.length > 0) {
+        var run = this._runs.shift();
         run.fn(run.obj);
       }
     },
 
     add: function(obj, fn) {
-      this.runs.push({
+      this._runs.push({
         obj: obj,
         fn: fn
       });
@@ -561,18 +563,18 @@
     this.game = game;
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
-    this.ctx = canvas.getContext('2d');
-    this.backgroundColor = backgroundColor;
+    this._ctx = canvas.getContext('2d');
+    this._backgroundColor = backgroundColor;
 
     canvas.width = wView;
     canvas.height = hView;
     this._viewSize = { x:wView, y:hView };
-    this.viewCenterPos = { x: this._viewSize.x / 2, y: this._viewSize.y / 2 };
+    this._viewCenterPos = { x: this._viewSize.x / 2, y: this._viewSize.y / 2 };
   };
 
   Renderer.prototype = {
     getCtx: function() {
-      return this.ctx;
+      return this._ctx;
     },
 
     getViewSize: function() {
@@ -580,25 +582,25 @@
     },
 
     getViewCenterPos: function() {
-      return this.viewCenterPos;
+      return this._viewCenterPos;
     },
 
     setViewCenterPos: function(pos) {
-      this.viewCenterPos = { x:pos.x, y:pos.y };
+      this._viewCenterPos = { x:pos.x, y:pos.y };
     },
 
     update: function(interval) {
       var ctx = this.getCtx();
 
-      var viewTranslate = viewOffset(this.viewCenterPos, this._viewSize);
+      var viewTranslate = viewOffset(this._viewCenterPos, this._viewSize);
 
       // translate so all objs placed relative to viewport
       ctx.translate(-viewTranslate.x, -viewTranslate.y);
 
       // draw background
-      ctx.fillStyle = this.backgroundColor;
-      ctx.fillRect(this.viewCenterPos.x - this._viewSize.x / 2,
-                   this.viewCenterPos.y - this._viewSize.y / 2,
+      ctx.fillStyle = this._backgroundColor;
+      ctx.fillRect(this._viewCenterPos.x - this._viewSize.x / 2,
+                   this._viewCenterPos.y - this._viewSize.y / 2,
                    this._viewSize.x,
                    this._viewSize.y);
 
@@ -619,8 +621,8 @@
       return Maths.rectanglesIntersecting(obj, {
         size: this._viewSize,
         pos: {
-          x: this.viewCenterPos.x - this._viewSize.x / 2,
-          y: this.viewCenterPos.y - this._viewSize.y / 2
+          x: this._viewCenterPos.x - this._viewSize.x / 2,
+          y: this._viewCenterPos.y - this._viewSize.y / 2
         }
       });
     }
