@@ -5,11 +5,11 @@
     this.inputter = new Coquette.Inputter(this, canvas, autoFocus);
     this.entities = new Coquette.Entities(this, game);
     this.runner = new Coquette.Runner(this);
-    // this.collider = new Coquette.Collider(this);
+    this.collider = new Coquette.Collider(this);
 
     var self = this;
     this.ticker = new Coquette.Ticker(this, function(interval) {
-      // self.collider.update(interval);
+      self.collider.update(interval);
       self.runner.update(interval);
       if (game.update !== undefined) {
         game.update(interval);
@@ -691,7 +691,7 @@
       this.coquette.runner.add(this, function(entities) {
         for(var i = 0; i < entities._entities.length; i++) {
           if(entities._entities[i] === entity) {
-            // self.coquette.collider.destroyEntity(entity);
+            self.coquette.collider.destroyEntity(entity);
             entities._entities.splice(i, 1);
             if (callback !== undefined) {
               callback();
