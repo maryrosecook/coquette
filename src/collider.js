@@ -117,11 +117,6 @@
     CIRCLE: 1
   };
 
-  var orEqual = function(obj1BB, obj2BB, bBType1, bBType2) {
-    return (obj1BB === bBType1 && obj2BB === bBType2) ||
-      (obj1BB === bBType2 && obj2BB === bBType1);
-  }
-
   var notifyEntityOfCollision = function(entity, other, type) {
     if (entity.collision !== undefined) {
       entity.collision(other, type);
@@ -171,7 +166,6 @@
         };
       }
     },
-
 
     pointInsideObj: function(point, obj) {
       return point.x >= obj.pos.x
