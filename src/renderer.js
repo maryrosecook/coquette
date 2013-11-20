@@ -17,7 +17,7 @@
     canvas.width = wView;
     canvas.height = hView;
     this._viewSize = { x:wView, y:hView };
-    this.viewCenterPos = { x: this._viewSize.x / 2, y: this._viewSize.y / 2 };
+    this._viewCenterPos = { x: this._viewSize.x / 2, y: this._viewSize.y / 2 };
   };
 
   Renderer.prototype = {
@@ -30,25 +30,25 @@
     },
 
     getViewCenterPos: function() {
-      return this.viewCenterPos;
+      return this._viewCenterPos;
     },
 
     setViewCenterPos: function(pos) {
-      this.viewCenterPos = { x:pos.x, y:pos.y };
+      this._viewCenterPos = { x:pos.x, y:pos.y };
     },
 
     update: function(interval) {
       var ctx = this.getCtx();
 
-      var viewTranslate = viewOffset(this.viewCenterPos, this._viewSize);
+      var viewTranslate = viewOffset(this._viewCenterPos, this._viewSize);
 
       // translate so all objs placed relative to viewport
       ctx.translate(-viewTranslate.x, -viewTranslate.y);
 
       // draw background
       ctx.fillStyle = this.backgroundColor;
-      ctx.fillRect(this.viewCenterPos.x - this._viewSize.x / 2,
-                   this.viewCenterPos.y - this._viewSize.y / 2,
+      ctx.fillRect(this._viewCenterPos.x - this._viewSize.x / 2,
+                   this._viewCenterPos.y - this._viewSize.y / 2,
                    this._viewSize.x,
                    this._viewSize.y);
 
@@ -69,8 +69,8 @@
       return Maths.rectanglesIntersecting(obj, {
         size: this._viewSize,
         pos: {
-          x: this.viewCenterPos.x - this._viewSize.x / 2,
-          y: this.viewCenterPos.y - this._viewSize.y / 2
+          x: this._viewCenterPos.x - this._viewSize.x / 2,
+          y: this._viewCenterPos.y - this._viewSize.y / 2
         }
       });
     }
