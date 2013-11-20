@@ -123,7 +123,7 @@ describe('entities', function() {
   describe('background color', function() {
     it('should set background color to passed color', function() {
       var r = new Renderer(null, null, new MockCanvas(), null, null, "#aaa");
-      expect(r.backgroundColor).toEqual("#aaa");
+      expect(r._backgroundColor).toEqual("#aaa");
     });
   });
 

@@ -11,8 +11,8 @@
     this.game = game;
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
-    this.ctx = canvas.getContext('2d');
-    this.backgroundColor = backgroundColor;
+    this._ctx = canvas.getContext('2d');
+    this._backgroundColor = backgroundColor;
 
     canvas.width = wView;
     canvas.height = hView;
@@ -22,7 +22,7 @@
 
   Renderer.prototype = {
     getCtx: function() {
-      return this.ctx;
+      return this._ctx;
     },
 
     getViewSize: function() {
@@ -46,7 +46,7 @@
       ctx.translate(-viewTranslate.x, -viewTranslate.y);
 
       // draw background
-      ctx.fillStyle = this.backgroundColor;
+      ctx.fillStyle = this._backgroundColor;
       ctx.fillRect(this._viewCenterPos.x - this._viewSize.x / 2,
                    this._viewCenterPos.y - this._viewSize.y / 2,
                    this._viewSize.x,
