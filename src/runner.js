@@ -1,7 +1,7 @@
 ;(function(exports) {
   function Runner(coquette) {
     this.coquette = coquette;
-    this.runs = [];
+    this._runs = [];
   };
 
   Runner.prototype = {
@@ -10,14 +10,14 @@
     },
 
     run: function() {
-      while(this.runs.length > 0) {
-        var run = this.runs.shift();
+      while(this._runs.length > 0) {
+        var run = this._runs.shift();
         run.fn(run.obj);
       }
     },
 
     add: function(obj, fn) {
-      this.runs.push({
+      this._runs.push({
         obj: obj,
         fn: fn
       });
