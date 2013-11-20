@@ -17,7 +17,7 @@
     canvas.width = wView;
     canvas.height = hView;
     this._viewSize = { x:wView, y:hView };
-    this._viewCenterPos = { x: this._viewSize.x / 2, y: this._viewSize.y / 2 };
+    this._viewCenter = { x: this._viewSize.x / 2, y: this._viewSize.y / 2 };
   };
 
   Renderer.prototype = {
@@ -29,26 +29,24 @@
       return this._viewSize;
     },
 
-    getViewCenterPos: function() {
-      return this._viewCenterPos;
+    getViewCenter: function() {
+      return this._viewCenter;
     },
 
-    setViewCenterPos: function(pos) {
-      this._viewCenterPos = { x:pos.x, y:pos.y };
+    setViewCenter: function(pos) {
+      this._viewCenter = { x:pos.x, y:pos.y };
     },
 
     update: function(interval) {
       var ctx = this.getCtx();
+      var viewTranslate = viewOffset(this._viewCenter, this._viewSize);
 
-      var viewTranslate = viewOffset(this._viewCenterPos, this._viewSize);
-
-      // translate so all objs placed relative to viewport
-      ctx.translate(-viewTranslate.x, -viewTranslate.y);
+      ctx.translate(viewTranslate.x, viewTranslate.y);
 
       // draw background
       ctx.fillStyle = this._backgroundColor;
-      ctx.fillRect(this._viewCenterPos.x - this._viewSize.x / 2,
-                   this._viewCenterPos.y - this._viewSize.y / 2,
+      ctx.fillRect(this._viewCenter.x - this._viewSize.x / 2,
+                   this._viewCenter.y - this._viewSize.y / 2,
                    this._viewSize.x,
                    this._viewSize.y);
 
@@ -57,29 +55,40 @@
         .concat(this.coquette.entities.all().concat().sort(zindexSort));
       for (var i = 0, len = drawables.length; i < len; i++) {
         if (drawables[i].draw !== undefined) {
+          var drawable = drawables[i];
+
+          ctx.save();
+
+          if (drawable.center !== undefined && drawable.angle !== undefined) {
+            ctx.translate(drawable.center.x, drawable.center.y);
+            ctx.rotate(drawable.angle * 0.01745); // to radians
+            ctx.translate(-drawable.center.x, -drawable.center.y);
+          }
+
           drawables[i].draw(ctx);
+
+          ctx.restore();
         }
       }
 
-      // translate back
-      ctx.translate(viewTranslate.x, viewTranslate.y);
+      ctx.translate(-viewTranslate.x, -viewTranslate.y);
     },
 
     onScreen: function(obj) {
       return Maths.rectanglesIntersecting(obj, {
         size: this._viewSize,
-        pos: {
-          x: this._viewCenterPos.x - this._viewSize.x / 2,
-          y: this._viewCenterPos.y - this._viewSize.y / 2
+        center: {
+          x: this._viewCenter.x,
+          y: this._viewCenter.y
         }
       });
     }
   };
 
-  var viewOffset = function(viewCenterPos, viewSize) {
+  var viewOffset = function(viewCenter, viewSize) {
     return {
-      x:viewCenterPos.x - viewSize.x / 2,
-      y:viewCenterPos.y - viewSize.y / 2
+      x: -(viewCenter.x - viewSize.x / 2),
+      y: -(viewCenter.y - viewSize.y / 2)
     }
   };
 
