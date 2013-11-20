@@ -1,3 +1,17 @@
+0.2.1 / 2013-11-19
+
+* Several object attributes renamed to discourage use from outside:
+
+  * runner.runs to _runs
+
+  * renderer.backgroundColor to _backgroundColor
+
+  * renderer.viewCenterPos to _viewCenterPos
+
+  * renderer.viewSize to _viewSize
+
+  * collider.collideRecords to _collideRecords
+
 0.2.1 / 2013-09-20
 
 * Entities no longer need to have a `pos` and `size`.  If they are missing either, they will be ignored when checking for collisions.
