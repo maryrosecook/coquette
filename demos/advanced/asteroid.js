@@ -65,7 +65,7 @@
       this.game.endClip(ctx);
     },
 
-    destroy: function(other) {
+    destroy: function() {
       for (var i = 0, len = this.collidingAsteroids.length; i < len; i++) {
         if (this.collidingAsteroids[i] !== undefined) {
           if (this.collidingAsteroids[i].destroyed === false) {
@@ -87,9 +87,7 @@
           if (this.collidingAsteroids.length === 0) {
             this.spawnTwin(other);
           } else if (this.collidingAsteroids.length > 0) {
-            this.game.coquette.runner.add(this, function(self) {
-              self.destroy(other);
-            });
+            this.destroy();
           }
         } else if (other instanceof Player) {
           this.spawnTwin(other);
