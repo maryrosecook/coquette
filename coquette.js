@@ -316,9 +316,8 @@
     if (autoFocus === false) {
       inputReceiverElement = canvas;
       inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
-      this.suppressedKeys = [];
     } else {
-      this.supressedKeys = [
+      var suppressedKeys = [
         this.SPACE,
         this.LEFT_ARROW,
         this.UP_ARROW,
@@ -328,8 +327,8 @@
 
       // suppress scrolling
       window.addEventListener("keydown", function(e) {
-        for (var i = 0; i < self.supressedKeys.length; i++) {
-          if(self.supressedKeys[i] === e.keyCode) {
+        for (var i = 0; i < suppressedKeys.length; i++) {
+          if(suppressedKeys[i] === e.keyCode) {
             e.preventDefault();
             return;
           }
