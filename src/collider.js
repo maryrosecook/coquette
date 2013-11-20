@@ -14,7 +14,7 @@
   };
 
   var isSetupForCollisions = function(obj) {
-    return obj.pos !== undefined && obj.size !== undefined;
+    return obj.center !== undefined && obj.size !== undefined;
   };
 
   Collider.prototype = {
@@ -131,7 +131,7 @@
 
   var Maths = {
     circlesIntersecting: function(obj1, obj2) {
-      return Maths.distance(Maths.center(obj1), Maths.center(obj2)) <
+      return Maths.distance(obj1.center, obj2.center) <
         obj1.size.x / 2 + obj2.size.x / 2;
     },
 
@@ -150,28 +150,22 @@
     },
 
     circleAndRectangleIntersecting: function(circleObj, rectangleObj) {
-      var corners = Maths.rectangleCorners(rectangleObj);
-      return Maths.pointInsideObj(Maths.center(circleObj), rectangleObj) ||
+      var corners = this.rectangleCorners(rectangleObj);
+      return Maths.pointInsideObj(circleObj.center, rectangleObj) ||
         Maths.isLineIntersectingCircle(circleObj, corners[0], corners[1]) ||
         Maths.isLineIntersectingCircle(circleObj, corners[1], corners[2]) ||
         Maths.isLineIntersectingCircle(circleObj, corners[2], corners[3]) ||
         Maths.isLineIntersectingCircle(circleObj, corners[3], corners[0]);
     },
 
-    center: function(obj) {
-      if(obj.pos !== undefined) {
-        return {
-          x: obj.pos.x + (obj.size.x / 2),
-          y: obj.pos.y + (obj.size.y / 2),
-        };
       }
     },
 
     pointInsideObj: function(point, obj) {
-      return point.x >= obj.pos.x
-        && point.y >= obj.pos.y
-        && point.x <= obj.pos.x + obj.size.x
-        && point.y <= obj.pos.y + obj.size.y;
+      return point.x >= obj.center.x - obj.size.x / 2
+        && point.y >= obj.center.y - obj.size.y / 2
+        && point.x <= obj.center.x + obj.size.x / 2
+        && point.y <= obj.center.y + obj.size.y / 2;
     },
 
     distance: function(point1, point2) {
@@ -180,15 +174,15 @@
       return Math.sqrt((x * x) + (y * y));
     },
 
-    rectangleCorners: function(rectangleObj) {
+    rectangleCorners: function(obj) {
       var corners = [];
-      corners.push({ x:rectangleObj.pos.x, y: rectangleObj.pos.y });
-      corners.push({ x:rectangleObj.pos.x + rectangleObj.size.x, y:rectangleObj.pos.y });
+      corners.push({ x:obj.center.x - obj.size.x / 2, y: obj.center.y - obj.size.y / 2 });
+      corners.push({ x:obj.center.x + obj.size.x / 2, y:obj.center.y - obj.size.y / 2 });
       corners.push({
-        x:rectangleObj.pos.x + rectangleObj.size.x,
-        y:rectangleObj.pos.y + rectangleObj.size.y
+        x:obj.center.x + obj.size.x / 2,
+        y:obj.center.y + obj.size.y / 2
       });
-      corners.push({ x:rectangleObj.pos.x, y: rectangleObj.pos.y + rectangleObj.size.y });
+      corners.push({ x:obj.center.x - obj.size.x / 2, y: obj.center.y + obj.size.y / 2 });
       return corners;
     },
 
@@ -236,15 +230,10 @@
     },
 
     isLineIntersectingCircle: function(circleObj, linePointA, linePointB) {
-      var circ_pos = {
-        x: circleObj.pos.x + circleObj.size.x / 2,
-        y: circleObj.pos.y + circleObj.size.y / 2
-      };
-
-      var closest = Maths.closestPointOnSeg(linePointA, linePointB, circ_pos);
-      var dist_v = Maths.vectorTo(closest, circ_pos);
+      var closest = Maths.closestPointOnSeg(linePointA, linePointB, circleObj.center);
+      var dist_v = Maths.vectorTo(closest, circleObj.center);
       return Maths.magnitude(dist_v) < circleObj.size.x / 2;
-    }
+    },
   };
 
   exports.Collider = Collider;

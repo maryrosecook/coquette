@@ -4,9 +4,9 @@ var Entities = require('../src/entities').Entities;
 var Runner = require('../src/runner').Runner;
 var Maths = Collider.Maths;
 
-var mockObj = function(posX, posY, sizeX, sizeY, boundingBox) {
+var mockObj = function(centerX, centerY, sizeX, sizeY, boundingBox) {
   return {
-    pos: { x:posX, y:posY },
+    center: { x:centerX, y:centerY },
     size: { x:sizeX, y:sizeY },
     boundingBox: boundingBox
   };
@@ -199,7 +199,7 @@ describe('collider', function() {
   describe('maths', function() {
     describe('rectangleCorners', function() {
       it('should get corners of rect', function() {
-        var obj = mockObj(5, 5, 10, 10);
+        var obj = mockObj(10, 10, 10, 10);
         var corners = Maths.rectangleCorners(obj);
         expect(corners[0]).toEqual({ x:5, y:5 });
         expect(corners[1]).toEqual({ x:15, y:5 });
@@ -210,13 +210,13 @@ describe('collider', function() {
 
     describe('isLineIntersectingCircle', function() {
       it('should return false when circle and line intersect', function() {
-        var obj = mockObj(5, 5, 10, 10);
+        var obj = mockObj(10, 10, 10, 10);
         var intersecting = Maths.isLineIntersectingCircle(obj, { x:1, y:1 }, { x:20, y:20 });
         expect(intersecting).toEqual(true);
       });
 
       it('should return false when circle and line do not intersect', function() {
-        var obj = mockObj(5, 5, 10, 10);
+        var obj = mockObj(10, 10, 10, 10);
         var intersecting = Maths.isLineIntersectingCircle(obj, { x:1, y:1 }, { x:1, y:20 });
         expect(intersecting).toEqual(false);
       });
@@ -224,22 +224,22 @@ describe('collider', function() {
 
     describe('circleAndRectangleIntersecting', function() {
       it('should return true when centres align', function() {
-        var circle = mockObj(5, 5, 10, 10);
-        var rectangle = mockObj(7, 7, 10, 10);
+        var circle = mockObj(12, 12, 10, 10);
+        var rectangle = mockObj(12, 12, 10, 10);
         var intersecting = Maths.circleAndRectangleIntersecting(circle, rectangle);
         expect(intersecting).toEqual(true);
       });
 
       it('should return true when circle and rect overlap a bit', function() {
-        var circle = mockObj(5, 5, 10, 10);
-        var rectangle = mockObj(7, 7, 10, 10);
+        var circle = mockObj(10, 10, 10, 10);
+        var rectangle = mockObj(12, 12, 10, 10);
         var intersecting = Maths.circleAndRectangleIntersecting(circle, rectangle);
         expect(intersecting).toEqual(true);
       });
 
       it('should return false when circle and rect do not intersect', function() {
-        var circle = mockObj(5, 5, 10, 10);
-        var rectangle = mockObj(16, 16, 10, 10);
+        var circle = mockObj(10, 10, 10, 10);
+        var rectangle = mockObj(21, 21, 10, 10);
         var intersecting = Maths.circleAndRectangleIntersecting(circle, rectangle);
         expect(intersecting).toEqual(false);
       });
@@ -249,18 +249,18 @@ describe('collider', function() {
       describe('objects not set up for collisions', function() {
         var correctObj = mockObj(5, 5, 10, 10);
         var c = new Collider();
-        it('should return true for two objects with pos and size', function() {
+        it('should return true for two objects with center and size', function() {
           expect(c.isColliding(correctObj, correctObj)).toEqual(true);
         });
 
-        it('should return false when pos missing', function() {
+        it('should return false when center missing', function() {
           expect(c.isColliding(correctObj, { size: { x:1, y: 1 }})).toEqual(false);
           expect(c.isColliding({ size: { x:1, y: 1 }}, correctObj)).toEqual(false);
         });
 
         it('should return false when size missing', function() {
-          expect(c.isColliding(correctObj, { pos: { x:1, y: 1 }})).toEqual(false);
-          expect(c.isColliding({ pos: { x:1, y: 1 }}, correctObj)).toEqual(false);
+          expect(c.isColliding(correctObj, { center: { x:1, y: 1 }})).toEqual(false);
+          expect(c.isColliding({ center: { x:1, y: 1 }}, correctObj)).toEqual(false);
         });
       });
     });
@@ -268,8 +268,8 @@ describe('collider', function() {
     describe('isIntersecting', function() {
       it('should use rect as default bounding box', function() {
         var collider = new Collider();
-        var obj1 = mockObj(5, 5, 10, 10);
-        var obj2 = mockObj(15, 15, 10, 10);
+        var obj1 = mockObj(10, 10, 10, 10);
+        var obj2 = mockObj(20, 20, 10, 10);
         var intersecting = collider.isIntersecting(obj1, obj2);
         expect(intersecting).toEqual(true);
       });
@@ -277,35 +277,35 @@ describe('collider', function() {
       describe('two rects', function() {
         describe('collisions', function() {
           it('should return true: bottom right corner over top left corner', function() {
-            expect(new Collider().isIntersecting(mockObj(10, 10, 2, 4),
-                                                 mockObj(12, 14, 4, 2))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(11, 12, 2, 4),
+                                                 mockObj(14, 15, 4, 2))).toEqual(true);
           });
 
           it('should return true: bottom left corner over top right corner', function() {
-            expect(new Collider().isIntersecting(mockObj(10, 10, 2, 4),
-                                                 mockObj(6, 14, 4, 2))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(11, 12, 2, 4),
+                                                 mockObj(8, 15, 4, 2))).toEqual(true);
           });
 
           it('should return true: top left corner over bottom right corner', function() {
-            expect(new Collider().isIntersecting(mockObj(12, 14, 4, 2),
-                                                 mockObj(10, 10, 2, 4))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(14, 15, 4, 2),
+                                                 mockObj(11, 12, 2, 4))).toEqual(true);
           });
 
           it('should return true: top right corner over bottom left corner', function() {
-            expect(new Collider().isIntersecting(mockObj(6, 14, 4, 2),
-                                                 mockObj(10, 10, 2, 4))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(8, 15, 4, 2),
+                                                 mockObj(11, 12, 2, 4))).toEqual(true);
           });
         });
 
         describe('non-collisions', function() {
           it('should return true: bottom right corner over top left corner', function() {
-            expect(new Collider().isIntersecting(mockObj(10, 10, 2, 4),
-                                                 mockObj(13, 14, 4, 2))).toEqual(false);
+            expect(new Collider().isIntersecting(mockObj(11, 12, 2, 4),
+                                                 mockObj(15, 15, 4, 2))).toEqual(false);
           });
 
           it('should return true: bottom left corner over top right corner', function() {
-            expect(new Collider().isIntersecting(mockObj(10, 10, 2, 4),
-                                                 mockObj(5, 14, 4, 2))).toEqual(false);
+            expect(new Collider().isIntersecting(mockObj(11, 12, 2, 4),
+                                                 mockObj(7, 15, 4, 2))).toEqual(false);
           });
 
           it('should return true: top left corner over bottom right corner', function() {
@@ -314,26 +314,33 @@ describe('collider', function() {
           });
 
           it('should return true: top right corner over bottom left corner', function() {
-            expect(new Collider().isIntersecting(mockObj(5, 14, 4, 2),
-                                                 mockObj(10, 10, 2, 4))).toEqual(false);
+            expect(new Collider().isIntersecting(mockObj(7, 15, 4, 2),
+                                                 mockObj(11, 12, 2, 4))).toEqual(false);
           });
         });
       });
 
       it('should return false for two circles that are not colliding', function() {
         var collider = new Collider();
-        var obj1 = mockObj(5, 5, 10, 10, collider.CIRCLE);
-        var obj2 = mockObj(14, 14, 10, 10, collider.CIRCLE);
+        var obj1 = mockObj(10, 10, 10, 10, collider.CIRCLE);
+        var obj2 = mockObj(19, 19, 10, 10, collider.CIRCLE);
+        var intersecting = collider.isIntersecting(obj1, obj2);
+        expect(intersecting).toEqual(false);
+      });
+
+      it('should return false for circ+rect that are not colliding', function() {
+        var collider = new Collider();
+        var obj1 = mockObj(10, 10, 10, 10, collider.CIRCLE);
+        var obj2 = mockObj(19, 19, 10, 10, collider.RECTANGLE);
         var intersecting = collider.isIntersecting(obj1, obj2);
         expect(intersecting).toEqual(false);
       });
 
       it('should return true for circ+rect that are colliding', function() {
         var collider = new Collider();
-        var obj1 = mockObj(5, 5, 10, 10, collider.CIRCLE);
+        var obj1 = mockObj(10, 10, 10, 10, collider.CIRCLE);
         var obj2 = mockObj(14, 14, 10, 10, collider.RECTANGLE);
-        var intersecting = collider.isIntersecting(obj1, obj2);
-        expect(intersecting).toEqual(false);
+        expect(collider.isIntersecting(obj1, obj2)).toEqual(true);
       });
 
       it('should throw when either obj has invalid bounding box', function() {
@@ -356,13 +363,13 @@ describe('collider', function() {
         it('should only return true when circle+rect in right order to collide', function() {
           var collider = new Collider();
 
-          var obj1 = mockObj(33, 33, 10, 10, collider.CIRCLE);
-          var obj2 = mockObj(5, 5, 30, 30, collider.RECTANGLE);
+          var obj1 = mockObj(38, 38, 10, 10, collider.CIRCLE);
+          var obj2 = mockObj(20, 20, 30, 30, collider.RECTANGLE);
           expect(collider.isIntersecting(obj1, obj2)).toEqual(true);
 
           // same dimensions, swap shape type and get no collision
-          var obj1 = mockObj(33, 33, 10, 10, collider.RECTANGLE);
-          var obj2 = mockObj(5, 5, 30, 30, collider.CIRCLE);
+          var obj1 = mockObj(38, 38, 10, 10, collider.RECTANGLE);
+          var obj2 = mockObj(20, 20, 30, 30, collider.CIRCLE);
           expect(collider.isIntersecting(obj1, obj2)).toEqual(false);
         });
       });
