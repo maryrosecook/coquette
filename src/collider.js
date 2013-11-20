@@ -135,25 +135,9 @@
   };
 
   var Maths = {
-    center: function(obj) {
-      if(obj.pos !== undefined) {
-        return {
-          x: obj.pos.x + (obj.size.x / 2),
-          y: obj.pos.y + (obj.size.y / 2),
-        };
-      }
-    },
-
     circlesIntersecting: function(obj1, obj2) {
       return Maths.distance(Maths.center(obj1), Maths.center(obj2)) <
         obj1.size.x / 2 + obj2.size.x / 2;
-    },
-
-    pointInsideObj: function(point, obj) {
-      return point.x >= obj.pos.x
-        && point.y >= obj.pos.y
-        && point.x <= obj.pos.x + obj.size.x
-        && point.y <= obj.pos.y + obj.size.y;
     },
 
     rectanglesIntersecting: function(obj1, obj2) {
@@ -168,6 +152,32 @@
       } else {
         return true;
       }
+    },
+
+    circleAndRectangleIntersecting: function(circleObj, rectangleObj) {
+      var corners = Maths.rectangleCorners(rectangleObj);
+      return Maths.pointInsideObj(Maths.center(circleObj), rectangleObj) ||
+        Maths.isLineIntersectingCircle(circleObj, corners[0], corners[1]) ||
+        Maths.isLineIntersectingCircle(circleObj, corners[1], corners[2]) ||
+        Maths.isLineIntersectingCircle(circleObj, corners[2], corners[3]) ||
+        Maths.isLineIntersectingCircle(circleObj, corners[3], corners[0]);
+    },
+
+    center: function(obj) {
+      if(obj.pos !== undefined) {
+        return {
+          x: obj.pos.x + (obj.size.x / 2),
+          y: obj.pos.y + (obj.size.y / 2),
+        };
+      }
+    },
+
+
+    pointInsideObj: function(point, obj) {
+      return point.x >= obj.pos.x
+        && point.y >= obj.pos.y
+        && point.x <= obj.pos.x + obj.size.x
+        && point.y <= obj.pos.y + obj.size.y;
     },
 
     distance: function(point1, point2) {
@@ -240,16 +250,7 @@
       var closest = Maths.closestPointOnSeg(linePointA, linePointB, circ_pos);
       var dist_v = Maths.vectorTo(closest, circ_pos);
       return Maths.magnitude(dist_v) < circleObj.size.x / 2;
-    },
-
-    circleAndRectangleIntersecting: function(circleObj, rectangleObj) {
-      var corners = Maths.rectangleCorners(rectangleObj);
-      return Maths.pointInsideObj(Maths.center(circleObj), rectangleObj) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[0], corners[1]) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[1], corners[2]) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[2], corners[3]) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[3], corners[0]);
-    },
+    }
   };
 
   exports.Collider = Collider;
