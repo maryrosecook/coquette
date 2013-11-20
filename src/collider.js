@@ -18,7 +18,7 @@
   };
 
   Collider.prototype = {
-    collideRecords: [],
+    _collideRecords: [],
 
     update: function() {
       var ent = this.coquette.entities.all();
@@ -38,7 +38,7 @@
       if (!isUncollisionOn(this.coquette.entities.all())) {
         collisionType = this.INITIAL;
       } else if (this.getCollideRecordIds(entity1, entity2).length === 0) {
-        this.collideRecords.push([entity1, entity2]);
+        this._collideRecords.push([entity1, entity2]);
         collisionType = this.INITIAL;
       } else {
         collisionType = this.SUSTAINED;
@@ -57,26 +57,28 @@
 
     // remove collision at passed index
     removeOldCollision: function(recordId) {
-      var record = this.collideRecords[recordId];
+      var record = this._collideRecords[recordId];
       if (record !== undefined) {
         notifyEntityOfUncollision(record[0], record[1])
         notifyEntityOfUncollision(record[1], record[0])
-        this.collideRecords.splice(recordId, 1);
+        this._collideRecords.splice(recordId, 1);
       }
     },
 
     getCollideRecordIds: function(entity1, entity2) {
       if (entity1 !== undefined && entity2 !== undefined) {
         var recordIds = [];
-        for (var i = 0, len = this.collideRecords.length; i < len; i++) {
-          if (this.collideRecords[i][0] === entity1 && this.collideRecords[i][1] === entity2) {
+        for (var i = 0, len = this._collideRecords.length; i < len; i++) {
+          if (this._collideRecords[i][0] === entity1 &&
+              this._collideRecords[i][1] === entity2) {
             recordIds.push(i);
           }
         }
         return recordIds;
       } else if (entity1 !== undefined) {
-        for (var i = 0, len = this.collideRecords.length; i < len; i++) {
-          if (this.collideRecords[i][0] === entity1 || this.collideRecords[i][1] === entity1) {
+        for (var i = 0, len = this._collideRecords.length; i < len; i++) {
+          if (this._collideRecords[i][0] === entity1 ||
+              this._collideRecords[i][1] === entity1) {
             return [i];
           }
         }
