@@ -61,7 +61,7 @@
 
           if (drawable.center !== undefined && drawable.angle !== undefined) {
             ctx.translate(drawable.center.x, drawable.center.y);
-            ctx.rotate(drawable.angle * 0.01745); // to radians
+            ctx.rotate(drawable.angle * Coquette.Collider.Maths.RADIAN_TO_DEGREES);
             ctx.translate(-drawable.center.x, -drawable.center.y);
           }
 

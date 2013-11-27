@@ -94,8 +94,8 @@
     },
 
     isIntersecting: function(obj1, obj2) {
-      var obj1BoundingBox = obj1.boundingBox || this.RECTANGLE;
-      var obj2BoundingBox = obj2.boundingBox || this.RECTANGLE;
+      var obj1BoundingBox = this.boundingBox(obj1);
+      var obj2BoundingBox = this.boundingBox(obj2);
 
       if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.RECTANGLE) {
         return Maths.rectanglesIntersecting(obj1, obj2);
@@ -129,6 +129,10 @@
     }
   };
 
+  var rotated = function(obj) {
+    return obj.angle !== undefined && obj.angle !== 0;
+  };
+
   var Maths = {
     circlesIntersecting: function(obj1, obj2) {
       return Maths.distance(obj1.center, obj2.center) <
@@ -136,54 +140,120 @@
     },
 
     rectanglesIntersecting: function(obj1, obj2) {
-      if(obj1.pos.x + obj1.size.x < obj2.pos.x) {
+      if (!rotated(obj1) && !rotated(obj2)) {
+        return this.unrotatedRectanglesIntersecting(obj1, obj2); // faster
+      } else {
+        return this.rotatedRectanglesIntersecting(obj1, obj2); // slower
+      }
+    },
+
+    circleAndRectangleIntersecting: function(circleObj, rectangleObj) {
+      var max = -Infinity;
+      var rectangleToCircleVector = this.vectorTo(rectangleObj.center, circleObj.center);
+      var rectangleToCircleVectorNormalised = this.unitVector(rectangleToCircleVector);
+      var rectangleToCircleMagnitude = this.magnitude(rectangleToCircleVector);
+
+      var rectangleCorners = this.sat.rectangleCorners(rectangleObj);
+      for (var i = 0; i < rectangleCorners.length; i++) {
+        var currentMax = this.dotProduct(this.vectorTo(rectangleCorners[i],
+                                                      rectangleObj.center),
+                                         rectangleToCircleVectorNormalised);
+
+        if (max < currentMax) {
+          max = currentMax;
+        }
+      }
+
+      return !(rectangleToCircleMagnitude > 0 &&
+               rectangleToCircleMagnitude - max - circleObj.size.x / 2 > 0);
+    },
+
+
+
+    unrotatedRectanglesIntersecting: function(obj1, obj2) {
+      if(obj1.center.x + obj1.size.x / 2 < obj2.center.x - obj2.size.x / 2) {
         return false;
-      } else if(obj1.pos.x > obj2.pos.x + obj2.size.x) {
+      } else if(obj1.center.x - obj1.size.x / 2 > obj2.center.x + obj2.size.x / 2) {
         return false;
-      } else if(obj1.pos.y > obj2.pos.y + obj2.size.y) {
+      } else if(obj1.center.y - obj1.size.y / 2 > obj2.center.y + obj2.size.y / 2) {
         return false;
-      } else if(obj1.pos.y + obj1.size.y < obj2.pos.y) {
+      } else if(obj1.center.y + obj1.size.y / 2 < obj2.center.y - obj2.size.y / 2) {
         return false
       } else {
         return true;
       }
     },
 
-    circleAndRectangleIntersecting: function(circleObj, rectangleObj) {
-      var corners = this.rectangleCorners(rectangleObj);
-      return Maths.pointInsideObj(circleObj.center, rectangleObj) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[0], corners[1]) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[1], corners[2]) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[2], corners[3]) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[3], corners[0]);
-    },
+    rotatedRectanglesIntersecting: function(obj1, obj2) {
+      var obj1Normals = this.sat.rectanglePerpendicularNormals(obj1);
+      var obj2Normals = this.sat.rectanglePerpendicularNormals(obj2);
 
+      var obj1Corners = this.sat.rectangleCorners(obj1);
+      var obj2Corners = this.sat.rectangleCorners(obj2);
+
+      if (this.sat.projectionsSeparate(
+        this.sat.getMinMaxProjection(obj1Corners, obj1Normals[1]),
+        this.sat.getMinMaxProjection(obj2Corners, obj1Normals[1]))) {
+        return false;
+      } else if (this.sat.projectionsSeparate(
+        this.sat.getMinMaxProjection(obj1Corners, obj1Normals[0]),
+        this.sat.getMinMaxProjection(obj2Corners, obj1Normals[0]))) {
+        return false;
+      } else if (this.sat.projectionsSeparate(
+        this.sat.getMinMaxProjection(obj1Corners, obj2Normals[1]),
+        this.sat.getMinMaxProjection(obj2Corners, obj2Normals[1]))) {
+        return false;
+      } else if (this.sat.projectionsSeparate(
+        this.sat.getMinMaxProjection(obj1Corners, obj2Normals[0]),
+        this.sat.getMinMaxProjection(obj2Corners, obj2Normals[0]))) {
+        return false;
+      } else {
+        return true;
       }
     },
 
+    boundingBox: function(obj) {
+      return obj.boundingBox || this.RECTANGLE;
+    },
+
     pointInsideObj: function(point, obj) {
-      return point.x >= obj.center.x - obj.size.x / 2
-        && point.y >= obj.center.y - obj.size.y / 2
-        && point.x <= obj.center.x + obj.size.x / 2
-        && point.y <= obj.center.y + obj.size.y / 2;
+      var objBoundingBox = this.boundingBox(obj);
+
+      if (objBoundingBox === this.RECTANGLE) {
+        return this.pointInsideRectangle(point, obj);
+      } else if (objBoundingBox === this.CIRCLE) {
+        return this.pointInsideCircle(point, obj);
+      } else {
+        throw "Tried to see if point inside object with unsupported bounding box.";
+      }
+    },
+
+    pointInsideRectangle: function(point, obj) {
+      var c = math.cos(-obj.angle * Math.PI / 180);
+      var s = math.sin(-obj.angle * Math.PI / 180);
+
+      var rotatedX = obj.center.x + c *
+          (point.x - obj.center.x) - s * (point.y - obj.center.y);
+      var rotatedY = obj.center.y + s *
+          (point.x - obj.center.x) + c * (point.y - obj.center.y);
+
+      var leftX = obj.center.x - obj.size.x / 2;
+      var rightX = obj.center.x + obj.size.x / 2;
+      var topY = obj.center.y - obj.size.y / 2;
+      var bottomY = obj.center.y + obj.size.y / 2;
+
+      return leftX <= rotatedX && rotatedX <= rightX &&
+        topY <= rotatedY && rotatedY <= bottomY;
+    };
+
+    pointInsideCircle: function() {
+
     },
 
     distance: function(point1, point2) {
       var x = point1.x - point2.x;
       var y = point1.y - point2.y;
       return Math.sqrt((x * x) + (y * y));
-    },
-
-    rectangleCorners: function(obj) {
-      var corners = [];
-      corners.push({ x:obj.center.x - obj.size.x / 2, y: obj.center.y - obj.size.y / 2 });
-      corners.push({ x:obj.center.x + obj.size.x / 2, y:obj.center.y - obj.size.y / 2 });
-      corners.push({
-        x:obj.center.x + obj.size.x / 2,
-        y:obj.center.y + obj.size.y / 2
-      });
-      corners.push({ x:obj.center.x - obj.size.x / 2, y: obj.center.y + obj.size.y / 2 });
-      return corners;
     },
 
     vectorTo: function(start, end) {
@@ -197,6 +267,13 @@
       return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
     },
 
+    leftNormalizedNormal: function(vector) {
+      return {
+        x: -vector.y,
+        y: vector.x
+      };
+    },
+
     dotProduct: function(vector1, vector2) {
       return vector1.x * vector2.x + vector1.y * vector2.y;
     },
@@ -208,32 +285,72 @@
       };
     },
 
-    closestPointOnSeg: function(linePointA, linePointB, circ_pos) {
-      var seg_v = Maths.vectorTo(linePointA, linePointB);
-      var pt_v = Maths.vectorTo(linePointA, circ_pos);
-      if (Maths.magnitude(seg_v) <= 0) {
-        throw "Invalid segment length";
-      }
+    sat: {
+      projectionsSeparate: function(proj1, proj2) {
+        return proj1.max < proj2.min || proj2.max < proj1.min;
+      },
 
-      var seg_v_unit = Maths.unitVector(seg_v);
-      var proj = Maths.dotProduct(pt_v, seg_v_unit);
-      if (proj <= 0) {
-        return linePointA;
-      } else if (proj >= Maths.magnitude(seg_v)) {
-        return linePointB;
-      } else {
-        return {
-          x: linePointA.x + seg_v_unit.x * proj,
-          y: linePointA.y + seg_v_unit.y * proj
-        };
+      getMinMaxProjection: function(objCorners, normal) {
+        var min = Maths.dotProduct(objCorners[0], normal);
+        var max = Maths.dotProduct(objCorners[0], normal);
+
+        for (var i = 1; i < objCorners.length; i++) {
+          var current = Maths.dotProduct(objCorners[i], normal);
+          if (min > current) {
+            min = current;
+          }
+
+          if (current > max) {
+            max = current;
+          }
+        }
+
+        return { min: min, max: max };
+      },
+
+      rectangleCorners: function(obj) {
+        var corners = [ // unrotated
+          { x:obj.center.x - obj.size.x / 2, y: obj.center.y - obj.size.y / 2 },
+          { x:obj.center.x + obj.size.x / 2, y: obj.center.y - obj.size.y / 2 },
+          { x:obj.center.x + obj.size.x / 2, y: obj.center.y + obj.size.y / 2 },
+          { x:obj.center.x - obj.size.x / 2, y: obj.center.y + obj.size.y / 2 }
+        ];
+
+        var angle = (obj.angle === undefined ? 0 : obj.angle) *
+          Maths.RADIAN_TO_DEGREES;
+
+			  for (var i = 0; i < corners.length; i++) {
+				  var xOffset = corners[i].x - obj.center.x;
+				  var yOffset = corners[i].y - obj.center.y;
+				  corners[i].x = obj.center.x +
+            xOffset * Math.cos(angle) - yOffset * Math.sin(angle);
+				  corners[i].y = obj.center.y +
+            xOffset * Math.sin(angle) + yOffset * Math.cos(angle);
+			  }
+
+        return corners;
+      },
+
+      rectangleSideVectors: function(obj) {
+        var corners = this.rectangleCorners(obj);
+        return [
+          { x: corners[0].x - corners[1].x, y: corners[0].y - corners[1].y },
+          { x: corners[1].x - corners[2].x, y: corners[1].y - corners[2].y },
+          { x: corners[2].x - corners[3].x, y: corners[2].y - corners[3].y },
+          { x: corners[3].x - corners[0].x, y: corners[3].y - corners[0].y }
+        ];
+      },
+
+      rectanglePerpendicularNormals: function(obj) {
+        var sides = this.rectangleSideVectors(obj);
+        return [
+          Maths.leftNormalizedNormal(sides[0]),
+          Maths.leftNormalizedNormal(sides[1])
+        ];
       }
     },
 
-    isLineIntersectingCircle: function(circleObj, linePointA, linePointB) {
-      var closest = Maths.closestPointOnSeg(linePointA, linePointB, circleObj.center);
-      var dist_v = Maths.vectorTo(closest, circleObj.center);
-      return Maths.magnitude(dist_v) < circleObj.size.x / 2;
-    },
+    RADIAN_TO_DEGREES: 0.01745
   };
 
   exports.Collider = Collider;
