@@ -84,14 +84,6 @@ describe('inputter', function() {
     });
   });
 
-  describe('state()', function() {
-    it('should be able to use as alias for down()', function() {
-      var canvas = new InputReceiver();
-      var inp = new Inputter(null, canvas, false);
-      canvas.fire("keydown", { keyCode: 51 });
-      expect(inp.state(51)).toEqual(true);
-    });
-  });
 
   describe('down()', function() {
     it('should say down key is down', function() {

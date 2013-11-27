@@ -125,8 +125,6 @@
     SINGLE_QUOTE: 222
   };
 
-  Inputter.prototype.state = Inputter.prototype.down;
-
   var getInputReceiverElement = function(window, canvas, autoFocus) {
     var receiver = window;
     if (autoFocus === false) {
