@@ -5,31 +5,8 @@
     this._keyPressedState = {};
     var self = this;
 
-    // handle whether to autofocus on canvas, or not
-
-    var inputReceiverElement = window;
-    if (autoFocus === false) {
-      inputReceiverElement = canvas;
-      inputReceiverElement.contentEditable = true; // lets canvas get focus and get key events
-    } else {
-      var suppressedKeys = [
-        this.SPACE,
-        this.LEFT_ARROW,
-        this.UP_ARROW,
-        this.RIGHT_ARROW,
-        this.DOWN_ARROW
-      ];
-
-      // suppress scrolling
-      window.addEventListener("keydown", function(e) {
-        for (var i = 0; i < suppressedKeys.length; i++) {
-          if(suppressedKeys[i] === e.keyCode) {
-            e.preventDefault();
-            return;
-          }
-        }
-      }, false);
-    }
+    var receiver = getInputReceiverElement(window, canvas, autoFocus);
+    connectInputReceiverToInput(receiver, window, autoFocus);
 
     // set up key listeners
 
@@ -151,5 +128,37 @@
 
   Inputter.prototype.state = Inputter.prototype.down;
 
+  var getInputReceiverElement = function(window, canvas, autoFocus) {
+    var receiver = window;
+    if (autoFocus === false) {
+      receiver = canvas;
+    }
+
+    return receiver;
+  };
+
+  var connectInputReceiverToInput = function(receiver, window, autoFocus) {
+    if (autoFocus === false) {
+      receiver.contentEditable = true; // lets canvas get focus and get key events
+    } else {
+      var suppressedKeys = [
+        Inputter.prototype.SPACE,
+        Inputter.prototype.LEFT_ARROW,
+        Inputter.prototype.UP_ARROW,
+        Inputter.prototype.RIGHT_ARROW,
+        Inputter.prototype.DOWN_ARROW
+      ];
+
+      // suppress scrolling
+      window.addEventListener("keydown", function(e) {
+        for (var i = 0; i < suppressedKeys.length; i++) {
+          if(suppressedKeys[i] === e.keyCode) {
+            e.preventDefault();
+            return;
+          }
+        }
+      }, false);
+    }
+  };
   exports.Inputter = Inputter;
 })(typeof exports === 'undefined' ? this.Coquette : exports);
