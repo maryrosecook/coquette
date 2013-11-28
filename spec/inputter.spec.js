@@ -1,21 +1,5 @@
 var Inputter = require('../src/inputter').Inputter;
 
-var mockWindowInputReceiver = function() {
-  var restoreWindow;
-  if (typeof window === 'undefined') {
-    window = new InputReceiver();
-    return function() {
-      window = undefined; // not a perfect reversal if window was not even declared before
-    };
-  } else {
-    var oldWindow = window;
-    window = new InputReceiver();
-    return function() {
-      window = oldWindow;
-    };
-  }
-};
-
 var InputReceiver = function() {
   var callbacks = {};
   this.fire = function(eventName, data) {
@@ -33,17 +17,12 @@ var InputReceiver = function() {
 };
 
 describe('inputter', function() {
-  var restoreWindow;
-  beforeEach(function() {
-    restoreWindow = mockWindowInputReceiver()
-  });
-
-  afterEach(function() {
-    restoreWindow();
-  });
-
   describe('input source', function() {
     describe('window', function() {
+      beforeEach(function() {
+        window = new InputReceiver()
+      });
+
       it('should use window if autoFocus set to false', function() {
         var canvas = {};
         var inp = new Inputter(null, canvas, true);
