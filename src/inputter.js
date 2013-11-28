@@ -1,6 +1,5 @@
 ;(function(exports) {
   var Inputter = function(coquette, canvas, autoFocus) {
-    this.coquette = coquette;
     var receiver = getInputReceiverElement(window, canvas, autoFocus);
     connectInputReceiverToInput(receiver, window, autoFocus);
 
