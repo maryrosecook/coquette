@@ -37,10 +37,11 @@
       return this._buttonListener.isDown(button);
     },
 
+    // Returns true if passed button just gone down. true once per keypress.
+    isPressed: function(button) {
+      return this._buttonListener.isPressed(button);
     },
 
-    pressed: function(keyCode) {
-      return this._keyPressedState[keyCode] || false;
     },
 
     BACKSPACE: 8,
