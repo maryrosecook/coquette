@@ -32,10 +32,11 @@
           this._keyPressedState[i] = false; // end key press
         }
       }
+    // Returns true if passed button currently down
+    isDown: function(button) {
+      return this._buttonListener.isDown(button);
     },
 
-    down: function(keyCode) {
-      return this._keyDownState[keyCode] || false;
     },
 
     pressed: function(keyCode) {

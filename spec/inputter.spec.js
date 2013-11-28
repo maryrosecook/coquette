@@ -27,7 +27,7 @@ describe('inputter', function() {
         var canvas = {};
         var inp = new Inputter(null, canvas, true);
         window.fire("keydown", { keyCode: 51 });
-        expect(inp.down(51)).toEqual(true);
+        expect(inp.isDown(51)).toEqual(true);
       });
 
       it('should ignore presses on suppressed keys', function() {
@@ -52,7 +52,7 @@ describe('inputter', function() {
         var receiver = new InputReceiver();
         var inp = new Inputter(null, receiver, false);
         receiver.fire("keydown", { keyCode: 51 });
-        expect(inp.down(51)).toEqual(true);
+        expect(inp.isDown(51)).toEqual(true);
       });
 
       it('should set contentEditable to true', function() {
@@ -63,35 +63,34 @@ describe('inputter', function() {
     });
   });
 
-
-  describe('down()', function() {
+  describe('isDown()', function() {
     it('should say down key is down', function() {
       var canvas = new InputReceiver();
       var inp = new Inputter(null, canvas, false);
       canvas.fire("keydown", { keyCode: 51 });
-      expect(inp.down(51)).toEqual(true);
+      expect(inp.isDown(51)).toEqual(true);
     });
 
     it('should say never down key is not down', function() {
       var canvas = new InputReceiver();
       var inp = new Inputter(null, canvas, false);
-      expect(inp.down(51)).toEqual(false);
+      expect(inp.isDown(51)).toEqual(false);
     });
 
     it('should say key that has gone down then up not down', function() {
       var canvas = new InputReceiver();
       var inp = new Inputter(null, canvas, false);
       canvas.fire("keydown", { keyCode: 51 });
-      expect(inp.down(51)).toEqual(true);
+      expect(inp.isDown(51)).toEqual(true);
       canvas.fire("keyup", { keyCode: 51 });
-      expect(inp.down(51)).toEqual(false);
+      expect(inp.isDown(51)).toEqual(false);
     });
 
     it('should say key that is not down is not down when other key is down', function() {
       var canvas = new InputReceiver();
       var inp = new Inputter(null, canvas, false);
       canvas.fire("keydown", { keyCode: 51 });
-      expect(inp.down(52)).toEqual(false);
+      expect(inp.isDown(52)).toEqual(false);
     });
   });
 
