@@ -1,37 +1,17 @@
 ;(function(exports) {
   var Inputter = function(coquette, canvas, autoFocus) {
     this.coquette = coquette;
-    this._keyDownState = {};
-    this._keyPressedState = {};
-    var self = this;
-
     var receiver = getInputReceiverElement(window, canvas, autoFocus);
     connectInputReceiverToInput(receiver, window, autoFocus);
 
-    // set up key listeners
-
-    inputReceiverElement.addEventListener('keydown', function(e) {
-      self._keyDownState[e.keyCode] = true;
-      if (self._keyPressedState[e.keyCode] === undefined) { // start of new keypress
-        self._keyPressedState[e.keyCode] = true; // register keypress in progress
-      }
-    }, false);
-
-    inputReceiverElement.addEventListener('keyup', function(e) {
-      self._keyDownState[e.keyCode] = false;
-      if (self._keyPressedState[e.keyCode] === false) { // prev keypress over
-        self._keyPressedState[e.keyCode] = undefined; // prep for keydown to start next press
-      }
-    }, false);
+    this._buttonListener = new ButtonListener(receiver);
   };
 
   Inputter.prototype = {
     update: function() {
-      for (var i in this._keyPressedState) {
-        if (this._keyPressedState[i] === true) { // tick passed and press event in progress
-          this._keyPressedState[i] = false; // end key press
-        }
-      }
+      this._buttonListener.update();
+    },
+
     // Returns true if passed button currently down
     isDown: function(button) {
       return this._buttonListener.isDown(button);
@@ -42,7 +22,8 @@
       return this._buttonListener.isPressed(button);
     },
 
-    },
+    LEFT_MOUSE: "LEFT_MOUSE",
+    RIGHT_MOUSE: "RIGHT_MOUSE",
 
     BACKSPACE: 8,
     TAB: 9,
@@ -125,6 +106,72 @@
     BACK_SLASH: 220,
     CLOSE_SQUARE_BRACKET: 221,
     SINGLE_QUOTE: 222
+  };
+
+  var ButtonListener = function(element) {
+    var self = this;
+    this._buttonDownState = {};
+    this._buttonPressedState = {};
+
+    element.addEventListener('keydown', function(e) {
+      self._down(e.keyCode);
+    }, false);
+
+    element.addEventListener('keyup', function(e) {
+      self._up(e.keyCode);
+    }, false);
+
+    canvas.addEventListener('mousedown', function(e) {
+      self._down(self._getMouseButton(e));
+    }, false);
+
+    canvas.addEventListener('mouseup', function(e) {
+      self._up(self._getMouseButton(e));
+    }, false);
+  };
+
+  ButtonListener.prototype = {
+    update: function() {
+      for (var i in this._buttonPressedState) {
+        if (this._buttonPressedState[i] === true) { // tick passed and press event in progress
+          this._buttonPressedState[i] = false; // end key press
+        }
+      }
+    },
+
+    _down: function(buttonId) {
+      this._buttonDownState[buttonId] = true;
+      if (this._buttonPressedState[buttonId] === undefined) { // start of new keypress
+        this._buttonPressedState[buttonId] = true; // register keypress in progress
+      }
+    },
+
+    _up: function(buttonId) {
+      this._buttonDownState[buttonId] = false;
+      if (this._buttonPressedState[buttonId] === false) { // prev keypress over
+        this._buttonPressedState[buttonId] = undefined; // prep for keydown to start next press
+      }
+    },
+
+    isDown: function(button) {
+      return this._buttonDownState[button] || false;
+    },
+
+    isPressed: function(button) {
+      return this._buttonPressedState[button] || false;
+    },
+
+    _getMouseButton: function(e) {
+      if (e.which !== undefined || e.button !== undefined) {
+        if (e.which === 3 || e.button === 2) {
+          return Inputter.prototype.RIGHT_MOUSE;
+        } else if (e.which === 1 || e.button === 0 || e.button === 1) {
+          return Inputter.prototype.LEFT_MOUSE;
+        }
+      }
+
+      throw "Cannot judge button pressed on passed mouse button event";
+    }
   };
 
   var getInputReceiverElement = function(window, canvas, autoFocus) {

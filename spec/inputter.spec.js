@@ -145,4 +145,121 @@ describe('inputter', function() {
       expect(inp.isPressed(52)).toEqual(false);
     });
   });
+
+  describe('mouse', function() {
+    describe('buttons', function() {
+      var canvas, inp;
+      beforeEach(function() {
+        canvas = new InputReceiver();
+        inp = new Inputter(null, canvas, false);
+      });
+
+      describe('isDown()', function() {
+        it('should say all mouse buttons not down when no events sent', function() {
+          expect(inp.isDown(inp.LEFT_MOUSE)).toEqual(false);
+          expect(inp.isDown(inp.RIGHT_MOUSE)).toEqual(false);
+        });
+
+        it('should say down mouse button is down', function() {
+          canvas.fire("mousedown", { which: 1 });
+          expect(inp.isDown(inp.LEFT_MOUSE)).toEqual(true);
+        });
+
+        it('should say button that has gone down then up not down', function() {
+          canvas.fire("mousedown", { which: 1 });
+          expect(inp.isDown(inp.LEFT_MOUSE)).toEqual(true);
+          canvas.fire("mouseup", { which: 1 });
+          expect(inp.isDown(inp.LEFT_MOUSE)).toEqual(false);
+        });
+
+        it('should say button that is not down is not down when other button is down', function() {
+          canvas.fire("mousedown", { which: 3 });
+          expect(inp.isDown(inp.RIGHT_MOUSE)).toEqual(true);
+          expect(inp.isDown(inp.LEFT_MOUSE)).toEqual(false);
+        });
+      });
+
+      describe('isPressed()', function() {
+        it('should say all mouse buttons not pressed when no events sent', function() {
+          expect(inp.isPressed(inp.LEFT_MOUSE)).toEqual(false);
+          expect(inp.isPressed(inp.RIGHT_MOUSE)).toEqual(false);
+        });
+
+        it('should say pressed button is pressed', function() {
+          canvas.fire("mousedown", { which: 1 });
+          expect(inp.isPressed(inp.LEFT_MOUSE)).toEqual(true);
+        });
+
+        it('should say pressed button is still pressed after mouseup if no update', function() {
+          canvas.fire("mousedown", { which: 1 });
+          expect(inp.isPressed(inp.LEFT_MOUSE)).toEqual(true);
+          canvas.fire("mouseup", { which: 1 });
+          expect(inp.isPressed(inp.LEFT_MOUSE)).toEqual(true);
+        });
+
+        it('should say pressed button is not pressed after mouseup if update', function() {
+          canvas.fire("mousedown", { which: 1 });
+          canvas.fire("mouseup", { which: 1 });
+          expect(inp.isPressed(inp.LEFT_MOUSE)).toEqual(true);
+          inp.update();
+          expect(inp.isPressed(inp.LEFT_MOUSE)).toEqual(false);
+        });
+
+        it('should say pressed button is not pressed in next tick', function() {
+          canvas.fire("mousedown", { which: 1 });
+          expect(inp.isPressed(inp.LEFT_MOUSE)).toEqual(true);
+          inp.update();
+          expect(inp.isPressed(inp.LEFT_MOUSE)).toEqual(false);
+        });
+
+        it('should say key is not pressed if get keyup with no preceding keydown', function() {
+          canvas.fire("mouseup", { which: 1 });
+          expect(inp.isPressed(inp.LEFT_MOUSE)).toEqual(false);
+        });
+      });
+
+      describe('_getMouseButton()', function() {
+        it('should throw if does not get event with .which or .button', function() {
+          expect(function() {
+            inp._buttonListener._getMouseButton();
+          }).toThrow("Cannot read property 'which' of undefined");
+
+          expect(function() {
+            inp._buttonListener._getMouseButton({});
+          }).toThrow("Cannot judge button pressed on passed mouse button event");
+
+          inp._buttonListener._getMouseButton({ which: 1 });
+          inp._buttonListener._getMouseButton({ button: 1 });
+        });
+
+        it('should throw for all event which and button values not covered', function() {
+          [{ which: 0 }, { which: 2 }, { which:4 }, { button: 3 }].forEach(function(e) {
+            expect(function() {
+              inp._buttonListener._getMouseButton(e);
+            }).toThrow("Cannot judge button pressed on passed mouse button event");
+          });
+        });
+
+        it('should return left button for button:0', function() {
+          expect(inp._buttonListener._getMouseButton({ button: 0 })).toEqual(inp.LEFT_MOUSE);
+        });
+
+        it('should return left button for which:1', function() {
+          expect(inp._buttonListener._getMouseButton({ which: 1 })).toEqual(inp.LEFT_MOUSE);
+        });
+
+        it('should return left button for button:1', function() {
+          expect(inp._buttonListener._getMouseButton({ button: 1 })).toEqual(inp.LEFT_MOUSE);
+        });
+
+        it('should return right button for which:3', function() {
+          expect(inp._buttonListener._getMouseButton({ which: 3 })).toEqual(inp.RIGHT_MOUSE);
+        });
+
+        it('should return right button for button:2', function() {
+          expect(inp._buttonListener._getMouseButton({ button: 2 })).toEqual(inp.RIGHT_MOUSE);
+        });
+      });
+    });
+  });
 });
