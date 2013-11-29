@@ -24,14 +24,14 @@ describe('inputter', function() {
       });
 
       it('should use window if autoFocus set to false', function() {
-        var canvas = {};
+        var canvas = { addEventListener: function() {} }; // swallow incidental binds
         var inp = new Inputter(null, canvas, true);
         window.fire("keydown", { keyCode: 51 });
         expect(inp.isDown(51)).toEqual(true);
       });
 
       it('should ignore presses on suppressed keys', function() {
-        var canvas = {};
+        var canvas = { addEventListener: function() {} }; // swallow incidental binds
         var inp = new Inputter(null, canvas, true);
 
         var run = false;

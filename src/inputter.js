@@ -1,9 +1,9 @@
 ;(function(exports) {
   var Inputter = function(coquette, canvas, autoFocus) {
-    var receiver = getInputReceiverElement(window, canvas, autoFocus);
-    connectInputReceiverToInput(receiver, window, autoFocus);
+    var keyboardReceiver = autoFocus === false ? canvas : window;
+    connectReceiverToKeyboard(keyboardReceiver, window, autoFocus);
 
-    this._buttonListener = new ButtonListener(receiver);
+    this._buttonListener = new ButtonListener(canvas, keyboardReceiver);
   };
 
   Inputter.prototype = {
@@ -107,16 +107,16 @@
     SINGLE_QUOTE: 222
   };
 
-  var ButtonListener = function(element) {
+  var ButtonListener = function(canvas, keyboardReceiver) {
     var self = this;
     this._buttonDownState = {};
     this._buttonPressedState = {};
 
-    element.addEventListener('keydown', function(e) {
+    keyboardReceiver.addEventListener('keydown', function(e) {
       self._down(e.keyCode);
     }, false);
 
-    element.addEventListener('keyup', function(e) {
+    keyboardReceiver.addEventListener('keyup', function(e) {
       self._up(e.keyCode);
     }, false);
 
@@ -173,18 +173,9 @@
     }
   };
 
-  var getInputReceiverElement = function(window, canvas, autoFocus) {
-    var receiver = window;
+  var connectReceiverToKeyboard = function(keyboardReceiver, window, autoFocus) {
     if (autoFocus === false) {
-      receiver = canvas;
-    }
-
-    return receiver;
-  };
-
-  var connectInputReceiverToInput = function(receiver, window, autoFocus) {
-    if (autoFocus === false) {
-      receiver.contentEditable = true; // lets canvas get focus and get key events
+      keyboardReceiver.contentEditable = true; // lets canvas get focus and get key events
     } else {
       var suppressedKeys = [
         Inputter.prototype.SPACE,
@@ -205,5 +196,6 @@
       }, false);
     }
   };
+
   exports.Inputter = Inputter;
 })(typeof exports === 'undefined' ? this.Coquette : exports);
