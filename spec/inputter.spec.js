@@ -63,86 +63,88 @@ describe('inputter', function() {
     });
   });
 
-  describe('isDown()', function() {
-    it('should say down key is down', function() {
-      var canvas = new InputReceiver();
-      var inp = new Inputter(null, canvas, false);
-      canvas.fire("keydown", { keyCode: 51 });
-      expect(inp.isDown(51)).toEqual(true);
+  describe('keyboard input', function() {
+    describe('isDown()', function() {
+      it('should say down key is down', function() {
+        var canvas = new InputReceiver();
+        var inp = new Inputter(null, canvas, false);
+        canvas.fire("keydown", { keyCode: 51 });
+        expect(inp.isDown(51)).toEqual(true);
+      });
+
+      it('should say never down key is not down', function() {
+        var canvas = new InputReceiver();
+        var inp = new Inputter(null, canvas, false);
+        expect(inp.isDown(51)).toEqual(false);
+      });
+
+      it('should say key that has gone down then up not down', function() {
+        var canvas = new InputReceiver();
+        var inp = new Inputter(null, canvas, false);
+        canvas.fire("keydown", { keyCode: 51 });
+        expect(inp.isDown(51)).toEqual(true);
+        canvas.fire("keyup", { keyCode: 51 });
+        expect(inp.isDown(51)).toEqual(false);
+      });
+
+      it('should say key that is not down is not down when other key is down', function() {
+        var canvas = new InputReceiver();
+        var inp = new Inputter(null, canvas, false);
+        canvas.fire("keydown", { keyCode: 51 });
+        expect(inp.isDown(52)).toEqual(false);
+      });
     });
 
-    it('should say never down key is not down', function() {
-      var canvas = new InputReceiver();
-      var inp = new Inputter(null, canvas, false);
-      expect(inp.isDown(51)).toEqual(false);
-    });
+    describe('isPressed()', function() {
+      it('should say pressed key is pressed', function() {
+        var canvas = new InputReceiver();
+        var inp = new Inputter(null, canvas, false);
+        canvas.fire("keydown", { keyCode: 51 });
+        expect(inp.isPressed(51)).toEqual(true);
+      });
 
-    it('should say key that has gone down then up not down', function() {
-      var canvas = new InputReceiver();
-      var inp = new Inputter(null, canvas, false);
-      canvas.fire("keydown", { keyCode: 51 });
-      expect(inp.isDown(51)).toEqual(true);
-      canvas.fire("keyup", { keyCode: 51 });
-      expect(inp.isDown(51)).toEqual(false);
-    });
+      it('should say pressed key is still pressed after keyup if no update', function() {
+        var canvas = new InputReceiver();
+        var inp = new Inputter(null, canvas, false);
+        canvas.fire("keydown", { keyCode: 51 });
+        expect(inp.isPressed(51)).toEqual(true);
+        canvas.fire("keyup", { keyCode: 51 });
+        expect(inp.isPressed(51)).toEqual(true);
+      });
 
-    it('should say key that is not down is not down when other key is down', function() {
-      var canvas = new InputReceiver();
-      var inp = new Inputter(null, canvas, false);
-      canvas.fire("keydown", { keyCode: 51 });
-      expect(inp.isDown(52)).toEqual(false);
-    });
-  });
+      it('should say pressed key is not pressed after keyup if update', function() {
+        var canvas = new InputReceiver();
+        var inp = new Inputter(null, canvas, false);
+        canvas.fire("keydown", { keyCode: 51 });
+        canvas.fire("keyup", { keyCode: 51 });
+        expect(inp.isPressed(51)).toEqual(true);
+        inp.update();
+        expect(inp.isPressed(51)).toEqual(false);
+      });
 
-  describe('isPressed()', function() {
-    it('should say pressed key is pressed', function() {
-      var canvas = new InputReceiver();
-      var inp = new Inputter(null, canvas, false);
-      canvas.fire("keydown", { keyCode: 51 });
-      expect(inp.isPressed(51)).toEqual(true);
-    });
+      it('should say pressed key is not pressed in next tick', function() {
+        var canvas = new InputReceiver();
+        var inp = new Inputter(null, canvas, false);
+        canvas.fire("keydown", { keyCode: 51 });
+        expect(inp.isPressed(51)).toEqual(true);
+        inp.update();
+        expect(inp.isPressed(51)).toEqual(false);
+      });
 
-    it('should say pressed key is still pressed after keyup if no update', function() {
-      var canvas = new InputReceiver();
-      var inp = new Inputter(null, canvas, false);
-      canvas.fire("keydown", { keyCode: 51 });
-      expect(inp.isPressed(51)).toEqual(true);
-      canvas.fire("keyup", { keyCode: 51 });
-      expect(inp.isPressed(51)).toEqual(true);
-    });
+      it('should say key is not pressed if get keyup with no preceding keydown', function() {
+        var canvas = new InputReceiver();
+        var inp = new Inputter(null, canvas, false);
+        canvas.fire("keyup", { keyCode: 51 });
+        expect(inp.isPressed(51)).toEqual(false);
+      });
 
-    it('should say pressed key is not pressed after keyup if update', function() {
-      var canvas = new InputReceiver();
-      var inp = new Inputter(null, canvas, false);
-      canvas.fire("keydown", { keyCode: 51 });
-      canvas.fire("keyup", { keyCode: 51 });
-      expect(inp.isPressed(51)).toEqual(true);
-      inp.update();
-      expect(inp.isPressed(51)).toEqual(false);
-    });
-
-    it('should say pressed key is not pressed in next tick', function() {
-      var canvas = new InputReceiver();
-      var inp = new Inputter(null, canvas, false);
-      canvas.fire("keydown", { keyCode: 51 });
-      expect(inp.isPressed(51)).toEqual(true);
-      inp.update();
-      expect(inp.isPressed(51)).toEqual(false);
-    });
-
-    it('should say key is not pressed if get keyup with no preceding keydown', function() {
-      var canvas = new InputReceiver();
-      var inp = new Inputter(null, canvas, false);
-      canvas.fire("keyup", { keyCode: 51 });
-      expect(inp.isPressed(51)).toEqual(false);
-    });
-
-    it('should say key not pressed is not pressed if other key is pressed', function() {
-      var canvas = new InputReceiver();
-      var inp = new Inputter(null, canvas, false);
-      canvas.fire("keydown", { keyCode: 51 });
-      expect(inp.isPressed(51)).toEqual(true);
-      expect(inp.isPressed(52)).toEqual(false);
+      it('should say key not pressed is not pressed if other key is pressed', function() {
+        var canvas = new InputReceiver();
+        var inp = new Inputter(null, canvas, false);
+        canvas.fire("keydown", { keyCode: 51 });
+        expect(inp.isPressed(51)).toEqual(true);
+        expect(inp.isPressed(52)).toEqual(false);
+      });
     });
   });
 
