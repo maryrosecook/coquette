@@ -16,54 +16,91 @@ var InputReceiver = function() {
   };
 };
 
+// very simple - just has basic stuff
+var mockMouseMoveEvent = function() {
+  return { pageX: 10, pageY: 10 };
+};
+
 describe('inputter', function() {
   describe('input source', function() {
-    describe('window', function() {
-      beforeEach(function() {
-        window = new InputReceiver();
-      });
-
-      afterEach(function() {
-        window = undefined; // undo global effect as best as possible
-      });
-
-      it('should use window if autoFocus set to false', function() {
-        var canvas = { addEventListener: function() {} }; // swallow incidental binds
-        var inp = new Inputter(null, canvas, true);
-        window.fire("keydown", { keyCode: 51 });
-        expect(inp.isDown(51)).toEqual(true);
-      });
-
-      it('should ignore presses on suppressed keys', function() {
-        var canvas = { addEventListener: function() {} }; // swallow incidental binds
-        var inp = new Inputter(null, canvas, true);
-
-        var run = false;
-        expect(run).toEqual(false);
-        window.fire("keydown", {
-          keyCode: 32, // space (suppressed key)
-          preventDefault: function() {
-            run = true;
-          }
+    describe('autoFocus and keyboard events', function() {
+      describe('window', function() {
+        beforeEach(function() {
+          window = new InputReceiver();
         });
 
-        expect(run).toEqual(true);
-      })
-    });
+        afterEach(function() {
+          window = undefined; // undo global effect as best as possible
+        });
 
-    describe('canvas', function() {
-      it('should use canvas if autoFocus set to true', function() {
-        var receiver = new InputReceiver();
-        var inp = new Inputter(null, receiver, false);
-        receiver.fire("keydown", { keyCode: 51 });
-        expect(inp.isDown(51)).toEqual(true);
+        it('should use window if autoFocus set to false', function() {
+          var canvas = { addEventListener: function() {} }; // swallow incidental binds
+          var inp = new Inputter(null, canvas, true);
+          window.fire("keydown", { keyCode: 51 });
+          expect(inp.isDown(51)).toEqual(true);
+        });
+
+        it('should ignore presses on suppressed keys', function() {
+          var canvas = { addEventListener: function() {} }; // swallow incidental binds
+          var inp = new Inputter(null, canvas, true);
+
+          var run = false;
+          expect(run).toEqual(false);
+          window.fire("keydown", {
+            keyCode: 32, // space (suppressed key)
+            preventDefault: function() {
+              run = true;
+            }
+          });
+
+          expect(run).toEqual(true);
+        })
       });
 
-      it('should set contentEditable to true', function() {
+      describe('canvas', function() {
+        it('should use canvas if autoFocus set to true', function() {
+          var receiver = new InputReceiver();
+          var inp = new Inputter(null, receiver, false);
+          receiver.fire("keydown", { keyCode: 51 });
+          expect(inp.isDown(51)).toEqual(true);
+        });
+
+        it('should set contentEditable to true', function() {
+          var canvas = new InputReceiver();
+          var inp = new Inputter(null, canvas, false);
+          expect(canvas.contentEditable).toEqual(true);
+        })
+      });
+    });
+
+    describe('mouse button events', function() {
+      it('should not respond to mouse button events sent to window', function() {
         var canvas = new InputReceiver();
         var inp = new Inputter(null, canvas, false);
-        expect(canvas.contentEditable).toEqual(true);
-      })
+        canvas.fire("mousedown", { which: 1 });
+        expect(inp.isDown(inp.LEFT_MOUSE)).toEqual(true);
+
+        window = new InputReceiver();
+        inp = new Inputter(null, canvas, false);
+        window.fire("mousedown", { which: 1 });
+        expect(inp.isDown(inp.LEFT_MOUSE)).toEqual(false);
+      });
+    });
+
+    describe('mouse move event', function() {
+      it('should not respond to mouse move events sent to window', function() {
+        var canvas = new InputReceiver();
+        var inp = new Inputter(null, canvas, false);
+        var called = false;
+        inp.bindMouseMove(function(e) { called = true; });
+        canvas.fire("mousemove", mockMouseMoveEvent());
+        expect(called).toEqual(true);
+
+        window = new InputReceiver();
+        inp = new Inputter(null, canvas, false);
+        inp.bindMouseMove(function(e) { throw "Should not happen"; });
+        window.fire("mousemove", mockMouseMoveEvent());
+      });
     });
   });
 
@@ -250,6 +287,87 @@ describe('inputter', function() {
 
         it('should return right button for button:2', function() {
           expect(inp._buttonListener._getMouseButton({ button: 2 })).toEqual(inp.RIGHT_MOUSE);
+        });
+      });
+    });
+
+    describe('moving', function() {
+      var canvas, inp;
+      beforeEach(function() {
+        canvas = new InputReceiver();
+        inp = new Inputter(null, canvas, false);
+      });
+
+      describe('bindMouseMove()', function() {
+        it('should call fn bound to mouse move when mouse moves', function(done) {
+          inp.bindMouseMove(function() { done(); });
+          canvas.fire("mousemove", mockMouseMoveEvent());
+        });
+
+        it('should call all bound fns when mouse moves', function() {
+          var firstCalled = false;
+          var secondCalled = false;
+          inp.bindMouseMove(function() { firstCalled = true; });
+          inp.bindMouseMove(function() { secondCalled = true; });
+          canvas.fire("mousemove", mockMouseMoveEvent());
+          expect(firstCalled).toEqual(true);
+          expect(secondCalled).toEqual(true);
+        });
+
+        it('should return mouse positions relative to canvas', function(done) {
+          canvas.offsetLeft = 20;
+          canvas.offsetTop = 15;
+
+          // remake to recalc elementPosition: will be fine in real code
+          // cause canvas will be positioned
+          inp = new Inputter(null, canvas, false);
+
+          inp.bindMouseMove(function(e) {
+            expect(e).toEqual({ x: 30, y: 40 });
+            done();
+          });
+          canvas.fire("mousemove", { pageX: 50, pageY: 55 });
+        });
+      });
+
+      describe('unbindMouseMove()', function() {
+        it('should unbind passed fn', function() {
+          var calls = 0;
+          var boundFn = function() {
+            calls++;
+          };
+
+          inp.bindMouseMove(boundFn);
+          canvas.fire("mousemove", mockMouseMoveEvent());
+          inp.unbindMouseMove(boundFn);
+          canvas.fire("mousemove", mockMouseMoveEvent());
+          expect(calls).toEqual(1);
+        });
+
+        it('should unbind passed fn', function(done) {
+          var fnThatWillGetUnbound = function() {};
+          inp.bindMouseMove(fnThatWillGetUnbound);
+          inp.bindMouseMove(function() { done(); });
+          inp.unbindMouseMove(fnThatWillGetUnbound);
+          canvas.fire("mousemove", mockMouseMoveEvent());
+        });
+
+        it('should throw if given fn that was not bound', function() {
+          expect(function() {
+            inp.unbindMouseMove(function() { });
+          }).toThrow("Function to unbind from mouse moves was never bound");
+        });
+      });
+
+      describe('_getMousePosition()', function() {
+        it('should return pageX and pageY when they are on event', function() {
+          expect(inp._mouseMoveListener._getMousePosition({ pageX: 10, pageY: 20 }))
+            .toEqual({ x: 10, y: 20 });
+        });
+
+        it('should return clientX and clientY when they are on event', function() {
+          expect(inp._mouseMoveListener._getMousePosition({ clientX: 10, clientY: 20 }))
+            .toEqual({ x: 10, y: 20 });
         });
       });
     });
