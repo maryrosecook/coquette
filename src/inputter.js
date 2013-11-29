@@ -4,6 +4,7 @@
     connectReceiverToKeyboard(keyboardReceiver, window, autoFocus);
 
     this._buttonListener = new ButtonListener(canvas, keyboardReceiver);
+    this._mouseMoveListener = new MouseMoveListener(canvas);
   };
 
   Inputter.prototype = {
@@ -19,6 +20,16 @@
     // Returns true if passed button just gone down. true once per keypress.
     isPressed: function(button) {
       return this._buttonListener.isPressed(button);
+    },
+
+    // Returns true if passed button currently down
+    bindMouseMove: function(fn) {
+      return this._mouseMoveListener.bind(fn);
+    },
+
+    // Stops calling passed fn on mouse move
+    unbindMouseMove: function(fn) {
+      return this._mouseMoveListener.unbind(fn);
     },
 
     LEFT_MOUSE: "LEFT_MOUSE",
@@ -170,6 +181,48 @@
       }
 
       throw "Cannot judge button pressed on passed mouse button event";
+    }
+  };
+
+  var MouseMoveListener = function(canvas) {
+    this._bindings = [];
+
+    var elementPosition = { x: canvas.offsetLeft, y: canvas.offsetTop };
+
+    var self = this;
+    canvas.addEventListener('mousemove', function(e) {
+      var position = self._getMousePosition(e);
+      for (var i = 0; i < self._bindings.length; i++) {
+        self._bindings[i]({
+          x: position.x - elementPosition.x,
+          y: position.y - elementPosition.y
+        });
+      }
+    }, false);
+  };
+
+  MouseMoveListener.prototype = {
+    bind: function(fn) {
+      this._bindings.push(fn);
+    },
+
+    unbind: function(fn) {
+      for (var i = 0; i < this._bindings.length; i++) {
+        if (this._bindings[i] === fn) {
+          this._bindings.splice(i, 1);
+          return;
+        }
+      }
+
+      throw "Function to unbind from mouse moves was never bound";
+    },
+
+    _getMousePosition: function(e) {
+	    if (e.pageX) 	{
+        return { x: e.pageX, y: e.pageY };
+	    } else if (e.clientX) {
+        return { x: e.clientX, y: e.clientY };
+      }
     }
   };
 
