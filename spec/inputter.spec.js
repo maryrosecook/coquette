@@ -20,7 +20,11 @@ describe('inputter', function() {
   describe('input source', function() {
     describe('window', function() {
       beforeEach(function() {
-        window = new InputReceiver()
+        window = new InputReceiver();
+      });
+
+      afterEach(function() {
+        window = undefined; // undo global effect as best as possible
       });
 
       it('should use window if autoFocus set to false', function() {
