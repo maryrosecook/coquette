@@ -5,7 +5,7 @@
     coq.entities.create(Person, { pos:{ x:250, y:40 }, color:"#099" }); // paramour
     coq.entities.create(Person, { pos:{ x:256, y:110 }, color:"#f07", // player
       update: function() {
-        if (coq.inputter.down(coq.inputter.UP_ARROW)) {
+        if (coq.inputter.isDown(coq.inputter.UP_ARROW)) {
           this.pos.y -= 0.4;
         }
       },

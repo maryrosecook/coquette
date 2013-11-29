@@ -95,15 +95,15 @@
     },
 
     handleKeyboard: function() {
-      if(this.game.coquette.inputter.down(this.game.coquette.inputter.LEFT_ARROW)) {
+      if(this.game.coquette.inputter.isDown(this.game.coquette.inputter.LEFT_ARROW)) {
         this.move("left");
       }
 
-      if(this.game.coquette.inputter.down(this.game.coquette.inputter.RIGHT_ARROW)) {
+      if(this.game.coquette.inputter.isDown(this.game.coquette.inputter.RIGHT_ARROW)) {
         this.move("right");
       }
 
-      if(this.game.coquette.inputter.pressed(this.game.coquette.inputter.SPACE)) {
+      if(this.game.coquette.inputter.isPressed(this.game.coquette.inputter.SPACE)) {
         this.shootBullet();
       }
     },
