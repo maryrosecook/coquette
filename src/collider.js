@@ -137,6 +137,10 @@
     return obj.angle !== undefined && obj.angle !== 0;
   };
 
+  var getAngle = function(obj) {
+    return obj.angle === undefined ? 0 : obj.angle;
+  };
+
   var Maths = {
     circlesIntersecting: function(obj1, obj2) {
       return Maths.distance(obj1.center, obj2.center) <
@@ -229,8 +233,8 @@
     },
 
     pointInsideRectangle: function(point, obj) {
-      var c = math.cos(-obj.angle * Math.PI / 180);
-      var s = math.sin(-obj.angle * Math.PI / 180);
+      var c = Math.cos(-getAngle(obj) * Maths.RADIANS_TO_DEGREES);
+      var s = Math.sin(-getAngle(obj) * Maths.RADIANS_TO_DEGREES);
 
       var rotatedX = obj.center.x + c *
           (point.x - obj.center.x) - s * (point.y - obj.center.y);
