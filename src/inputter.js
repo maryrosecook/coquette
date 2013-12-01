@@ -22,6 +22,10 @@
       return this._buttonListener.isPressed(button);
     },
 
+    getMousePosition: function() {
+      return this._mouseMoveListener.getMousePosition();
+    },
+
     // Returns true if passed button currently down
     bindMouseMove: function(fn) {
       return this._mouseMoveListener.bind(fn);
@@ -186,17 +190,22 @@
 
   var MouseMoveListener = function(canvas) {
     this._bindings = [];
+    this._mousePosition;
+    var self = this;
 
     var elementPosition = { x: canvas.offsetLeft, y: canvas.offsetTop };
 
-    var self = this;
     canvas.addEventListener('mousemove', function(e) {
-      var position = self._getMousePosition(e);
+      var absoluteMousePosition = self._getAbsoluteMousePosition(e);
+      self._mousePosition = {
+        x: absoluteMousePosition.x - elementPosition.x,
+        y: absoluteMousePosition.y - elementPosition.y
+      };
+    }, false);
+
+    canvas.addEventListener('mousemove', function(e) {
       for (var i = 0; i < self._bindings.length; i++) {
-        self._bindings[i]({
-          x: position.x - elementPosition.x,
-          y: position.y - elementPosition.y
-        });
+        self._bindings[i](self.getMousePosition());
       }
     }, false);
   };
@@ -217,7 +226,11 @@
       throw "Function to unbind from mouse moves was never bound";
     },
 
-    _getMousePosition: function(e) {
+    getMousePosition: function() {
+      return this._mousePosition;
+    },
+
+    _getAbsoluteMousePosition: function(e) {
 	    if (e.pageX) 	{
         return { x: e.pageX, y: e.pageY };
 	    } else if (e.clientX) {

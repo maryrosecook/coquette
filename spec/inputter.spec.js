@@ -359,14 +359,14 @@ describe('inputter', function() {
         });
       });
 
-      describe('_getMousePosition()', function() {
+      describe('_getAbsoluteMousePosition()', function() {
         it('should return pageX and pageY when they are on event', function() {
-          expect(inp._mouseMoveListener._getMousePosition({ pageX: 10, pageY: 20 }))
+          expect(inp._mouseMoveListener._getAbsoluteMousePosition({ pageX: 10, pageY: 20 }))
             .toEqual({ x: 10, y: 20 });
         });
 
         it('should return clientX and clientY when they are on event', function() {
-          expect(inp._mouseMoveListener._getMousePosition({ clientX: 10, clientY: 20 }))
+          expect(inp._mouseMoveListener._getAbsoluteMousePosition({ clientX: 10, clientY: 20 }))
             .toEqual({ x: 10, y: 20 });
         });
       });
