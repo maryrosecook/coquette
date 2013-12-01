@@ -363,7 +363,7 @@
       ];
     },
 
-    RADIAN_TO_DEGREES: 0.01745
+    RADIANS_TO_DEGREES: 0.01745
   };
 
   exports.Collider = Collider;
