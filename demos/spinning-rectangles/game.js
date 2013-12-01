@@ -4,33 +4,19 @@
   var SpinningRectanglesGame = function() {
     var autoFocus = false
     this.c = new Coquette(this, "canvas", 500, 500 / GOLDEN_RATIO, "white", autoFocus);
+    this.dragger = new Dragger(this.c); // controls dragging of shapes with mouse
   };
 
   SpinningRectanglesGame.prototype = {
     update: function() {
-      // if not enough shapes, create another one
-      // if (this.c.entities.all().length < 7) {
-      //   var Constructor = Math.random() > 0.5 ? Circle : Rectangle;
-      //   var viewSize = this.c.renderer.getViewSize();
-      //   this.c.entities.create(Constructor, { // make one
-      //     center: { x: Math.random() * viewSize.x, y: Math.random() * viewSize.y }
-      //   });
-      // }
-
-      if (this.c.entities.all(Rectangle).length < 6) {
+      this.dragger.update();
+      if (this.c.entities.all().length < 10) {
         var viewSize = this.c.renderer.getViewSize();
-        this.c.entities.create(Rectangle, { // make one
+        var Shape = Math.random() > 0.5 ? Rectangle : Circle;
+        this.c.entities.create(Shape, { // make one
           center: { x: Math.random() * viewSize.x, y: Math.random() * viewSize.y }
         });
       }
-
-      if (this.c.entities.all(Circle).length < 6) {
-        var viewSize = this.c.renderer.getViewSize();
-        this.c.entities.create(Circle, { // make one
-          center: { x: Math.random() * viewSize.x, y: Math.random() * viewSize.y }
-        });
-      }
-
 
       // destroy entities that are off screen
       var entities = this.c.entities.all();
@@ -40,50 +26,18 @@
         }
       }
     },
-
-    draw: function(ctx) {
-      var circle = this.c.entities.all(Circle)[0];
-      var rectangle = this.c.entities.all(Rectangle)[0];
-      if (circle && rectangle) {
-        // var rectangleToCircleVector = Coquette.Collider.Maths.vectorTo(rectangle.center,
-        //                                                                circle.center);
-        // ctx.strokeStyle = "red";
-        // ctx.beginPath();
-        // ctx.moveTo(rectangle.center.x, rectangle.center.y);
-        // ctx.lineTo(rectangle.center.x + rectangleToCircleVector.x,
-        //            rectangle.center.y + rectangleToCircleVector.y)
-        // ctx.closePath();
-        // ctx.stroke();
-
-        var m = Coquette.Collider.Maths;
-        var rectangleToCircleVector = m.vectorTo(rectangle.center, circle.center);
-        var rectangleToCircleVectorNormalised = m.unitVector(rectangleToCircleVector);
-        var rectangleCorners = m.sat.rectangleCorners(rectangle);
-        for (var i = 0; i < 3; i++) {
-          var v = m.vectorTo(rectangleCorners[i], rectangle.center);
-          // var currentMax = m.dotProduct(v, rectangleToCircleVectorNormalised);
-          ctx.strokeStyle = "red";
-          ctx.beginPath();
-          ctx.moveTo(rectangle.center.x, rectangle.center.y);
-          ctx.lineTo(rectangle.center.x + v.x,
-                     rectangle.center.y + v.y)
-          ctx.closePath();
-          ctx.stroke();
-        }
-      }
-    }
   };
 
   var Rectangle = function(game, settings) {
     this.c = game.c;
-    this.angle = 0;
+    this.angle = Math.random() * 360;
     this.center = settings.center;
     this.size = { x: 0, y: 0 }; // slowly grows
 
     this.vec = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
     this.turnSpeed = 2 * Math.random() - 1;
 
-    this.colliderCount = 0; // number of other boxes currently touching this rectangle
+    mixin(countCurrentColliders, this);
   };
 
   Rectangle.prototype = {
@@ -108,20 +62,15 @@
 
 
       } else {
-        ctx.fillStyle = "black";
-        ctx.fillRect(this.center.x - this.size.x / 2, this.center.y - this.size.y / 2,
-                     this.size.x, this.size.y);
+        ctx.strokeStyle = "#aaa";
+        ctx.strokeRect(this.center.x - this.size.x / 2, this.center.y - this.size.y / 2,
+                       this.size.x, this.size.y);
       }
     },
 
-    collision: function(_, type) {
-      if (type === this.c.collider.INITIAL) {
-        this.colliderCount++;
-      }
-    },
-
-    uncollision: function() {
-      this.colliderCount--;
+    startDrag: function() {
+      this.vec = { x: 0, y: 0 };
+      this.turnSpeed = 0;
     }
   };
 
@@ -133,7 +82,7 @@
 
     this.vec = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
 
-    this.colliderCount = 0; // number of other boxes currently touching this rectangle
+    mixin(countCurrentColliders, this);
   };
 
   Circle.prototype = {
@@ -153,16 +102,89 @@
       ctx.arc(this.center.x, this.center.y, this.size.x / 2, 0, Math.PI * 2, true);
       ctx.closePath();
 
-      // if (this.colliderCount > 0) {
+      if (this.colliderCount > 0) {
         ctx.strokeStyle = "black";
         ctx.stroke();
-      // } else {
-      //   ctx.fillStyle = "black";
-      //   ctx.fill();
-      // }
-
-
+      } else {
+        ctx.strokeStyle = "#aaa";
+        ctx.stroke();
+      }
     },
+
+    startDrag: function() {
+      this.vec = { x: 0, y: 0 };
+    }
+  };
+
+  var Dragger = function(c) {
+    this.c = c;
+    this._currentDrag;
+    var self = this;
+
+    c.inputter.bindMouseMove(function(e) {
+      if (self.isDragging()) {
+        self._currentDrag.target.center = {
+          x: e.x + self._currentDrag.centerOffset.x,
+          y: e.y + self._currentDrag.centerOffset.y
+        };
+      }
+    });
+  };
+
+  Dragger.prototype = {
+    update: function() {
+      if (this.c.inputter.isDown(this.c.inputter.LEFT_MOUSE)) {
+        if (!this.isDragging()) {
+          var mousePosition = this.c.inputter.getMousePosition();
+          var target = this._getTarget(this.c.entities.all(), mousePosition)
+          if (target !== undefined) {
+            this._startDrag(target, mousePosition);
+          }
+        }
+      } else {
+        this._stopDrag();
+      }
+    },
+
+    isDragging: function() {
+      return this._currentDrag !== undefined;
+    },
+
+    _getTarget: function(targets, e) {
+      for (var i = 0; i < targets.length; i++) {
+        if (Coquette.Collider.Maths.pointInsideObj(e, targets[i])) {
+          return targets[i];
+        }
+      }
+    },
+
+    _startDrag: function(target, e) {
+      this._currentDrag = {
+        target: target,
+        centerOffset: {
+          x: target.center.x - e.x,
+          y: target.center.y - e.y
+        }
+      };
+
+      target.startDrag();
+    },
+
+    _stopDrag: function() {
+      if (this.isDragging()) {
+        this._currentDrag = undefined;
+      }
+    }
+  };
+
+  var mixin = function(from, to) {
+    for (var i in from) {
+      to[i] = from[i];
+    }
+  };
+
+  var countCurrentColliders = {
+    colliderCount: 0, // number of other shapes currently touching this shape
 
     collision: function(_, type) {
       if (type === this.c.collider.INITIAL) {
@@ -173,7 +195,7 @@
     uncollision: function() {
       this.colliderCount--;
     }
-  }
+  };
 
   exports.SpinningRectanglesGame = SpinningRectanglesGame;
 })(this);
