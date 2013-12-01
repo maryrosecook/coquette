@@ -208,20 +208,6 @@ describe('collider', function() {
       });
     });
 
-    describe('isLineIntersectingCircle', function() {
-      it('should return false when circle and line intersect', function() {
-        var obj = mockObj(10, 10, 10, 10);
-        var intersecting = Maths.isLineIntersectingCircle(obj, { x:1, y:1 }, { x:20, y:20 });
-        expect(intersecting).toEqual(true);
-      });
-
-      it('should return false when circle and line do not intersect', function() {
-        var obj = mockObj(10, 10, 10, 10);
-        var intersecting = Maths.isLineIntersectingCircle(obj, { x:1, y:1 }, { x:1, y:20 });
-        expect(intersecting).toEqual(false);
-      });
-    });
-
     describe('circleAndRectangleIntersecting', function() {
       it('should return true when centres align', function() {
         var circle = mockObj(12, 12, 10, 10);
