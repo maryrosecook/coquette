@@ -200,7 +200,7 @@ describe('collider', function() {
     describe('rectangleCorners', function() {
       it('should get corners of rect', function() {
         var obj = mockObj(10, 10, 10, 10);
-        var corners = Maths.sat.rectangleCorners(obj);
+        var corners = Maths.rectangleCorners(obj);
         expect(corners[0]).toEqual({ x:5, y:5 });
         expect(corners[1]).toEqual({ x:15, y:5 });
         expect(corners[2]).toEqual({ x:15, y:15 });
