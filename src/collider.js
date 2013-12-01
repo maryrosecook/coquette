@@ -205,27 +205,27 @@
     },
 
     rotatedRectanglesIntersecting: function(obj1, obj2) {
-      var obj1Normals = this.sat.rectanglePerpendicularNormals(obj1);
-      var obj2Normals = this.sat.rectanglePerpendicularNormals(obj2);
+      var obj1Normals = this.rectanglePerpendicularNormals(obj1);
+      var obj2Normals = this.rectanglePerpendicularNormals(obj2);
 
-      var obj1Corners = this.sat.rectangleCorners(obj1);
-      var obj2Corners = this.sat.rectangleCorners(obj2);
+      var obj1Corners = this.rectangleCorners(obj1);
+      var obj2Corners = this.rectangleCorners(obj2);
 
-      if (this.sat.projectionsSeparate(
-        this.sat.getMinMaxProjection(obj1Corners, obj1Normals[1]),
-        this.sat.getMinMaxProjection(obj2Corners, obj1Normals[1]))) {
+      if (this.projectionsSeparate(
+        this.getMinMaxProjection(obj1Corners, obj1Normals[1]),
+        this.getMinMaxProjection(obj2Corners, obj1Normals[1]))) {
         return false;
-      } else if (this.sat.projectionsSeparate(
-        this.sat.getMinMaxProjection(obj1Corners, obj1Normals[0]),
-        this.sat.getMinMaxProjection(obj2Corners, obj1Normals[0]))) {
+      } else if (this.projectionsSeparate(
+        this.getMinMaxProjection(obj1Corners, obj1Normals[0]),
+        this.getMinMaxProjection(obj2Corners, obj1Normals[0]))) {
         return false;
-      } else if (this.sat.projectionsSeparate(
-        this.sat.getMinMaxProjection(obj1Corners, obj2Normals[1]),
-        this.sat.getMinMaxProjection(obj2Corners, obj2Normals[1]))) {
+      } else if (this.projectionsSeparate(
+        this.getMinMaxProjection(obj1Corners, obj2Normals[1]),
+        this.getMinMaxProjection(obj2Corners, obj2Normals[1]))) {
         return false;
-      } else if (this.sat.projectionsSeparate(
-        this.sat.getMinMaxProjection(obj1Corners, obj2Normals[0]),
-        this.sat.getMinMaxProjection(obj2Corners, obj2Normals[0]))) {
+      } else if (this.projectionsSeparate(
+        this.getMinMaxProjection(obj1Corners, obj2Normals[0]),
+        this.getMinMaxProjection(obj2Corners, obj2Normals[0]))) {
         return false;
       } else {
         return true;
@@ -260,8 +260,6 @@
 
       return leftX <= rotatedX && rotatedX <= rightX &&
         topY <= rotatedY && rotatedY <= bottomY;
-    };
-
     },
 
     pointInsideCircle: function(point, obj) {
@@ -303,69 +301,66 @@
       };
     },
 
-    sat: {
-      projectionsSeparate: function(proj1, proj2) {
-        return proj1.max < proj2.min || proj2.max < proj1.min;
-      },
+    projectionsSeparate: function(proj1, proj2) {
+      return proj1.max < proj2.min || proj2.max < proj1.min;
+    },
 
-      getMinMaxProjection: function(objCorners, normal) {
-        var min = Maths.dotProduct(objCorners[0], normal);
-        var max = Maths.dotProduct(objCorners[0], normal);
+    getMinMaxProjection: function(objCorners, normal) {
+      var min = Maths.dotProduct(objCorners[0], normal);
+      var max = Maths.dotProduct(objCorners[0], normal);
 
-        for (var i = 1; i < objCorners.length; i++) {
-          var current = Maths.dotProduct(objCorners[i], normal);
-          if (min > current) {
-            min = current;
-          }
-
-          if (current > max) {
-            max = current;
-          }
+      for (var i = 1; i < objCorners.length; i++) {
+        var current = Maths.dotProduct(objCorners[i], normal);
+        if (min > current) {
+          min = current;
         }
 
-        return { min: min, max: max };
-      },
-
-      rectangleCorners: function(obj) {
-        var corners = [ // unrotated
-          { x:obj.center.x - obj.size.x / 2, y: obj.center.y - obj.size.y / 2 },
-          { x:obj.center.x + obj.size.x / 2, y: obj.center.y - obj.size.y / 2 },
-          { x:obj.center.x + obj.size.x / 2, y: obj.center.y + obj.size.y / 2 },
-          { x:obj.center.x - obj.size.x / 2, y: obj.center.y + obj.size.y / 2 }
-        ];
-
-        var angle = (obj.angle === undefined ? 0 : obj.angle) *
-          Maths.RADIAN_TO_DEGREES;
-
-			  for (var i = 0; i < corners.length; i++) {
-				  var xOffset = corners[i].x - obj.center.x;
-				  var yOffset = corners[i].y - obj.center.y;
-				  corners[i].x = obj.center.x +
-            xOffset * Math.cos(angle) - yOffset * Math.sin(angle);
-				  corners[i].y = obj.center.y +
-            xOffset * Math.sin(angle) + yOffset * Math.cos(angle);
-			  }
-
-        return corners;
-      },
-
-      rectangleSideVectors: function(obj) {
-        var corners = this.rectangleCorners(obj);
-        return [
-          { x: corners[0].x - corners[1].x, y: corners[0].y - corners[1].y },
-          { x: corners[1].x - corners[2].x, y: corners[1].y - corners[2].y },
-          { x: corners[2].x - corners[3].x, y: corners[2].y - corners[3].y },
-          { x: corners[3].x - corners[0].x, y: corners[3].y - corners[0].y }
-        ];
-      },
-
-      rectanglePerpendicularNormals: function(obj) {
-        var sides = this.rectangleSideVectors(obj);
-        return [
-          Maths.leftNormalizedNormal(sides[0]),
-          Maths.leftNormalizedNormal(sides[1])
-        ];
+        if (current > max) {
+          max = current;
+        }
       }
+
+      return { min: min, max: max };
+    },
+
+    rectangleCorners: function(obj) {
+      var corners = [ // unrotated
+        { x:obj.center.x - obj.size.x / 2, y: obj.center.y - obj.size.y / 2 },
+        { x:obj.center.x + obj.size.x / 2, y: obj.center.y - obj.size.y / 2 },
+        { x:obj.center.x + obj.size.x / 2, y: obj.center.y + obj.size.y / 2 },
+        { x:obj.center.x - obj.size.x / 2, y: obj.center.y + obj.size.y / 2 }
+      ];
+
+      var angle = getAngle(obj) * Maths.RADIANS_TO_DEGREES;
+
+			for (var i = 0; i < corners.length; i++) {
+				var xOffset = corners[i].x - obj.center.x;
+				var yOffset = corners[i].y - obj.center.y;
+				corners[i].x = obj.center.x +
+          xOffset * Math.cos(angle) - yOffset * Math.sin(angle);
+				corners[i].y = obj.center.y +
+          xOffset * Math.sin(angle) + yOffset * Math.cos(angle);
+			}
+
+      return corners;
+    },
+
+    rectangleSideVectors: function(obj) {
+      var corners = this.rectangleCorners(obj);
+      return [
+        { x: corners[0].x - corners[1].x, y: corners[0].y - corners[1].y },
+        { x: corners[1].x - corners[2].x, y: corners[1].y - corners[2].y },
+        { x: corners[2].x - corners[3].x, y: corners[2].y - corners[3].y },
+        { x: corners[3].x - corners[0].x, y: corners[3].y - corners[0].y }
+      ];
+    },
+
+    rectanglePerpendicularNormals: function(obj) {
+      var sides = this.rectangleSideVectors(obj);
+      return [
+        Maths.leftNormalizedNormal(sides[0]),
+        Maths.leftNormalizedNormal(sides[1])
+      ];
     },
 
     RADIAN_TO_DEGREES: 0.01745
