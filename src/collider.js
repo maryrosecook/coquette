@@ -156,27 +156,39 @@
     },
 
     circleAndRectangleIntersecting: function(circleObj, rectangleObj) {
-      var max = -Infinity;
-      var rectangleToCircleVector = this.vectorTo(rectangleObj.center, circleObj.center);
-      var rectangleToCircleVectorNormalised = this.unitVector(rectangleToCircleVector);
-      var rectangleToCircleMagnitude = this.magnitude(rectangleToCircleVector);
+      var rectangleObjAngleRad = -getAngle(rectangleObj) * Maths.RADIANS_TO_DEGREES;
 
-      var rectangleCorners = this.sat.rectangleCorners(rectangleObj);
-      for (var i = 0; i < rectangleCorners.length; i++) {
-        var currentMax = this.dotProduct(this.vectorTo(rectangleCorners[i],
-                                                      rectangleObj.center),
-                                         rectangleToCircleVectorNormalised);
+      var unrotatedCircleCenter = {
+        x: Math.cos(rectangleObjAngleRad) *
+          (circleObj.center.x - rectangleObj.center.x) -
+          Math.sin(rectangleObjAngleRad) *
+          (circleObj.center.y - rectangleObj.center.y) + rectangleObj.center.x,
+        y: Math.sin(rectangleObjAngleRad) *
+          (circleObj.center.x - rectangleObj.center.x) +
+          Math.cos(rectangleObjAngleRad) *
+          (circleObj.center.y - rectangleObj.center.y) + rectangleObj.center.y
+      };
 
-        if (max < currentMax) {
-          max = currentMax;
-        }
+      var closest = { x: 0, y: 0 };
+
+      if (unrotatedCircleCenter.x < rectangleObj.center.x - rectangleObj.size.x / 2) {
+        closest.x = rectangleObj.center.x - rectangleObj.size.x / 2;
+      } else if (unrotatedCircleCenter.x > rectangleObj.center.x + rectangleObj.size.x / 2) {
+        closest.x = rectangleObj.center.x + rectangleObj.size.x / 2;
+      } else {
+        closest.x = unrotatedCircleCenter.x;
       }
 
-      return !(rectangleToCircleMagnitude > 0 &&
-               rectangleToCircleMagnitude - max - circleObj.size.x / 2 > 0);
+      if (unrotatedCircleCenter.y < rectangleObj.center.y - rectangleObj.size.y / 2) {
+        closest.y = rectangleObj.center.y - rectangleObj.size.y / 2;
+      } else if (unrotatedCircleCenter.y > rectangleObj.center.y + rectangleObj.size.y / 2) {
+        closest.y = rectangleObj.center.y + rectangleObj.size.y / 2;
+      } else {
+        closest.y = unrotatedCircleCenter.y;
+      }
+
+      return this.distance(unrotatedCircleCenter, closest) < circleObj.size.x / 2;
     },
-
-
 
     unrotatedRectanglesIntersecting: function(obj1, obj2) {
       if(obj1.center.x + obj1.size.x / 2 < obj2.center.x - obj2.size.x / 2) {
