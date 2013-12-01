@@ -94,8 +94,8 @@
     },
 
     isIntersecting: function(obj1, obj2) {
-      var obj1BoundingBox = this.boundingBox(obj1);
-      var obj2BoundingBox = this.boundingBox(obj2);
+      var obj1BoundingBox = getBoundingBox(obj1);
+      var obj2BoundingBox = getBoundingBox(obj2);
 
       if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.RECTANGLE) {
         return Maths.rectanglesIntersecting(obj1, obj2);
@@ -115,6 +115,10 @@
 
     RECTANGLE: 0,
     CIRCLE: 1
+  };
+
+  var getBoundingBox = function(obj) {
+    return obj.boundingBox || Collider.prototype.RECTANGLE;
   };
 
   var notifyEntityOfCollision = function(entity, other, type) {
@@ -212,16 +216,12 @@
       }
     },
 
-    boundingBox: function(obj) {
-      return obj.boundingBox || this.RECTANGLE;
-    },
-
     pointInsideObj: function(point, obj) {
-      var objBoundingBox = this.boundingBox(obj);
+      var objBoundingBox = getBoundingBox(obj);
 
-      if (objBoundingBox === this.RECTANGLE) {
+      if (objBoundingBox === Collider.prototype.RECTANGLE) {
         return this.pointInsideRectangle(point, obj);
-      } else if (objBoundingBox === this.CIRCLE) {
+      } else if (objBoundingBox === Collider.prototype.CIRCLE) {
         return this.pointInsideCircle(point, obj);
       } else {
         throw "Tried to see if point inside object with unsupported bounding box.";
