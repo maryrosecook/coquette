@@ -1,13 +1,13 @@
 ;(function(exports) {
   var GOLDEN_RATIO = 1.61803398875;
 
-  var SpinningRectanglesGame = function() {
+  var SpinningShapesGame = function() {
     var autoFocus = false
     this.c = new Coquette(this, "canvas", 500, 500 / GOLDEN_RATIO, "white", autoFocus);
     this.dragger = new Dragger(this.c); // controls dragging of shapes with mouse
   };
 
-  SpinningRectanglesGame.prototype = {
+  SpinningShapesGame.prototype = {
     update: function() {
       this.dragger.update();
       if (this.c.entities.all().length < 10) {
@@ -197,5 +197,5 @@
     }
   };
 
-  exports.SpinningRectanglesGame = SpinningRectanglesGame;
+  exports.SpinningShapesGame = SpinningShapesGame;
 })(this);
