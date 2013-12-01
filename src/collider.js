@@ -262,8 +262,10 @@
         topY <= rotatedY && rotatedY <= bottomY;
     };
 
-    pointInsideCircle: function() {
+    },
 
+    pointInsideCircle: function(point, obj) {
+      return this.distance(point, obj.center) <= obj.size.x / 2;
     },
 
     distance: function(point1, point2) {
