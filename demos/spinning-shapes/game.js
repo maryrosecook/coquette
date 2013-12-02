@@ -56,16 +56,14 @@
 
     draw: function(ctx) {
       if (this.colliderCount > 0) {
-        ctx.strokeStyle = "black";
-        ctx.strokeRect(this.center.x - this.size.x / 2, this.center.y - this.size.y / 2,
-                       this.size.x, this.size.y);
-
-
+        ctx.lineWidth = 2;
       } else {
-        ctx.strokeStyle = "#aaa";
-        ctx.strokeRect(this.center.x - this.size.x / 2, this.center.y - this.size.y / 2,
-                       this.size.x, this.size.y);
+        ctx.lineWidth = 1;
       }
+
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(this.center.x - this.size.x / 2, this.center.y - this.size.y / 2,
+                     this.size.x, this.size.y);
     },
 
     startDrag: function() {
@@ -98,17 +96,17 @@
     },
 
     draw: function(ctx) {
+      if (this.colliderCount > 0) {
+        ctx.lineWidth = 2;
+      } else {
+        ctx.lineWidth = 1;
+      }
+
       ctx.beginPath();
       ctx.arc(this.center.x, this.center.y, this.size.x / 2, 0, Math.PI * 2, true);
       ctx.closePath();
-
-      if (this.colliderCount > 0) {
-        ctx.strokeStyle = "black";
-        ctx.stroke();
-      } else {
-        ctx.strokeStyle = "#aaa";
-        ctx.stroke();
-      }
+      ctx.strokeStyle = "black";
+      ctx.stroke();
     },
 
     startDrag: function() {
