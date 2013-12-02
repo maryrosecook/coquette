@@ -10,18 +10,22 @@
   SpinningShapesGame.prototype = {
     update: function() {
       this.dragger.update();
-      if (this.c.entities.all().length < 10) {
-        var viewSize = this.c.renderer.getViewSize();
+      var viewSize = this.c.renderer.getViewSize();
+      var viewCenter = this.c.renderer.getViewCenter();
+
+      if (this.c.entities.all().length < 20) { // not enough shapes
+        var dirFromCenter = randomDirection();
         var Shape = Math.random() > 0.5 ? Rectangle : Circle;
         this.c.entities.create(Shape, { // make one
-          center: { x: Math.random() * viewSize.x, y: Math.random() * viewSize.y }
+          center: offscreenPosition(dirFromCenter, viewSize, viewCenter),
+          vec: movingOnscreenVec(dirFromCenter)
         });
       }
 
       // destroy entities that are off screen
       var entities = this.c.entities.all();
       for (var i = 0; i < entities.length; i++) {
-        if (!this.c.renderer.onScreen(entities[i])) {
+        if (isOutOfView(entities[i], viewSize, viewCenter)) {
           this.c.entities.destroy(entities[i]);
         }
       }
@@ -33,11 +37,10 @@
     this.angle = Math.random() * 360;
     this.center = settings.center;
     this.size = { x: 0, y: 0 }; // slowly grows
-
-    this.vec = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
+    this.vec = settings.vec;
     this.turnSpeed = 2 * Math.random() - 1;
 
-    mixin(countCurrentColliders, this);
+    mixin(makeCurrentCollidersCountable, this);
   };
 
   Rectangle.prototype = {
@@ -77,10 +80,9 @@
     this.boundingBox = this.c.collider.CIRCLE;
     this.center = settings.center;
     this.size = { x: 0, y: 0 }; // slowly grows
+    this.vec = settings.vec;
 
-    this.vec = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
-
-    mixin(countCurrentColliders, this);
+    mixin(makeCurrentCollidersCountable, this);
   };
 
   Circle.prototype = {
@@ -175,13 +177,33 @@
     }
   };
 
+  var randomDirection = function() {
+    return Coquette.Collider.Maths.unitVector({ x:Math.random() - .5, y:Math.random() - .5 });
+  };
+
+  var movingOnscreenVec = function(dirFromCenter) {
+    return { x: -dirFromCenter.x * 3 * Math.random(), y: -dirFromCenter.y * 3 * Math.random() }
+  };
+
+  var offscreenPosition = function(dirFromCenter, viewSize, viewCenter) {
+    return {
+      x: viewCenter.x + direction.x * viewSize.x,
+      y: viewCenter.y + direction.y * viewSize.y,
+    };
+  };
+
+  var isOutOfView = function(obj, viewSize, viewCenter) {
+    return Coquette.Collider.Maths.distance(obj.center, viewCenter) >
+      Math.max(viewSize.x, viewSize.y);
+  };
+
   var mixin = function(from, to) {
     for (var i in from) {
       to[i] = from[i];
     }
   };
 
-  var countCurrentColliders = {
+  var makeCurrentCollidersCountable = {
     colliderCount: 0, // number of other shapes currently touching this shape
 
     collision: function(_, type) {
