@@ -40,7 +40,7 @@
   };
 
   var isSetupForCollisions = function(obj) {
-    return obj.pos !== undefined && obj.size !== undefined;
+    return obj.center !== undefined && obj.size !== undefined;
   };
 
   Collider.prototype = {
@@ -120,8 +120,8 @@
     },
 
     isIntersecting: function(obj1, obj2) {
-      var obj1BoundingBox = obj1.boundingBox || this.RECTANGLE;
-      var obj2BoundingBox = obj2.boundingBox || this.RECTANGLE;
+      var obj1BoundingBox = getBoundingBox(obj1);
+      var obj2BoundingBox = getBoundingBox(obj2);
 
       if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.RECTANGLE) {
         return Maths.rectanglesIntersecting(obj1, obj2);
@@ -129,18 +129,8 @@
         return Maths.circleAndRectangleIntersecting(obj1, obj2);
       } else if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.CIRCLE) {
         return Maths.circleAndRectangleIntersecting(obj2, obj1);
-      } else if (obj1BoundingBox === this.POINT && obj2BoundingBox === this.RECTANGLE) {
-        return Maths.pointAndRectangleIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.POINT) {
-        return Maths.pointAndRectangleIntersecting(obj2, obj1);
       } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.CIRCLE) {
         return Maths.circlesIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.POINT && obj2BoundingBox === this.CIRCLE) {
-        return Maths.pointAndCircleIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.POINT) {
-        return Maths.pointAndCircleIntersecting(obj2, obj1);
-      } else if (obj1BoundingBox === this.POINT && obj2BoundingBox === this.POINT) {
-        return Maths.pointsIntersecting(obj1, obj2);
       } else {
         throw "Objects being collision tested have unsupported bounding box types."
       }
@@ -150,14 +140,12 @@
     SUSTAINED: 1,
 
     RECTANGLE: 0,
-    CIRCLE: 1,
-    POINT:2
+    CIRCLE: 1
   };
 
-  var orEqual = function(obj1BB, obj2BB, bBType1, bBType2) {
-    return (obj1BB === bBType1 && obj2BB === bBType2) ||
-      (obj1BB === bBType2 && obj2BB === bBType1);
-  }
+  var getBoundingBox = function(obj) {
+    return obj.boundingBox || Collider.prototype.RECTANGLE;
+  };
 
   var notifyEntityOfCollision = function(entity, other, type) {
     if (entity.collision !== undefined) {
@@ -171,70 +159,143 @@
     }
   };
 
-  var Maths = {
-    center: function(obj) {
-      if(obj.pos !== undefined) {
-        return {
-          x: obj.pos.x + (obj.size.x / 2),
-          y: obj.pos.y + (obj.size.y / 2),
-        };
-      }
-    },
+  var rotated = function(obj) {
+    return obj.angle !== undefined && obj.angle !== 0;
+  };
 
+  var getAngle = function(obj) {
+    return obj.angle === undefined ? 0 : obj.angle;
+  };
+
+  var Maths = {
     circlesIntersecting: function(obj1, obj2) {
-      return Maths.distance(Maths.center(obj1), Maths.center(obj2)) <
+      return Maths.distance(obj1.center, obj2.center) <
         obj1.size.x / 2 + obj2.size.x / 2;
     },
 
-    pointAndCircleIntersecting: function(obj1, obj2) {
-      return this.distance(obj1.pos, this.center(obj2)) < obj2.size.x / 2;
-    },
-
-    pointAndRectangleIntersecting: function(obj1, obj2) {
-      return this.pointInsideObj(obj1.pos, obj2);
-    },
-
-    pointsIntersecting: function(obj1, obj2) {
-      return obj1.pos.x === obj2.pos.x && obj1.pos.y === obj2.pos.y;
-    },
-
-    pointInsideObj: function(point, obj) {
-      return point.x >= obj.pos.x
-        && point.y >= obj.pos.y
-        && point.x <= obj.pos.x + obj.size.x
-        && point.y <= obj.pos.y + obj.size.y;
-    },
-
     rectanglesIntersecting: function(obj1, obj2) {
-      if(obj1.pos.x + obj1.size.x < obj2.pos.x) {
+      if (!rotated(obj1) && !rotated(obj2)) {
+        return this.unrotatedRectanglesIntersecting(obj1, obj2); // faster
+      } else {
+        return this.rotatedRectanglesIntersecting(obj1, obj2); // slower
+      }
+    },
+
+    circleAndRectangleIntersecting: function(circleObj, rectangleObj) {
+      var rectangleObjAngleRad = -getAngle(rectangleObj) * Maths.RADIANS_TO_DEGREES;
+
+      var unrotatedCircleCenter = {
+        x: Math.cos(rectangleObjAngleRad) *
+          (circleObj.center.x - rectangleObj.center.x) -
+          Math.sin(rectangleObjAngleRad) *
+          (circleObj.center.y - rectangleObj.center.y) + rectangleObj.center.x,
+        y: Math.sin(rectangleObjAngleRad) *
+          (circleObj.center.x - rectangleObj.center.x) +
+          Math.cos(rectangleObjAngleRad) *
+          (circleObj.center.y - rectangleObj.center.y) + rectangleObj.center.y
+      };
+
+      var closest = { x: 0, y: 0 };
+
+      if (unrotatedCircleCenter.x < rectangleObj.center.x - rectangleObj.size.x / 2) {
+        closest.x = rectangleObj.center.x - rectangleObj.size.x / 2;
+      } else if (unrotatedCircleCenter.x > rectangleObj.center.x + rectangleObj.size.x / 2) {
+        closest.x = rectangleObj.center.x + rectangleObj.size.x / 2;
+      } else {
+        closest.x = unrotatedCircleCenter.x;
+      }
+
+      if (unrotatedCircleCenter.y < rectangleObj.center.y - rectangleObj.size.y / 2) {
+        closest.y = rectangleObj.center.y - rectangleObj.size.y / 2;
+      } else if (unrotatedCircleCenter.y > rectangleObj.center.y + rectangleObj.size.y / 2) {
+        closest.y = rectangleObj.center.y + rectangleObj.size.y / 2;
+      } else {
+        closest.y = unrotatedCircleCenter.y;
+      }
+
+      return this.distance(unrotatedCircleCenter, closest) < circleObj.size.x / 2;
+    },
+
+    unrotatedRectanglesIntersecting: function(obj1, obj2) {
+      if(obj1.center.x + obj1.size.x / 2 < obj2.center.x - obj2.size.x / 2) {
         return false;
-      } else if(obj1.pos.x > obj2.pos.x + obj2.size.x) {
+      } else if(obj1.center.x - obj1.size.x / 2 > obj2.center.x + obj2.size.x / 2) {
         return false;
-      } else if(obj1.pos.y > obj2.pos.y + obj2.size.y) {
+      } else if(obj1.center.y - obj1.size.y / 2 > obj2.center.y + obj2.size.y / 2) {
         return false;
-      } else if(obj1.pos.y + obj1.size.y < obj2.pos.y) {
+      } else if(obj1.center.y + obj1.size.y / 2 < obj2.center.y - obj2.size.y / 2) {
         return false
       } else {
         return true;
       }
     },
 
+    rotatedRectanglesIntersecting: function(obj1, obj2) {
+      var obj1Normals = this.rectanglePerpendicularNormals(obj1);
+      var obj2Normals = this.rectanglePerpendicularNormals(obj2);
+
+      var obj1Corners = this.rectangleCorners(obj1);
+      var obj2Corners = this.rectangleCorners(obj2);
+
+      if (this.projectionsSeparate(
+        this.getMinMaxProjection(obj1Corners, obj1Normals[1]),
+        this.getMinMaxProjection(obj2Corners, obj1Normals[1]))) {
+        return false;
+      } else if (this.projectionsSeparate(
+        this.getMinMaxProjection(obj1Corners, obj1Normals[0]),
+        this.getMinMaxProjection(obj2Corners, obj1Normals[0]))) {
+        return false;
+      } else if (this.projectionsSeparate(
+        this.getMinMaxProjection(obj1Corners, obj2Normals[1]),
+        this.getMinMaxProjection(obj2Corners, obj2Normals[1]))) {
+        return false;
+      } else if (this.projectionsSeparate(
+        this.getMinMaxProjection(obj1Corners, obj2Normals[0]),
+        this.getMinMaxProjection(obj2Corners, obj2Normals[0]))) {
+        return false;
+      } else {
+        return true;
+      }
+    },
+
+    pointInsideObj: function(point, obj) {
+      var objBoundingBox = getBoundingBox(obj);
+
+      if (objBoundingBox === Collider.prototype.RECTANGLE) {
+        return this.pointInsideRectangle(point, obj);
+      } else if (objBoundingBox === Collider.prototype.CIRCLE) {
+        return this.pointInsideCircle(point, obj);
+      } else {
+        throw "Tried to see if point inside object with unsupported bounding box.";
+      }
+    },
+
+    pointInsideRectangle: function(point, obj) {
+      var c = Math.cos(-getAngle(obj) * Maths.RADIANS_TO_DEGREES);
+      var s = Math.sin(-getAngle(obj) * Maths.RADIANS_TO_DEGREES);
+
+      var rotatedX = obj.center.x + c *
+          (point.x - obj.center.x) - s * (point.y - obj.center.y);
+      var rotatedY = obj.center.y + s *
+          (point.x - obj.center.x) + c * (point.y - obj.center.y);
+
+      var leftX = obj.center.x - obj.size.x / 2;
+      var rightX = obj.center.x + obj.size.x / 2;
+      var topY = obj.center.y - obj.size.y / 2;
+      var bottomY = obj.center.y + obj.size.y / 2;
+
+      return leftX <= rotatedX && rotatedX <= rightX &&
+        topY <= rotatedY && rotatedY <= bottomY;
+    },
+
+    pointInsideCircle: function(point, obj) {
+      return this.distance(point, obj.center) <= obj.size.x / 2;
+    },
+
     distance: function(point1, point2) {
       var x = point1.x - point2.x;
       var y = point1.y - point2.y;
       return Math.sqrt((x * x) + (y * y));
-    },
-
-    rectangleCorners: function(rectangleObj) {
-      var corners = [];
-      corners.push({ x:rectangleObj.pos.x, y: rectangleObj.pos.y });
-      corners.push({ x:rectangleObj.pos.x + rectangleObj.size.x, y:rectangleObj.pos.y });
-      corners.push({
-        x:rectangleObj.pos.x + rectangleObj.size.x,
-        y:rectangleObj.pos.y + rectangleObj.size.y
-      });
-      corners.push({ x:rectangleObj.pos.x, y: rectangleObj.pos.y + rectangleObj.size.y });
-      return corners;
     },
 
     vectorTo: function(start, end) {
@@ -248,6 +309,13 @@
       return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
     },
 
+    leftNormalizedNormal: function(vector) {
+      return {
+        x: -vector.y,
+        y: vector.x
+      };
+    },
+
     dotProduct: function(vector1, vector2) {
       return vector1.x * vector2.x + vector1.y * vector2.y;
     },
@@ -259,46 +327,69 @@
       };
     },
 
-    closestPointOnSeg: function(linePointA, linePointB, circ_pos) {
-      var seg_v = Maths.vectorTo(linePointA, linePointB);
-      var pt_v = Maths.vectorTo(linePointA, circ_pos);
-      if (Maths.magnitude(seg_v) <= 0) {
-        throw "Invalid segment length";
+    projectionsSeparate: function(proj1, proj2) {
+      return proj1.max < proj2.min || proj2.max < proj1.min;
+    },
+
+    getMinMaxProjection: function(objCorners, normal) {
+      var min = Maths.dotProduct(objCorners[0], normal);
+      var max = Maths.dotProduct(objCorners[0], normal);
+
+      for (var i = 1; i < objCorners.length; i++) {
+        var current = Maths.dotProduct(objCorners[i], normal);
+        if (min > current) {
+          min = current;
+        }
+
+        if (current > max) {
+          max = current;
+        }
       }
 
-      var seg_v_unit = Maths.unitVector(seg_v);
-      var proj = Maths.dotProduct(pt_v, seg_v_unit);
-      if (proj <= 0) {
-        return linePointA;
-      } else if (proj >= Maths.magnitude(seg_v)) {
-        return linePointB;
-      } else {
-        return {
-          x: linePointA.x + seg_v_unit.x * proj,
-          y: linePointA.y + seg_v_unit.y * proj
-        };
-      }
+      return { min: min, max: max };
     },
 
-    isLineIntersectingCircle: function(circleObj, linePointA, linePointB) {
-      var circ_pos = {
-        x: circleObj.pos.x + circleObj.size.x / 2,
-        y: circleObj.pos.y + circleObj.size.y / 2
-      };
+    rectangleCorners: function(obj) {
+      var corners = [ // unrotated
+        { x:obj.center.x - obj.size.x / 2, y: obj.center.y - obj.size.y / 2 },
+        { x:obj.center.x + obj.size.x / 2, y: obj.center.y - obj.size.y / 2 },
+        { x:obj.center.x + obj.size.x / 2, y: obj.center.y + obj.size.y / 2 },
+        { x:obj.center.x - obj.size.x / 2, y: obj.center.y + obj.size.y / 2 }
+      ];
 
-      var closest = Maths.closestPointOnSeg(linePointA, linePointB, circ_pos);
-      var dist_v = Maths.vectorTo(closest, circ_pos);
-      return Maths.magnitude(dist_v) < circleObj.size.x / 2;
+      var angle = getAngle(obj) * Maths.RADIANS_TO_DEGREES;
+
+			for (var i = 0; i < corners.length; i++) {
+				var xOffset = corners[i].x - obj.center.x;
+				var yOffset = corners[i].y - obj.center.y;
+				corners[i].x = obj.center.x +
+          xOffset * Math.cos(angle) - yOffset * Math.sin(angle);
+				corners[i].y = obj.center.y +
+          xOffset * Math.sin(angle) + yOffset * Math.cos(angle);
+			}
+
+      return corners;
     },
 
-    circleAndRectangleIntersecting: function(circleObj, rectangleObj) {
-      var corners = Maths.rectangleCorners(rectangleObj);
-      return Maths.pointInsideObj(Maths.center(circleObj), rectangleObj) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[0], corners[1]) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[1], corners[2]) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[2], corners[3]) ||
-        Maths.isLineIntersectingCircle(circleObj, corners[3], corners[0]);
+    rectangleSideVectors: function(obj) {
+      var corners = this.rectangleCorners(obj);
+      return [
+        { x: corners[0].x - corners[1].x, y: corners[0].y - corners[1].y },
+        { x: corners[1].x - corners[2].x, y: corners[1].y - corners[2].y },
+        { x: corners[2].x - corners[3].x, y: corners[2].y - corners[3].y },
+        { x: corners[3].x - corners[0].x, y: corners[3].y - corners[0].y }
+      ];
     },
+
+    rectanglePerpendicularNormals: function(obj) {
+      var sides = this.rectangleSideVectors(obj);
+      return [
+        Maths.leftNormalizedNormal(sides[0]),
+        Maths.leftNormalizedNormal(sides[1])
+      ];
+    },
+
+    RADIANS_TO_DEGREES: 0.01745
   };
 
   exports.Collider = Collider;
@@ -327,6 +418,10 @@
     // Returns true if passed button just gone down. true once per keypress.
     isPressed: function(button) {
       return this._buttonListener.isPressed(button);
+    },
+
+    getMousePosition: function() {
+      return this._mouseMoveListener.getMousePosition();
     },
 
     // Returns true if passed button currently down
@@ -493,17 +588,22 @@
 
   var MouseMoveListener = function(canvas) {
     this._bindings = [];
+    this._mousePosition;
+    var self = this;
 
     var elementPosition = { x: canvas.offsetLeft, y: canvas.offsetTop };
 
-    var self = this;
     canvas.addEventListener('mousemove', function(e) {
-      var position = self._getMousePosition(e);
+      var absoluteMousePosition = self._getAbsoluteMousePosition(e);
+      self._mousePosition = {
+        x: absoluteMousePosition.x - elementPosition.x,
+        y: absoluteMousePosition.y - elementPosition.y
+      };
+    }, false);
+
+    canvas.addEventListener('mousemove', function(e) {
       for (var i = 0; i < self._bindings.length; i++) {
-        self._bindings[i]({
-          x: position.x - elementPosition.x,
-          y: position.y - elementPosition.y
-        });
+        self._bindings[i](self.getMousePosition());
       }
     }, false);
   };
@@ -524,7 +624,11 @@
       throw "Function to unbind from mouse moves was never bound";
     },
 
-    _getMousePosition: function(e) {
+    getMousePosition: function() {
+      return this._mousePosition;
+    },
+
+    _getAbsoluteMousePosition: function(e) {
 	    if (e.pageX) 	{
         return { x: e.pageX, y: e.pageY };
 	    } else if (e.clientX) {
@@ -668,7 +772,7 @@
     canvas.width = wView;
     canvas.height = hView;
     this._viewSize = { x:wView, y:hView };
-    this._viewCenterPos = { x: this._viewSize.x / 2, y: this._viewSize.y / 2 };
+    this._viewCenter = { x: this._viewSize.x / 2, y: this._viewSize.y / 2 };
   };
 
   Renderer.prototype = {
@@ -680,26 +784,24 @@
       return this._viewSize;
     },
 
-    getViewCenterPos: function() {
-      return this._viewCenterPos;
+    getViewCenter: function() {
+      return this._viewCenter;
     },
 
-    setViewCenterPos: function(pos) {
-      this._viewCenterPos = { x:pos.x, y:pos.y };
+    setViewCenter: function(pos) {
+      this._viewCenter = { x:pos.x, y:pos.y };
     },
 
     update: function(interval) {
       var ctx = this.getCtx();
+      var viewTranslate = viewOffset(this._viewCenter, this._viewSize);
 
-      var viewTranslate = viewOffset(this._viewCenterPos, this._viewSize);
-
-      // translate so all objs placed relative to viewport
-      ctx.translate(-viewTranslate.x, -viewTranslate.y);
+      ctx.translate(viewTranslate.x, viewTranslate.y);
 
       // draw background
       ctx.fillStyle = this._backgroundColor;
-      ctx.fillRect(this._viewCenterPos.x - this._viewSize.x / 2,
-                   this._viewCenterPos.y - this._viewSize.y / 2,
+      ctx.fillRect(this._viewCenter.x - this._viewSize.x / 2,
+                   this._viewCenter.y - this._viewSize.y / 2,
                    this._viewSize.x,
                    this._viewSize.y);
 
@@ -708,29 +810,40 @@
         .concat(this.coquette.entities.all().concat().sort(zindexSort));
       for (var i = 0, len = drawables.length; i < len; i++) {
         if (drawables[i].draw !== undefined) {
+          var drawable = drawables[i];
+
+          ctx.save();
+
+          if (drawable.center !== undefined && drawable.angle !== undefined) {
+            ctx.translate(drawable.center.x, drawable.center.y);
+            ctx.rotate(drawable.angle * Maths.RADIANS_TO_DEGREES);
+            ctx.translate(-drawable.center.x, -drawable.center.y);
+          }
+
           drawables[i].draw(ctx);
+
+          ctx.restore();
         }
       }
 
-      // translate back
-      ctx.translate(viewTranslate.x, viewTranslate.y);
+      ctx.translate(-viewTranslate.x, -viewTranslate.y);
     },
 
     onScreen: function(obj) {
       return Maths.rectanglesIntersecting(obj, {
         size: this._viewSize,
-        pos: {
-          x: this._viewCenterPos.x - this._viewSize.x / 2,
-          y: this._viewCenterPos.y - this._viewSize.y / 2
+        center: {
+          x: this._viewCenter.x,
+          y: this._viewCenter.y
         }
       });
     }
   };
 
-  var viewOffset = function(viewCenterPos, viewSize) {
+  var viewOffset = function(viewCenter, viewSize) {
     return {
-      x:viewCenterPos.x - viewSize.x / 2,
-      y:viewCenterPos.y - viewSize.y / 2
+      x: -(viewCenter.x - viewSize.x / 2),
+      y: -(viewCenter.y - viewSize.y / 2)
     }
   };
 
