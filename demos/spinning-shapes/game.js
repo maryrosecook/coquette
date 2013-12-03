@@ -2,8 +2,8 @@
   var GOLDEN_RATIO = 1.61803398875;
 
   var SpinningShapesGame = function() {
-    var autoFocus = false
     this.c = new Coquette(this, "canvas", 500, 500 / GOLDEN_RATIO, "white", autoFocus);
+    var autoFocus = false;
     this.dragger = new Dragger(this.c); // controls dragging of shapes with mouse
   };
 
