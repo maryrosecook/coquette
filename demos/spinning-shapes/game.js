@@ -164,6 +164,10 @@
 
     _stopDrag: function() {
       if (this._isDragging()) {
+        if (this._currentDrag.target.stopDrag !== undefined) {
+          this._currentDrag.target.stopDrag();
+        }
+
         this._currentDrag = undefined;
       }
     }
