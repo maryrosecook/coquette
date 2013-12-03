@@ -112,11 +112,11 @@
     var self = this;
 
     c.inputter.bindMouseMove(function(e) {
-      if (self.isDragging()) {
         self._currentDrag.target.center = {
           x: e.x + self._currentDrag.centerOffset.x,
           y: e.y + self._currentDrag.centerOffset.y
         };
+        if (self._isDragging()) {
       }
     });
   };
@@ -124,7 +124,7 @@
   Dragger.prototype = {
     update: function() {
       if (this.c.inputter.isDown(this.c.inputter.LEFT_MOUSE)) {
-        if (!this.isDragging()) {
+        if (!this._isDragging()) {
           var mousePosition = this.c.inputter.getMousePosition();
           var target = this._getTarget(this.c.entities.all(), mousePosition)
           if (target !== undefined) {
@@ -136,7 +136,7 @@
       }
     },
 
-    isDragging: function() {
+    _isDragging: function() {
       return this._currentDrag !== undefined;
     },
 
@@ -161,7 +161,7 @@
     },
 
     _stopDrag: function() {
-      if (this.isDragging()) {
+      if (this._isDragging()) {
         this._currentDrag = undefined;
       }
     }
