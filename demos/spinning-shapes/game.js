@@ -36,7 +36,7 @@
     this.c = game.c;
     this.angle = Math.random() * 360;
     this.center = settings.center;
-    this.size = { x: 0, y: 0 }; // slowly grows
+    this.size = { x: 70, y: 70 / GOLDEN_RATIO };
     this.vec = settings.vec;
     this.turnSpeed = 2 * Math.random() - 1;
 
@@ -48,13 +48,8 @@
       // move
       this.center.x += this.vec.x;
       this.center.y += this.vec.y;
-      this.angle += this.turnSpeed;
 
-      // grow until full size
-      if (this.size.x < 70) {
-        this.size.x += 2;
-        this.size.y += 2 / GOLDEN_RATIO;
-      }
+      this.angle += this.turnSpeed; // turn
     },
 
     draw: function(ctx) {
@@ -79,7 +74,7 @@
     this.c = game.c;
     this.boundingBox = this.c.collider.CIRCLE;
     this.center = settings.center;
-    this.size = { x: 0, y: 0 }; // slowly grows
+    this.size = { x: 55, y: 55 };
     this.vec = settings.vec;
 
     mixin(makeCurrentCollidersCountable, this);
@@ -90,11 +85,6 @@
       // move
       this.center.x += this.vec.x;
       this.center.y += this.vec.y;
-
-      // grow until full size
-      if (this.size.x < 55) {
-        this.size.x = this.size.y = this.size.x + 2;
-      }
     },
 
     draw: function(ctx) {
@@ -187,8 +177,8 @@
 
   var offscreenPosition = function(dirFromCenter, viewSize, viewCenter) {
     return {
-      x: viewCenter.x + direction.x * viewSize.x,
-      y: viewCenter.y + direction.y * viewSize.y,
+      x: viewCenter.x + dirFromCenter.x * viewSize.x,
+      y: viewCenter.y + dirFromCenter.y * viewSize.y,
     };
   };
 
