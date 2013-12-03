@@ -4,11 +4,12 @@ var Entities = require('../src/entities').Entities;
 var Runner = require('../src/runner').Runner;
 var Maths = Collider.Maths;
 
-var mockObj = function(centerX, centerY, sizeX, sizeY, boundingBox) {
+var mockObj = function(centerX, centerY, sizeX, sizeY, boundingBox, angle) {
   return {
     center: { x:centerX, y:centerY },
     size: { x:sizeX, y:sizeY },
-    boundingBox: boundingBox
+    boundingBox: boundingBox,
+    angle: angle === undefined ? 0 : angle
   };
 };
 
@@ -281,6 +282,21 @@ describe('collider', function() {
             expect(new Collider().isIntersecting(mockObj(8, 15, 4, 2),
                                                  mockObj(11, 12, 2, 4))).toEqual(true);
           });
+
+          it('should return true: rotated top right just touching rotated top left', function() {
+            expect(new Collider().isIntersecting(mockObj(207, 222, 70, 43, Collider.prototype.RECTANGLE, 325),
+                                                 mockObj(280, 235, 70, 43, Collider.prototype.RECTANGLE, -484))).toEqual(true);
+          });
+
+          it('should return true: rotated bottom right just touching rotated top left', function() {
+            expect(new Collider().isIntersecting(mockObj(238, 205, 70, 43, Collider.prototype.RECTANGLE, 280),
+                                                 mockObj(207, 133, 70, 43, Collider.prototype.RECTANGLE, 93))).toEqual(true);
+          });
+
+          it('should return true: rotated top right just touching rotated bottom left', function() {
+            expect(new Collider().isIntersecting(mockObj(349, 171, 70, 43, Collider.prototype.RECTANGLE, 113),
+                                                 mockObj(409, 123, 70, 43, Collider.prototype.RECTANGLE, 649))).toEqual(true);
+          });
         });
 
         describe('non-collisions', function() {
@@ -303,30 +319,99 @@ describe('collider', function() {
             expect(new Collider().isIntersecting(mockObj(7, 15, 4, 2),
                                                  mockObj(11, 12, 2, 4))).toEqual(false);
           });
+
+          it('should return false: rotated top right just missing rotated top left', function() {
+            expect(new Collider().isIntersecting(mockObj(199, 223, 70, 43, Collider.prototype.RECTANGLE, 325),
+                                                 mockObj(283, 237, 70, 43, Collider.prototype.RECTANGLE, -484))).toEqual(false);
+          });
+
+          it('should return false: rotated bottom right just missing rotated top left', function() {
+            expect(new Collider().isIntersecting(mockObj(242, 213, 70, 43, Collider.prototype.RECTANGLE, 280),
+                                                 mockObj(207, 133, 70, 43, Collider.prototype.RECTANGLE, 93))).toEqual(false);
+          });
+
+          it('should return true: rotated top right just missing rotated bottom left', function() {
+            expect(new Collider().isIntersecting(mockObj(340, 177, 70, 43, Collider.prototype.RECTANGLE, 113),
+                                                 mockObj(409, 123, 70, 43, Collider.prototype.RECTANGLE, 649))).toEqual(false);
+          });
         });
       });
 
-      it('should return false for two circles that are not colliding', function() {
-        var collider = new Collider();
-        var obj1 = mockObj(10, 10, 10, 10, collider.CIRCLE);
-        var obj2 = mockObj(19, 19, 10, 10, collider.CIRCLE);
-        var intersecting = collider.isIntersecting(obj1, obj2);
-        expect(intersecting).toEqual(false);
+      describe('circle and rectangle', function() {
+        describe('collisions', function() {
+          it('should return true: circles side by side just overlapping', function() {
+            expect(new Collider().isIntersecting(mockObj(332, 180, 55, 55, Collider.prototype.CIRCLE),
+                                                 mockObj(282, 182, 55, 55, Collider.prototype.CIRCLE))).toEqual(true);
+          });
+
+          it('should return true: circles one on top of the other just overlapping', function() {
+            expect(new Collider().isIntersecting(mockObj(291, 192, 55, 55, Collider.prototype.CIRCLE),
+                                                 mockObj(289, 241, 55, 55, Collider.prototype.CIRCLE))).toEqual(true);
+          });
+        });
+
+        describe('non-collisions', function() {
+          it('should return false: circles side by side just missing', function() {
+            expect(new Collider().isIntersecting(mockObj(345, 180, 55, 55, Collider.prototype.CIRCLE),
+                                                 mockObj(282, 182, 55, 55, Collider.prototype.CIRCLE))).toEqual(false);
+          });
+
+          it('should return false: circles one on top of the other just missing', function() {
+            expect(new Collider().isIntersecting(mockObj(291, 186, 55, 55, Collider.prototype.CIRCLE),
+                                                 mockObj(289, 249, 55, 55, Collider.prototype.CIRCLE))).toEqual(false);
+          });
+        });
       });
 
-      it('should return false for circ+rect that are not colliding', function() {
-        var collider = new Collider();
-        var obj1 = mockObj(10, 10, 10, 10, collider.CIRCLE);
-        var obj2 = mockObj(19, 19, 10, 10, collider.RECTANGLE);
-        var intersecting = collider.isIntersecting(obj1, obj2);
-        expect(intersecting).toEqual(false);
-      });
+      describe('circle and rectangle', function() {
+        describe('collisions', function() {
+          it('should return true for circ+rect that are colliding', function() {
+            var collider = new Collider();
+            var obj1 = mockObj(10, 10, 10, 10, collider.CIRCLE);
+            var obj2 = mockObj(14, 14, 10, 10, collider.RECTANGLE);
+            expect(collider.isIntersecting(obj1, obj2)).toEqual(true);
+          });
 
-      it('should return true for circ+rect that are colliding', function() {
-        var collider = new Collider();
-        var obj1 = mockObj(10, 10, 10, 10, collider.CIRCLE);
-        var obj2 = mockObj(14, 14, 10, 10, collider.RECTANGLE);
-        expect(collider.isIntersecting(obj1, obj2)).toEqual(true);
+          it('should return true: rotated top right just touching circle', function() {
+            expect(new Collider().isIntersecting(mockObj(208, 181, 55, 55, Collider.prototype.CIRCLE),
+                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(true);
+          });
+
+          it('should return true: rotated bottom right just touching circle', function() {
+            expect(new Collider().isIntersecting(mockObj(163, 277, 55, 55, Collider.prototype.CIRCLE),
+                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(true);
+          });
+
+          it('should return true: rotated top left side just touching circle', function() {
+            expect(new Collider().isIntersecting(mockObj(112, 193, 55, 55, Collider.prototype.CIRCLE),
+                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(true);
+          });
+        });
+
+        describe('non-collisions', function() {
+          it('should return false for circ+rect that are not colliding', function() {
+            var collider = new Collider();
+            var obj1 = mockObj(10, 10, 10, 10, collider.CIRCLE);
+            var obj2 = mockObj(19, 19, 10, 10, collider.RECTANGLE);
+            var intersecting = collider.isIntersecting(obj1, obj2);
+            expect(intersecting).toEqual(false);
+          });
+
+          it('should return false: rotated top right just missing circle', function() {
+            expect(new Collider().isIntersecting(mockObj(223, 180, 55, 55, Collider.prototype.CIRCLE),
+                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(false);
+          });
+
+          it('should return false: rotated bottom right just missing circle', function() {
+            expect(new Collider().isIntersecting(mockObj(166, 288, 55, 55, Collider.prototype.CIRCLE),
+                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(false);
+          });
+
+          it('should return false: rotated top left side just missing circle', function() {
+            expect(new Collider().isIntersecting(mockObj(105, 186, 55, 55, Collider.prototype.CIRCLE),
+                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(false);
+          });
+        });
       });
 
       it('should throw when either obj has invalid bounding box', function() {
