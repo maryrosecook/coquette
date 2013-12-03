@@ -1,16 +1,16 @@
 ;(function(exports) {
-  var Game = function(autoFocus) {
-    var coq = new Coquette(this, "canvas", 500, 150, "#000", autoFocus);
+  var SimpleGame = function(autoFocus) {
+    var coq = new Coquette(this, "simple-canvas", 500, 150, "#000", autoFocus);
 
-    coq.entities.create(Person, { pos:{ x:250, y:40 }, color:"#099" }); // paramour
-    coq.entities.create(Person, { pos:{ x:256, y:110 }, color:"#f07", // player
+    coq.entities.create(Person, { center: { x:250, y:40 }, color:"#099" }); // paramour
+    coq.entities.create(Person, { center: { x:256, y:110 }, color:"#f07", // player
       update: function() {
         if (coq.inputter.isDown(coq.inputter.UP_ARROW)) {
-          this.pos.y -= 0.4;
+          this.center.y -= 0.4;
         }
       },
       collision: function(other) {
-        other.pos.y = this.pos.y; // follow the player
+        other.center.y = this.center.y; // follow the player
       }
     });
   };
@@ -22,9 +22,9 @@
     this.size = { x:9, y:9 };
     this.draw = function(ctx) {
       ctx.fillStyle = settings.color;
-      ctx.fillRect(this.pos.x, this.pos.y, this.size.x, this.size.y);
+      ctx.fillRect(this.center.x, this.center.y, this.size.x, this.size.y);
     };
   };
 
-  exports.Game = Game;
+  exports.SimpleGame = SimpleGame;
 })(this);
