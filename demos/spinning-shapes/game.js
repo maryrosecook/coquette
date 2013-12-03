@@ -112,11 +112,13 @@
     var self = this;
 
     c.inputter.bindMouseMove(function(e) {
-        self._currentDrag.target.center = {
-          x: e.x + self._currentDrag.centerOffset.x,
-          y: e.y + self._currentDrag.centerOffset.y
-        };
+      if (c.inputter.isDown(c.inputter.LEFT_MOUSE)) {
         if (self._isDragging()) {
+          self._currentDrag.target.center = {
+            x: e.x + self._currentDrag.centerOffset.x,
+            y: e.y + self._currentDrag.centerOffset.y
+          };
+        }
       }
     });
   };
