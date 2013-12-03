@@ -1,7 +1,7 @@
 ;(function(exports) {
   var Asteroid = function(game, settings) {
     this.game = game;
-    this.pos = settings.pos;
+    this.center = settings.center;
     this.boundingBox = this.game.coquette.collider.CIRCLE;
 
     if (settings.radius === undefined) {
@@ -29,24 +29,24 @@
       if (this.game.state !== this.game.STATE.PLAYING) return;
       var mx = this.vel.x * tick;
       var my = this.vel.y * tick;
-      this.pos.x += mx;
-      this.pos.y += my;
+      this.center.x += mx;
+      this.center.y += my;
 
       this.wrap();
     },
 
     wrap: function() {
-      if (this.game.maths.distance(this.game.maths.center(this),
-                                   this.game.coquette.renderer.getViewCenterPos()) >
+      if (this.game.maths.distance(this.center,
+                                   this.game.coquette.renderer.getViewCenter()) >
           (this.game.coquette.renderer.getViewSize().x / 2 + this.size.x) + 100) {
-        if (this.pos.x < 0) {
-          this.pos.x = this.game.coquette.renderer.getViewSize().x;
-        } else if (this.pos.x > this.game.coquette.renderer.getViewSize().x) {
-          this.pos.x = -this.size.x;
-        } else if (this.pos.y < 0) {
-          this.pos.y = this.game.coquette.renderer.getViewSize().y + 1;
-        } else if (this.pos.y > this.game.coquette.renderer.getViewSize().y) {
-          this.pos.y = 0;
+        if (this.center.x < 0) {
+          this.center.x = this.game.coquette.renderer.getViewSize().x;
+        } else if (this.center.x > this.game.coquette.renderer.getViewSize().x) {
+          this.center.x = -this.size.x;
+        } else if (this.center.y < 0) {
+          this.center.y = this.game.coquette.renderer.getViewSize().y + 1;
+        } else if (this.center.y > this.game.coquette.renderer.getViewSize().y) {
+          this.center.y = 0;
         }
       }
     },
@@ -60,7 +60,7 @@
       if (this.collidingAsteroids.length === 0) {
         color = "#666";
       }
-      this.game.circle(this.pos, this.size.x / 2, color);
+      this.game.circle(this.center, this.size.x / 2, color);
 
       this.game.endClip(ctx);
     },
@@ -99,7 +99,7 @@
 
     spawnTwin: function(other) {
       this.game.coquette.entities.create(Asteroid, {
-        pos: { x:this.pos.x, y:this.pos.y },
+        center: { x:this.center.x, y:this.center.y },
         radius: this.size.x / 2,
         vel: {
           x: this.vel.x + other.vel.x / 15 + Math.random() * 0.1,

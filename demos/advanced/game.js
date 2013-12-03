@@ -22,7 +22,7 @@
     init: function() {
       var self = this;
       this.coquette.entities.create(Player, {
-        pos: { x:0, y:0 }
+        center: { x:0, y:0 }
       }, function(player) {
         self.player = player;
       });
@@ -42,7 +42,7 @@
 
           for (var i = 0; i < 3; i++) {
             this.coquette.entities.create(Asteroid, {
-              pos: {
+              center: {
                 x: Math.random() * this.coquette.renderer.getViewSize().x,
                 y: Math.random() * this.coquette.renderer.getViewSize().y
               }
@@ -58,15 +58,15 @@
       if (this.state === this.STATE.PLAYING) {
         for (var i = 0; i < this.maxScore; i++) {
           var rAngle = this.maths.degToRad(360 / this.maxScore * i);
-          var pos = {
+          var center = {
             x: this.coquette.renderer.getViewSize().x / 2 + Math.sin(rAngle) * 30,
             y: this.coquette.renderer.getViewSize().y / 2 + Math.cos(rAngle) * 30
           };
 
           if (i > this.score() - 1) {
-            this.circle(pos, 0.5, "#222");
+            this.circle(center, 0.5, "#222");
           } else {
-            this.circle(pos, 0.5, "#666");
+            this.circle(center, 0.5, "#666");
           }
         }
       } else {
@@ -76,11 +76,11 @@
       }
     },
 
-    circle: function(pos, radius, color) {
+    circle: function(center, radius, color) {
       var ctx = this.coquette.renderer.getCtx();
       ctx.strokeStyle = color;
       ctx.beginPath();
-      ctx.arc(pos.x + radius, pos.y + radius, radius, 0, Math.PI * 2, true);
+      ctx.arc(center.x, center.y, radius, 0, Math.PI * 2, true);
       ctx.closePath();
       ctx.stroke();
     },

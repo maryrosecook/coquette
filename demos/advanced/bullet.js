@@ -1,7 +1,8 @@
 ;(function(exports) {
   var Bullet = function(game, settings) {
     this.game = game;
-    this.pos = settings.pos;
+    this.boundingBox = game.coquette.collider.CIRCLE;
+    this.center = settings.center;
     this.vel = settings.vector;
   };
 
@@ -14,8 +15,8 @@
 
       var mx = this.vel.x * tick;
       var my = this.vel.y * tick;
-      this.pos.x += mx;
-      this.pos.y += my;
+      this.center.x += mx;
+      this.center.y += my;
 
       if (!this.game.coquette.renderer.onScreen(this)) {
         this.kill();
@@ -26,7 +27,7 @@
       if (this.game.state !== this.game.STATE.PLAYING) return;
 
       this.game.startClip(ctx);
-      this.game.circle(this.pos, this.size.x / 2, "#fff");
+      this.game.circle(this.center, this.size.x / 2, "#fff");
       this.game.endClip(ctx);
     },
 
