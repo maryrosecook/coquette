@@ -2,7 +2,7 @@
   var Asteroid = function(game, settings) {
     this.game = game;
     this.center = settings.center;
-    this.boundingBox = this.game.coquette.collider.CIRCLE;
+    this.boundingBox = this.game.c.collider.CIRCLE;
 
     if (settings.radius === undefined) {
       this.size = { x: 60, y: 60 };
@@ -37,15 +37,15 @@
 
     wrap: function() {
       if (this.game.maths.distance(this.center,
-                                   this.game.coquette.renderer.getViewCenter()) >
-          (this.game.coquette.renderer.getViewSize().x / 2 + this.size.x) + 100) {
+                                   this.game.c.renderer.getViewCenter()) >
+          (this.game.c.renderer.getViewSize().x / 2 + this.size.x) + 100) {
         if (this.center.x < 0) {
-          this.center.x = this.game.coquette.renderer.getViewSize().x;
-        } else if (this.center.x > this.game.coquette.renderer.getViewSize().x) {
+          this.center.x = this.game.c.renderer.getViewSize().x;
+        } else if (this.center.x > this.game.c.renderer.getViewSize().x) {
           this.center.x = -this.size.x;
         } else if (this.center.y < 0) {
-          this.center.y = this.game.coquette.renderer.getViewSize().y + 1;
-        } else if (this.center.y > this.game.coquette.renderer.getViewSize().y) {
+          this.center.y = this.game.c.renderer.getViewSize().y + 1;
+        } else if (this.center.y > this.game.c.renderer.getViewSize().y) {
           this.center.y = 0;
         }
       }
@@ -78,11 +78,11 @@
     },
 
     kill: function() {
-      this.game.coquette.entities.destroy(this);
+      this.game.c.entities.destroy(this);
     },
 
     collision: function(other, type) {
-      if (type === this.game.coquette.collider.INITIAL) {
+      if (type === this.game.c.collider.INITIAL) {
         if (other instanceof Bullet) {
           if (this.collidingAsteroids.length === 0) {
             this.spawnTwin(other);
@@ -98,7 +98,7 @@
     },
 
     spawnTwin: function(other) {
-      this.game.coquette.entities.create(Asteroid, {
+      this.game.c.entities.create(Asteroid, {
         center: { x:this.center.x, y:this.center.y },
         radius: this.size.x / 2,
         vel: {

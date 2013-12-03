@@ -1,6 +1,6 @@
 ;(function(exports) {
   var Game = function(canvasId, width, height) {
-    this.coquette = new Coquette(this, canvasId, width, height, "#000");
+    this.c = new Coquette(this, canvasId, width, height, "#000");
 
     this.maths = new Maths();
     this.STATE = {
@@ -21,7 +21,7 @@
 
     init: function() {
       var self = this;
-      this.coquette.entities.create(Player, {
+      this.c.entities.create(Player, {
         center: { x:0, y:0 }
       }, function(player) {
         self.player = player;
@@ -34,17 +34,17 @@
           this.state = this.STATE.OVER;
         }
       } else if (this.state === this.STATE.INTRO || this.state === this.STATE.OVER) {
-        if(this.coquette.inputter.isDown(this.coquette.inputter.SPACE)) {
-          var asteroids = this.coquette.entities.all(Asteroid);
+        if(this.c.inputter.isDown(this.c.inputter.SPACE)) {
+          var asteroids = this.c.entities.all(Asteroid);
           for (var i = 0; i < asteroids.length; i++) {
             asteroids[i].kill();
           }
 
           for (var i = 0; i < 3; i++) {
-            this.coquette.entities.create(Asteroid, {
+            this.c.entities.create(Asteroid, {
               center: {
-                x: Math.random() * this.coquette.renderer.getViewSize().x,
-                y: Math.random() * this.coquette.renderer.getViewSize().y
+                x: Math.random() * this.c.renderer.getViewSize().x,
+                y: Math.random() * this.c.renderer.getViewSize().y
               }
             });
           }
@@ -59,8 +59,8 @@
         for (var i = 0; i < this.maxScore; i++) {
           var rAngle = this.maths.degToRad(360 / this.maxScore * i);
           var center = {
-            x: this.coquette.renderer.getViewSize().x / 2 + Math.sin(rAngle) * 30,
-            y: this.coquette.renderer.getViewSize().y / 2 + Math.cos(rAngle) * 30
+            x: this.c.renderer.getViewSize().x / 2 + Math.sin(rAngle) * 30,
+            y: this.c.renderer.getViewSize().y / 2 + Math.cos(rAngle) * 30
           };
 
           if (i > this.score() - 1) {
@@ -71,13 +71,13 @@
         }
       } else {
         ctx.drawImage(this.introImage,
-                      this.coquette.renderer.getViewSize().x / 2 - 100,
-                      this.coquette.renderer.getViewSize().y / 2 - 50);
+                      this.c.renderer.getViewSize().x / 2 - 100,
+                      this.c.renderer.getViewSize().y / 2 - 50);
       }
     },
 
     circle: function(center, radius, color) {
-      var ctx = this.coquette.renderer.getCtx();
+      var ctx = this.c.renderer.getCtx();
       ctx.strokeStyle = color;
       ctx.beginPath();
       ctx.arc(center.x, center.y, radius, 0, Math.PI * 2, true);
@@ -88,9 +88,9 @@
     startClip: function(ctx) {
       ctx.save();
       ctx.beginPath();
-      ctx.arc(this.coquette.renderer.getViewSize().x / 2,
-              this.coquette.renderer.getViewSize().y / 2,
-              this.coquette.renderer.getViewSize().x / 2 , 0, Math.PI * 2, true);
+      ctx.arc(this.c.renderer.getViewSize().x / 2,
+              this.c.renderer.getViewSize().y / 2,
+              this.c.renderer.getViewSize().x / 2 , 0, Math.PI * 2, true);
       ctx.closePath();
       ctx.clip();
     },
@@ -100,7 +100,7 @@
     },
 
     score: function() {
-      return this.maxScore - this.coquette.entities.all(Asteroid).length;
+      return this.maxScore - this.c.entities.all(Asteroid).length;
     },
   };
 

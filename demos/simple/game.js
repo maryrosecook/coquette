@@ -1,11 +1,11 @@
 ;(function(exports) {
   var SimpleGame = function(autoFocus) {
-    var coq = new Coquette(this, "simple-canvas", 500, 150, "#000", autoFocus);
+    var c = new Coquette(this, "simple-canvas", 500, 150, "#000", autoFocus);
 
-    coq.entities.create(Person, { center: { x:250, y:40 }, color:"#099" }); // paramour
-    coq.entities.create(Person, { center: { x:256, y:110 }, color:"#f07", // player
+    c.entities.create(Person, { center: { x:250, y:40 }, color:"#099" }); // paramour
+    c.entities.create(Person, { center: { x:256, y:110 }, color:"#f07", // player
       update: function() {
-        if (coq.inputter.isDown(coq.inputter.UP_ARROW)) {
+        if (c.inputter.isDown(c.inputter.UP_ARROW)) {
           this.center.y -= 0.4;
         }
       },

@@ -68,12 +68,12 @@
 
 <pre class="prettyprint">
 var Game = function(autoFocus) {
-  var coq = new Coquette(this, "canvas", 500, 150, "#000", autoFocus);
+  var c = new Coquette(this, "canvas", 500, 150, "#000", autoFocus);
 
-  coq.entities.create(Person, { center: { x:250, y:40 }, color:"#099" }); // paramour
-  coq.entities.create(Person, { center: { x:256, y:110 }, color:"#f07", // player
+  c.entities.create(Person, { center: { x:250, y:40 }, color:"#099" }); // paramour
+  c.entities.create(Person, { center: { x:256, y:110 }, color:"#f07", // player
     update: function() {
-      if (coq.inputter.isDown(coq.inputter.UP_ARROW)) {
+      if (c.inputter.isDown(c.inputter.UP_ARROW)) {
         this.center.y -= 0.4;
       }
     },
@@ -134,7 +134,7 @@ window.addEventListener('load', function() {
     </ul>
 
 <pre class="prettyprint">
-var coquette = new Coquette(game, "canvas", 150, 150, "#000");
+var c = new Coquette(game, "canvas", 150, 150, "#000");
 </pre>
 
     <h3>Modules</h3>
@@ -147,18 +147,18 @@ var coquette = new Coquette(game, "canvas", 150, 150, "#000");
 
     <h5>Find out if a certain key is pressed</h5>
 
-    Call <code>coquette.inputter.down()</code>, passing in the key's code, e.g.:
+    Call <code>c.inputter.down()</code>, passing in the key's code, e.g.:
 
 <pre class="prettyprint">
-var down = coquette.inputter.down(coquette.inputter.LEFT_ARROW);
+var down = c.inputter.down(c.inputter.LEFT_ARROW);
 </pre>
 
     <h5>Find out if a certain key was pressed down and then released</h5>
 
-    Call <code>coquette.inputter.pressed()</code>, passing in the key's code, e.g.:
+    Call <code>c.inputter.pressed()</code>, passing in the key's code, e.g.:
 
 <pre class="prettyprint">
-var pressed = coquette.inputter.pressed(coquette.inputter.LEFT_ARROW);
+var pressed = c.inputter.pressed(c.inputter.LEFT_ARROW);
 </pre>
 
     <h4>Ticker</h4>
@@ -174,7 +174,7 @@ var pressed = coquette.inputter.pressed(coquette.inputter.LEFT_ARROW);
     <h5>Get the canvas drawing context</h5>
 
 <pre class="prettyprint">
-var ctx = coquette.renderer.getCtx();
+var ctx = c.renderer.getCtx();
 ctx.fillStyle = "#f00";
 ctx.fillRect(0, 0, 10, 10);
 </pre>
@@ -186,8 +186,8 @@ ctx.fillRect(0, 0, 10, 10);
     </p>
 
 <pre class="prettyprint">
-coquette.entities.create(BackgroundTile, { zindex: -1 });
-coquette.entities.create(Player, { zindex: 1 }); // drawn on top
+c.entities.create(BackgroundTile, { zindex: -1 });
+c.entities.create(Player, { zindex: 1 }); // drawn on top
 </pre>
 
     <h5>Move the view</h5>
@@ -198,9 +198,9 @@ coquette.entities.create(Player, { zindex: 1 }); // drawn on top
 
 <pre class="prettyprint">
 var Game = function() {
-  var coquette = new Coquette(this, "canvas", 500, 500, "#000");
+  var c = new Coquette(this, "canvas", 500, 500, "#000");
   var specialObject;
-  coquette.entities.create(SpecialObject, {}, function(obj) {
+  c.entities.create(SpecialObject, {}, function(obj) {
     specialObject = obj;
   });
 
@@ -216,7 +216,7 @@ var Game = function() {
 
     <h5>Create an entity</h5>
 
-    <p>Call <code>coquette.entities.create()</code> with:</p>
+    <p>Call <code>c.entities.create()</code> with:</p>
 
     <ul>
       <li>The constructor function of the object you want to create, e.g. <code>Bubble</code>.  When this constructor is called, it will get passed the main game object and a settings object.</li>
@@ -231,7 +231,7 @@ var Bubble = function(game, settings) {
 };
 
 var myBubble;
-coquette.entities.create(Bubble, {
+c.entities.create(Bubble, {
   radius: 60
 }, function(bubble) {
   myBubble = bubble;
@@ -242,7 +242,7 @@ coquette.entities.create(Bubble, {
 
     <h5>Destroy an entity</h5>
 
-    <p>Call <code>coquette.entities.destroy()</code> with:</p>
+    <p>Call <code>c.entities.destroy()</code> with:</p>
 
     <ul>
       <li>The entity you want to destroy, e.g. <code>bubble</code>.</li>
@@ -250,7 +250,7 @@ coquette.entities.create(Bubble, {
     </ul>
 
 <pre class="prettyprint">
-coquette.entities.destroy(bubble, function() {
+c.entities.destroy(bubble, function() {
   console.log("boom");
 });
 </pre>
@@ -260,13 +260,13 @@ coquette.entities.destroy(bubble, function() {
     <h5>Get all the entities in the game</h5>
 
 <pre class="prettyprint">
-var all = coquette.entities.all();
+var all = c.entities.all();
 </pre>
 
     <h5>Get all the entities of a certain type</h5>
 
 <pre class="prettyprint">
-var player = coquette.entities.all(Player)[0];
+var player = c.entities.all(Player)[0];
 </pre>
 
 
@@ -281,13 +281,13 @@ var player = coquette.entities.all(Player)[0];
     <ul>
       <li><code>pos</code>: the top left corner of the entity, e.g.: <code>{ x: 10, y: 20 }</code>.</li>
       <li><code>size</code>: the size of the entity, e.g.: <code>{ x: 50, y: 30 }</code>.</li>
-      <li><code>boundingBox</code>: the shape that best approximates the shape of the entity, either <code>coquette.collider.RECTANGLE</code> or <code>coquette.collider.CIRCLE</code>.</li>
+      <li><code>boundingBox</code>: the shape that best approximates the shape of the entity, either <code>c.collider.RECTANGLE</code> or <code>c.collider.CIRCLE</code>.</li>
     </ul>
 
     <p>And, optionally, these methods:</p>
 
     <ul>
-      <li><code>collision(other, type)</code>: called when the entity collides with another entity.  Takes <code>other</code>, the other entity involved in the collision.  Takes <code>type</code>, which will be <code>coquette.collider.INITIAL</code> if the entities were not colliding in the previous tick, or <code>coquette.collider.SUSTAINED</code> if the entities were colliding in the previous tick.</li>
+      <li><code>collision(other, type)</code>: called when the entity collides with another entity.  Takes <code>other</code>, the other entity involved in the collision.  Takes <code>type</code>, which will be <code>c.collider.INITIAL</code> if the entities were not colliding in the previous tick, or <code>c.collider.SUSTAINED</code> if the entities were colliding in the previous tick.</li>
       <li><code>uncollision(other)</code>: called when the entity was colliding with <code>other</code> in the last tick, but is no longer.</li>
     </ul>
 
@@ -297,12 +297,12 @@ var player = coquette.entities.all(Player)[0];
 var Player = function() {
   this.pos = { x: 10, y: 20 };
   this.size = { x: 50, y: 30 };
-  this.boundingBox = coquette.collider.CIRCLE;
+  this.boundingBox = c.collider.CIRCLE;
 
   this.collision = function(other, type) {
-    if (type === coquette.collider.INITIAL) {
+    if (type === c.collider.INITIAL) {
       console.log("Ow,", other, "hit me.");
-    } else if (type === coquette.collider.SUSTAINED) {
+    } else if (type === c.collider.SUSTAINED) {
       console.log("Ow,", other, "is still hitting me.");
     }
   };
