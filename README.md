@@ -2,7 +2,7 @@
 
 A micro framework for JavaScript games.
 
-Handles collision detection, the game update loop, keyboard input and canvas rendering.
+Handles collision detection, the game update loop, canvas rendering, and keyboard and mouse input.
 
 http://coquette.maryrosecook.com
 
