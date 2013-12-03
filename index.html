@@ -67,18 +67,19 @@
     The game code:
 
 <pre class="prettyprint">
-var Game = function() {
-  var coq = new Coquette(this, "canvas", 500, 150, "#000");
+var Game = function(autoFocus) {
+  var coq = new Coquette(this, "canvas", 500, 150, "#000", autoFocus);
 
-  coq.entities.create(Person, { pos:{ x:243, y:40 }, color:"#099" }); // paramour
-  coq.entities.create(Person, { pos:{ x:249, y:110 }, color:"#f07", // player
+  coq.entities.create(Person, { center: { x:250, y:40 }, color:"#099" }); // paramour
+  coq.entities.create(Person, { center: { x:256, y:110 }, color:"#f07", // player
     update: function() {
-      if (coq.inputter.down(coq.inputter.UP_ARROW)) {
-        this.pos.y -= 0.4;
+      if (coq.inputter.isDown(coq.inputter.UP_ARROW)) {
+        this.center.y -= 0.4;
       }
     },
+
     collision: function(other) {
-      other.pos.y = this.pos.y; // follow the player
+      other.center.y = this.center.y; // follow the player
     }
   });
 };
@@ -87,10 +88,11 @@ var Person = function(_, settings) {
   for (var i in settings) {
     this[i] = settings[i];
   }
+
   this.size = { x:9, y:9 };
   this.draw = function(ctx) {
     ctx.fillStyle = settings.color;
-    ctx.fillRect(this.pos.x, this.pos.y, this.size.x, this.size.y);
+    ctx.fillRect(this.center.x, this.center.y, this.size.x, this.size.y);
   };
 };
 
