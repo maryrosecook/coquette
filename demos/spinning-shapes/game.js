@@ -13,7 +13,7 @@
       var viewSize = this.c.renderer.getViewSize();
       var viewCenter = this.c.renderer.getViewCenter();
 
-      if (this.c.entities.all().length < 20) { // not enough shapes
+      if (this.c.entities.all().length < 15) { // not enough shapes
         var dirFromCenter = randomDirection();
         var Shape = Math.random() > 0.5 ? Rectangle : Circle;
         this.c.entities.create(Shape, { // make one
