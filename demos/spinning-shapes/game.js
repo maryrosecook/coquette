@@ -157,7 +157,9 @@
         }
       };
 
-      target.startDrag();
+      if (target.startDrag !== undefined) {
+        target.startDrag();
+      }
     },
 
     _stopDrag: function() {
