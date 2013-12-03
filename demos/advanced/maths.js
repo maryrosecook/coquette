@@ -38,22 +38,23 @@ Maths.prototype = {
     return Math.sqrt((x * x) + (y * y));
   },
 
+  // returns magnitude of passed vector
+  magnitude: function(vector) {
+    return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
   },
 
+  normalise: function(vector) {
+    var magnitude = this.magnitude(vector);
+    if (magnitude === 0) {
+      return { x: 0, y: 0 };
+    } else {
+      return {
+        x: vector.x / this.magnitude(vector),
+        y: vector.y / this.magnitude(vector)
+      };
     }
-
-    return angle;
-  },
-
-  normalise: function(vec) {
-    var v = this.vToSyl(vec).toUnitVector();
-    return this.vFromSyl(v);
   },
 
   degToRad: function(degrees) { return 0.01745 * degrees; },
   radToDeg: function(rad) { return rad / 0.01745; },
-
-  // from and to Sylvester
-  vToSyl: function(vec) { return $V([vec.x, vec.y || 0]); },
-  vFromSyl: function(vec) { return { x: vec.e(1), y: vec.e(2) } },
 };
