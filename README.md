@@ -138,7 +138,7 @@ When you create your entities, include some integer `zindex` attribute in the `s
 
 ##### Move the view
 
-You can use `coquette.renderer.setViewCenterPos()` to move the position of the view around the world.  For example, to make the view follow a specific object, you could call `setViewCenterPos(specificObj.pos)` in the `update()` function of your game:
+You can use `c.renderer.setViewCenter()` to move the position of the view around the world.  For example, to make the view follow a specific object, you could call `setViewCenter(specificObj.pos)` in the `update()` function of your game:
 
 ```javascript
   var Game = function() {
@@ -149,7 +149,7 @@ You can use `coquette.renderer.setViewCenterPos()` to move the position of the v
     });
 
     this.update = function() {
-      coquette.renderer.setViewCenterPos(specialObject.pos);
+      c.renderer.setViewCenter(specialObject.pos);
     };
   };
 ```
