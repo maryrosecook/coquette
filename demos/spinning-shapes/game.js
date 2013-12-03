@@ -126,7 +126,7 @@
       if (this.c.inputter.isDown(this.c.inputter.LEFT_MOUSE)) {
         if (!this._isDragging()) {
           var mousePosition = this.c.inputter.getMousePosition();
-          var target = this._getTarget(this.c.entities.all(), mousePosition)
+          var target = this._getTarget(this.c.entities.all(), mousePosition);
           if (target !== undefined) {
             this._startDrag(target, mousePosition);
           }
