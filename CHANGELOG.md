@@ -1,3 +1,27 @@
+0.3.0 / 2013-12-02
+
+* [BREAKING CHANGE] The `center` attribute on an entity is now used to indicate the entity's position (center). This replaces the `pos` attribute.
+
+* [BREAKING CHANGE] `c.inputter.state()` no longer supported. Replaced by `c.inputter.isDown()`.
+
+* [BREAKING CHANGE] `c.inputter.down()` is now called `c.inputter.isDown()`.
+
+* [BREAKING CHANGE] `c.inputter.pressed()` is now called `c.inputter.isPressed()`.
+
+* [BREAKING CHANGE] `c.renderer.getViewCenterPos()` is now called `c.renderer.getViewCenter()`.
+
+* [BREAKING CHANGE] `c.renderer.setViewCenterPos()` is now called `c.renderer.setViewCenter()`.
+
+* [BREAKING CHANGE] The `c.collider.POINT` bounding box is no longer supported.
+
+* [NEW] Collision detection works for rotated entities with a `c.collider.RECTANGLE` bounding boxes.  (Orientation doesn't matter for entities with a `c.collider.CIRCLE` bounding box.) Set an `angle` attribute on a rectangular entity to indicate its orientation in degrees.  It will get checked for collisions at that orientation.
+
+* [NEW] Entities that rotate get drawn at the right orientation.  Set an `angle` attribute on an entity to indicate its orientation in degrees.  Draw it upright.  The drawing will get rotated to the correct orientation.
+
+* [NEW] Input from mouse clicks and mouse moves is supported.
+
+* [NEW] Spinning shapes demo demonstrating mouse move input and collision detection for rotated entities.  Running on the Coquette homepage.
+
 0.2.1 / 2013-11-19
 
 * [BREAKING CHANGE] Several object attributes renamed to discourage use from outside:
