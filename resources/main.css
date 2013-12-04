@@ -15,18 +15,16 @@ h1 { font-size: 55px; font-weight:normal;
      margin-left:auto; margin-right:auto; text-align:center;
      margin-top:0; margin-bottom:0;
    }
-h2 { font-size: 30px; font-weight:normal; margin: 8px 0 2px -2px; }
-h3 { font-size: 23px; font-weight:normal; margin-top:16px; margin-bottom:16px;  }
-h4 { font-size: 19px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
-h5 { font-size: 14px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
+h2 { font-size: 30px; line-height: 30px; font-weight:normal; margin: 10px 0 2px -2px; }
+h3 { font-size: 24px; line-height: 24px; font-weight:normal; margin-top:16px; margin-bottom:14px;  }
+h4 { font-size: 21px; line-height: 21px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
+h5 { font-size: 16px; line-height: 16px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
 
-code { font-size:13px; }
+code { font-family: 'monaco', 'courier'; font-size:12px; }
 
 p { line-height:15px; margin:8px 0 8px 0; }
 
 hr { color: #aaa; background-color:#aaa; height:1px; border:0; }
-
-img { margin:10px 0 10px 0; }
 
 .footer { width:100px; margin-left: auto; margin-right: auto;  }
 
@@ -42,6 +40,6 @@ pre {
 }
 
 ul { padding-left: 25px; }
-li { padding: 3px 0 3px 0; }
+li { padding: 2px 0; }
 
 .demo { padding:11px 0 7px 0; }
