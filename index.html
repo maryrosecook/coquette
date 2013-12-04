@@ -8,19 +8,15 @@
 
     <script type="text/javascript" src="resources/prettify.js"></script>
 
-    <script type="text/javascript" src="coquette.js"></script>
-    <script type="text/javascript" src="demos/simple/game.js"></script>
-    <script type="text/javascript" src="demos/spinning-shapes/game.js"></script>
+    <script src="resources/head.loader.js"></script>
     <script type="text/javascript">
-      window.addEventListener('load', function() {
-        new SimpleGame(false);
-      });
-    </script>
-
-    <script type="text/javascript">
-      window.addEventListener('load', function() {
-        new SpinningShapesGame();
-      });
+      head.js("/coquette.js",
+              "/demos/simple/game.js",
+              "/demos/spinning-shapes/game.js",
+              function() {
+                new SimpleGame(false);
+                new SpinningShapesGame(false);
+              });
     </script>
   </head>
 
