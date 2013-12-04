@@ -21,12 +21,10 @@
   </head>
 
   <body onload="prettyPrint()">
-    <a href="https://github.com/maryrosecook/coquette"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png" alt="Fork me on GitHub"></a>
+    <a href="https://github.com/maryrosecook/coquette"><img style="position: absolute; top: 0; left: 0; border: 0;" src="/resources/forkme_left_darkblue_121621.png" alt="Fork me on GitHub"></a>
 
     <h1>Coquette</h1>
     <hr/>
-    <h2>About</h2>
-
     <p>A micro framework for JavaScript games.</p>
 
     <p>Handles collision detection, the game update loop, canvas rendering, and keyboard and mouse input.</p>
@@ -47,7 +45,7 @@
 
     <p>A game where you, the valiant player, must find a person of indeterminate gender in distress so you can take them away from all this.  Click on the game, then press the up arrow key to play.</p>
 
-    An HTML page that includes the Coquette library and the game code:
+    <p>An HTML page that includes a canvas element, the Coquette library and the game code:</p>
 
 <pre class="prettyprint">
 &lt;!DOCTYPE html&gt;
@@ -60,16 +58,19 @@
 &lt;/html&gt;
 </pre>
 
-    The game code:
+    <p>The game code:</p>
 
 <pre class="prettyprint">
-var Game = function(autoFocus) {
-  var c = new Coquette(this, "canvas", 500, 150, "#000", autoFocus);
+var Game = function() {
+  this.c = new Coquette(this, "canvas", 500, 150, "#000");
 
-  c.entities.create(Person, { center: { x:250, y:40 }, color:"#099" }); // paramour
-  c.entities.create(Person, { center: { x:256, y:110 }, color:"#f07", // player
+  // paramour
+  this.c.entities.create(Person, { center: { x:250, y:40 }, color:"#099" });
+
+  // player
+  this.c.entities.create(Person, { center: { x:256, y:110 }, color:"#f07",
     update: function() {
-      if (c.inputter.isDown(c.inputter.UP_ARROW)) {
+      if (this.c.inputter.isDown(this.c.inputter.UP_ARROW)) {
         this.center.y -= 0.4;
       }
     },
@@ -80,7 +81,8 @@ var Game = function(autoFocus) {
   });
 };
 
-var Person = function(_, settings) {
+var Person = function(game, settings) {
+  this.c = game.c;
   for (var i in settings) {
     this[i] = settings[i];
   }
@@ -93,7 +95,7 @@ var Person = function(_, settings) {
 };
 
 window.addEventListener('load', function() {
-  new Game();
+  new Game(false);
 });
 </pre>
 
@@ -101,14 +103,14 @@ window.addEventListener('load', function() {
 
     <p>
       Coquette handles collision detection for rotated entities.
-      It also handles keyboard and mouse input.
+      It also handles mouse (and keyboard) input.
       Try dragging a shape in the demo below.
     </p>
 
     <div class="demo"><canvas id="spinning-shapes-canvas"></canvas></body></div>
 
     <p>
-      This is a full game.  Click the image to play.
+      Below is a full game.  Click the image to play.
     </p>
 
     <p><a href='demos/advanced/' style="border:none;">
@@ -117,9 +119,9 @@ window.addEventListener('load', function() {
 
     <h2>Reference</h2>
 
-    <h3>Getting started</h3>
+    <h3>Instantiate Coquette</h3>
 
-    <p>Instantiate Coquette, passing in:</p>
+    <p>Pass in:</p>
 
     <ul>
       <li>Your main game object.</li>
@@ -130,128 +132,110 @@ window.addEventListener('load', function() {
     </ul>
 
 <pre class="prettyprint">
-var c = new Coquette(game, "canvas", 150, 150, "#000");
+var YourGame = function() {
+  this.c = new Coquette(this, "canvas", 150, 150, "#000");
+};
 </pre>
 
     <h3>Modules</h3>
 
     <p>When you instantiate Coquette, you get an object that has five modules. You can use these modules in your game.</p>
 
-    <h4>Inputter</h4>
+    <h4>Entities</h4>
 
-    Handles keyboard input from the player.
+    <p>Keeps track of all the entities in the game: the player, enemies, obstacles.</p>
 
-    <h5>Find out if a certain key is pressed</h5>
+    <h5>Define an entity</h5>
 
-    Call <code>c.inputter.down()</code>, passing in the key's code, e.g.:
+    <p>Most entities will have these attributes:</p>
 
-<pre class="prettyprint">
-var down = c.inputter.down(c.inputter.LEFT_ARROW);
-</pre>
+    <ul>
+      <li><code>center</code>: The center of the entity, e.g. <code>{ x: 10, y: 20 }</code></li>
+      <li><code>size</code>: The size of the entity, e.g. <code>{ x: 50, y: 30 }</code></li>
+      <li><code>angle</code>: The orientation of the entity in degrees, e.g. <code>30</code></li>
+    </ul>
 
-    <h5>Find out if a certain key was pressed down and then released</h5>
+    <p>And these methods:</p>
 
-    Call <code>c.inputter.pressed()</code>, passing in the key's code, e.g.:
+    <ul>
+      <li><code>update(timeSinceLastTick)</code>: Called every tick.  You should change the state of the entity in this method.</li>
+      <li><code>draw(canvasCtx)</code>: Called every tick.  You should draw the entity upright in this method.  The drawing will automatically get rotated to the orientation indicated by <code>angle</code>.</li>
+    </ul>
 
-<pre class="prettyprint">
-var pressed = c.inputter.pressed(c.inputter.LEFT_ARROW);
-</pre>
-
-    <h4>Ticker</h4>
-
-    <p>Does a tick - an iteration of the game update loop - sixty times a second.  If the main game object or a game entity has an <code>update()</code> function, it will get called on each tick.  If the main game object or a game entity has a <code>draw()</code> function, it will get called on each tick.
-    </p>
-
-
-    <h4>Renderer</h4>
-
-    <p>Holds the canvas drawing context.  Calls <code>draw()</code> on the main game object and all game entities.</p>
-
-    <h5>Get the canvas drawing context</h5>
+    <p>For example:</p>
 
 <pre class="prettyprint">
-var ctx = c.renderer.getCtx();
-ctx.fillStyle = "#f00";
-ctx.fillRect(0, 0, 10, 10);
-</pre>
+var Block = function(game, settings) {
+  this.game = game;
+  this.center = settings.center;
+  this.size = settings.size;
+  this.angle = 30;
+};
 
-    <h5>Set the order that entities are drawn</h5>
+Block.prototype = {
+  update: function(timeSinceLastTick) {
+    this.center.x += 0.02 * timeSinceLastTick;
+    this.center.y += 0.02 * timeSinceLastTick;
+  },
 
-    <p>
-      When you create your entities, include some integer <code>zindex</code> attribute in the <code>settings</code> object.  An entity with a higher <code>zindex</code> will get drawn on top of an entity with a lower <code>zindex</code>.  The default <code>zindex</code> is <code>0</code>.
-    </p>
-
-<pre class="prettyprint">
-c.entities.create(BackgroundTile, { zindex: -1 });
-c.entities.create(Player, { zindex: 1 }); // drawn on top
-</pre>
-
-    <h5>Move the view</h5>
-
-    <p>
-      You can use <code>c.renderer.setViewCenter()</code> to move the position of the view around the world.  For example, to make the view follow a specific object, you could call <code>setViewCenter(specificObj.pos)</code> in the <code>update()</code> function of your game:
-    </p>
-
-<pre class="prettyprint">
-var Game = function() {
-  var c = new Coquette(this, "canvas", 500, 500, "#000");
-  var specialObject;
-  c.entities.create(SpecialObject, {}, function(obj) {
-    specialObject = obj;
-  });
-
-  this.update = function() {
-    c.renderer.setViewCenter(specialObject.pos);
-  };
+  draw: function(canvasCtx) {
+    ctx.fillStyle = "black";
+    ctx.fillRect(this.center.x - this.size.x / 2,
+                 this.center.y - this.size.y / 2,
+                 this.size.x,
+                 this.size.y);
+  }
 };
 </pre>
 
-    <h4>Entities</h4>
-
-    <p>Keeps track of all game entities: the player, enemies.</p>
+    <p>See the Collider section for instructions on enabling collision detection.</p>
 
     <h5>Create an entity</h5>
 
     <p>Call <code>c.entities.create()</code> with:</p>
 
     <ul>
-      <li>The constructor function of the object you want to create, e.g. <code>Bubble</code>.  When this constructor is called, it will get passed the main game object and a settings object.</li>
-      <li>An optional settings object, e.g. <code>{ radius: 60 }</code>.</li>
+      <li>The constructor function of the entity you want to create, e.g. <code>Block</code>.  When this constructor is called, it will get passed the main game object and a settings object.</li>
+      <li>An optional settings object, e.g.<br/>
+        <code>{ center: { x: 5, y: 10 }, size: { x: 10, y: 30 } }</code>.</li>
       <li>An optional callback that will be called when the object is created.  This function will receive the created entity as an argument.</li>
     </ul>
 
 <pre class="prettyprint">
-var Bubble = function(game, settings) {
+var Block = function(game, settings) {
   this.game = game;
-  this.radius = settings.radius;
+  this.center = settings.center;
+  this.size = settings.size;
+  this.angle = 0;
 };
 
-var myBubble;
-c.entities.create(Bubble, {
-  radius: 60
-}, function(bubble) {
-  myBubble = bubble;
+var myBlock;
+c.entities.create(Block, {
+  center: { x: 5, y: 10 },
+  size: { x: 10, y: 30 }
+}, function(block) {
+  myBlock = block;
 });
 </pre>
 
-    <p>When you create an entity with the <code>Entities</code> module, the entity will not actually get created until the next tick.  This avoids logical and collision detection problems that arise from creating an entity mid-tick.</p>
+    <p>When you create an entity with the <code>Entities</code> module, the entity will not actually get created until the next tick.  This avoids problems with logic and collision detection that arise from creating an entity mid-tick.</p>
 
     <h5>Destroy an entity</h5>
 
     <p>Call <code>c.entities.destroy()</code> with:</p>
 
     <ul>
-      <li>The entity you want to destroy, e.g. <code>bubble</code>.</li>
+      <li>The entity you want to destroy, e.g. <code>myBlock</code>.</li>
       <li>An optional callback that will be called when the object is destroyed.</li>
     </ul>
 
 <pre class="prettyprint">
-c.entities.destroy(bubble, function() {
+c.entities.destroy(myBlock, function() {
   console.log("boom");
 });
 </pre>
 
-    <p>When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids logical and collision detection problems that arise from destroying an entity mid-tick.</p>
+    <p>When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids problems with logic and collision detection that arise from destroying an entity mid-tick.</p>
 
     <h5>Get all the entities in the game</h5>
 
@@ -265,47 +249,147 @@ var all = c.entities.all();
 var player = c.entities.all(Player)[0];
 </pre>
 
+    <h4>Inputter</h4>
+
+    <p>Handles keyboard and mouse input from the player.</p>
+
+    <h5>Find out if a certain key or mouse button is down</h5>
+
+<pre class="prettyprint">
+var leftArrowDown = c.inputter.isDown(c.inputter.LEFT_ARROW);
+var rightMouseDown = c.inputter.isDown(c.inputter.RIGHT_MOUSE);
+</pre>
+
+    <h5>Find out if a certain key or mouse button is pressed</h5>
+
+<pre class="prettyprint">
+var leftArrowPressed = c.inputter.isPressed(c.inputter.LEFT_ARROW);
+var rightMousePressed = c.inputter.isPressed(c.inputter.RIGHT_MOUSE);
+</pre>
+
+    <p>This is true for one tick when the key goes down.  Subsequently, it is false until the key is released and pressed down again.</p>
+
+    <h5>Run a function every time the mouse is moved</h5>
+
+<pre class="prettyprint">
+c.inputter.bindMouseMove(function(position) {
+  console.log("The mouse is at", position.x, position.y);
+});
+</pre>
+
+    <p><code>position</code> is relative to the game canvas.  If the mouse pointer is in the top left corner, position will be <code>{ x: 0, y: 0 }</code>.</p>
+
+    <h5>Get the current mouse position</h5>
+
+<pre class="prettyprint">
+var position = c.inputter.getMousePosition();
+</pre>
+
+    <p><code>position</code> is relative to the game canvas.  If the mouse pointer is in the top left corner, position will be <code>{ x: 0, y: 0 }</code>.</p>
+
+    <h4>Ticker</h4>
+
+    <p>Does a tick - an iteration of the game update loop - sixty times a second.  If the main game object or a game entity has an <code>update()</code> function, it will get called on each tick.  If the main game object or a game entity has a <code>draw()</code> function, it will get called on each tick.</p>
+
+    <h4>Renderer</h4>
+
+    <p>Holds the canvas drawing context.  Calls <code>draw()</code> on the main game object and all the game entities.</p>
+
+    <h5>Draw an entity</h5>
+
+    <p>See the Define an Entity sub-section of the Entities section.</p>
+
+    <h5>Get the canvas drawing context</h5>
+
+<pre class="prettyprint">
+var ctx = c.renderer.getCtx();
+ctx.fillStyle = "#f00";
+ctx.fillRect(0, 0, 10, 10);
+</pre>
+
+    <h5>Set the order that entities are drawn</h5>
+
+    <p>
+      When you create your entities, set an integer <code>zindex</code> attribute on them.  An entity with a higher <code>zindex</code> will get drawn on top of an entity with a lower <code>zindex</code>.  The default <code>zindex</code> is <code>0</code>.
+    </p>
+
+<pre class="prettyprint">
+var BackgroundTile = function() {
+  this.zindex = -1;
+};
+
+var Player = function() {
+  this.zindex = 0;
+};
+
+c.entities.create(BackgroundTile, {});
+c.entities.create(Player, {}); // drawn on top
+</pre>
+
+    <h5>Move the view</h5>
+
+    <p>
+      You can use <code>c.renderer.setViewCenter()</code> to move the view around the world.  For example, to make the view follow a specific object, you could call <code>setViewCenter(specificObj.center)</code> in the <code>update()</code> function of your game:
+    </p>
+
+<pre class="prettyprint">
+var Game = function() {
+  var c = new Coquette(this, "canvas", 500, 500, "#000");
+  var specialObject;
+  c.entities.create(SpecialObject, {}, function(obj) {
+    specialObject = obj;
+  });
+
+  this.update = function() {
+    c.renderer.setViewCenter(specialObject.center);
+  };
+};
+</pre>
 
     <h4>Collider</h4>
 
-    <p>Reports when two entities collide.</p>
+    <p>Reports when entities collide.</p>
 
     <h5>Entity setup</h5>
 
     <p>To make an entity support collisions, put these attributes on it:</p>
 
     <ul>
-      <li><code>pos</code>: the top left corner of the entity, e.g.: <code>{ x: 10, y: 20 }</code>.</li>
-      <li><code>size</code>: the size of the entity, e.g.: <code>{ x: 50, y: 30 }</code>.</li>
-      <li><code>boundingBox</code>: the shape that best approximates the shape of the entity, either <code>c.collider.RECTANGLE</code> or <code>c.collider.CIRCLE</code>.</li>
+      <li><code>center</code>: The center of the entity, e.g. <code>{ x: 10, y: 20 }</code>.</li>
+      <li><code>size</code>: The size of the entity, e.g. <code>{ x: 50, y: 30 }</code>.</li>
+      <li><code>boundingBox</code>: The shape that best approximates the shape of the entity, either <code>c.collider.RECTANGLE</code> or <code>c.collider.CIRCLE</code>.</li>
+      <li><code>angle</code>: The orientation of the entity in degrees, e.g. <code>30</code>.</li>
     </ul>
 
     <p>And, optionally, these methods:</p>
 
     <ul>
-      <li><code>collision(other, type)</code>: called when the entity collides with another entity.  Takes <code>other</code>, the other entity involved in the collision.  Takes <code>type</code>, which will be <code>c.collider.INITIAL</code> if the entities were not colliding in the previous tick, or <code>c.collider.SUSTAINED</code> if the entities were colliding in the previous tick.</li>
-      <li><code>uncollision(other)</code>: called when the entity was colliding with <code>other</code> in the last tick, but is no longer.</li>
+      <li><code>collision(other, type)</code>: Called when the entity collides with another entity.  Takes <code>other</code>, the other entity involved in the collision.  Takes <code>type</code>, which will be <code>c.collider.INITIAL</code> if the entities were not colliding in the previous tick, or <code>c.collider.SUSTAINED</code> if the entities were colliding in the previous tick.</li>
+      <li><code>uncollision(other)</code>: Called when the entity stops colliding with another entity.  Takes <code>other</code>, the other entity involved in the collision.</li>
     </ul>
 
-    <p>e.g.:</p>
+    <p>For example:</p>
 
 <pre class="prettyprint">
 var Player = function() {
-  this.pos = { x: 10, y: 20 };
-  this.size = { x: 50, y: 30 };
+  this.center = { x: 10, y: 20 };
+  this.size = { x: 50, y: 50 };
   this.boundingBox = c.collider.CIRCLE;
+  this.angle = 0;
+};
 
-  this.collision = function(other, type) {
+Player.prototype = {
+  collision: function(other, type) {
     if (type === c.collider.INITIAL) {
       console.log("Ow,", other, "hit me.");
     } else if (type === c.collider.SUSTAINED) {
       console.log("Ow,", other, "is still hitting me.");
     }
-  };
+  },
 
-  this.uncollision = function(other) {
+  uncollision: function(other) {
     console.log("Phew,", other, "has stopped hitting me.");
-  };
+  }
 };
 </pre>
 

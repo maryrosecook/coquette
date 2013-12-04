@@ -34,12 +34,15 @@ The game code:
 
 ```javascript
 var Game = function() {
-  var c = new Coquette(this, "canvas", 500, 150, "#000");
+  this.c = new Coquette(this, "canvas", 500, 150, "#000");
 
-  c.entities.create(Person, { center: { x: 250, y: 40 }, color: "#099" }); // paramour
-  c.entities.create(Person, { center: { x: 256, y: 110 }, color: "#f07", // player
+  // paramour
+  this.c.entities.create(Person, { center: { x:250, y:40 }, color:"#099" });
+
+  // player
+  this.c.entities.create(Person, { center: { x:256, y:110 }, color:"#f07",
     update: function() {
-      if (c.inputter.isDown(c.inputter.UP_ARROW)) {
+      if (this.c.inputter.isDown(this.c.inputter.UP_ARROW)) {
         this.center.y -= 0.4;
       }
     },
@@ -51,11 +54,12 @@ var Game = function() {
 };
 
 var Person = function(game, settings) {
+  this.c = game.c;
   for (var i in settings) {
     this[i] = settings[i];
   }
 
-  this.size = { x: 9, y: 9 };
+  this.size = { x:9, y:9 };
   this.draw = function(ctx) {
     ctx.fillStyle = settings.color;
     ctx.fillRect(this.center.x, this.center.y, this.size.x, this.size.y);
@@ -63,15 +67,15 @@ var Person = function(game, settings) {
 };
 
 window.addEventListener('load', function() {
-  new Game();
+  new Game(false);
 });
 ```
 
 ## Reference
 
-### Getting started
+### Instantiate Coquette
 
-Instantiate Coquette, passing in:
+Pass in:
 
 * Your main game object.
 * The ID of the canvas element, e.g. `"canvas"`.
@@ -80,7 +84,9 @@ Instantiate Coquette, passing in:
 * The background colour of your game, e.g. `"#000"`.
 
 ```javascript
-var c = new Coquette(game, "canvas", 150, 150, "#000");
+var YourGame = function() {
+  this.c = new Coquette(this, "canvas", 150, 150, "#000");
+};
 ```
 
 ### Modules
@@ -89,7 +95,7 @@ When you instantiate Coquette, you get an object that has five modules. You can 
 
 #### Entities
 
-Keeps track of all entities in the game: the player, enemies, obstacles.
+Keeps track of all the entities in the game: the player, enemies, obstacles.
 
 ##### Define an entity
 
@@ -131,13 +137,13 @@ Block.prototype = {
 
 ```
 
-See the `Collider` section for instructions on enabling collision detection.
+See the Collider section for instructions on enabling collision detection.
 
 ##### Create an entity
 
 Call `c.entities.create()` with:
 
-* The constructor function of the object you want to create, e.g. `Block`.  When this constructor is called, it will get passed the main game object and a settings object.
+* The constructor function of the entity you want to create, e.g. `Block`.  When this constructor is called, it will get passed the main game object and a settings object.
 * An optional settings object, e.g. `{ center: { x: 5, y: 10 }, size: { x: 10, y: 30 } }`.
 * An optional callback that will be called when the object is created.  This function will receive the created entity as an argument.
 
@@ -158,7 +164,7 @@ c.entities.create(Block, {
 });
 ```
 
-When you create an entity with the `Entities` module, the entity will not actually get created until the next tick.  This avoids logical and collision detection problems that arise from creating an entity mid-tick.
+When you create an entity with the `Entities` module, the entity will not actually get created until the next tick.  This avoids problems with logic and collision detection that arise from creating an entity mid-tick.
 
 ##### Destroy an entity
 
@@ -173,7 +179,7 @@ c.entities.destroy(myBlock, function() {
 });
 ```
 
-When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids logical and collision detection problems that arise from destroying an entity mid-tick.
+When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids problems with logic and collision detection that arise from destroying an entity mid-tick.
 
 ##### Get all the entities in the game
 
@@ -193,8 +199,6 @@ Handles keyboard and mouse input from the player.
 
 ##### Find out if a certain key or mouse button is down
 
-Call `c.inputter.isDown()`, passing in the key code or mouse button code, e.g.:
-
 ```javascript
 var leftArrowDown = c.inputter.isDown(c.inputter.LEFT_ARROW);
 var rightMouseDown = c.inputter.isDown(c.inputter.RIGHT_MOUSE);
@@ -202,18 +206,14 @@ var rightMouseDown = c.inputter.isDown(c.inputter.RIGHT_MOUSE);
 
 ##### Find out if a certain key or mouse button is pressed
 
-Call `c.inputter.isPressed()`, passing in the key code or mouse button code, e.g.:
-
 ```javascript
 var leftArrowPressed = c.inputter.isPressed(c.inputter.LEFT_ARROW);
 var rightMousePressed = c.inputter.isPressed(c.inputter.RIGHT_MOUSE);
 ```
 
-This is true for one tick when the key goes down.  It is subsequently false until the key is released and pressed down again.
+This is true for one tick when the key goes down.  Subsequently, it is false until the key is released and pressed down again.
 
 ##### Run a function every time the mouse is moved
-
-Call `c.inputter.bindMouseMove()`, passing in the function to be called when the mouse moves, e.g.:
 
 ```javascript
 c.inputter.bindMouseMove(function(position) {
@@ -224,8 +224,6 @@ c.inputter.bindMouseMove(function(position) {
 `position` is relative to the game canvas.  If the mouse pointer is in the top left corner, position will be `{ x: 0, y: 0 }`.
 
 ##### Get the current mouse position
-
-Call `c.inputter.getMousePosition()`, e.g.:
 
 ```javascript
 var position = c.inputter.getMousePosition();
@@ -239,11 +237,11 @@ Does a tick - an iteration of the game update loop - sixty times a second.  If t
 
 #### Renderer
 
-Holds the canvas drawing context.  Calls `draw()` on the main game object and all game entities.
+Holds the canvas drawing context.  Calls `draw()` on the main game object and all the game entities.
 
 ##### Draw an entity
 
-See the 'Define an entity' sub-section of the 'Entities' section for more information.
+See the Define an Entity sub-section of the Entities section.
 
 ##### Get the canvas drawing context
 
@@ -255,7 +253,7 @@ See the 'Define an entity' sub-section of the 'Entities' section for more inform
 
 ##### Set the order that entities are drawn
 
-When you create your entities, set some integer `zindex` attribute on them.  An entity with a higher `zindex` will get drawn on top of an entity with a lower `zindex`.  The default `zindex` is `0`.
+When you create your entities, set an integer `zindex` attribute on them.  An entity with a higher `zindex` will get drawn on top of an entity with a lower `zindex`.  The default `zindex` is `0`.
 
 ```javascript
   var BackgroundTile = function() {
@@ -311,7 +309,7 @@ For example:
 ```javascript
 var Player = function() {
   this.center = { x: 10, y: 20 };
-  this.size = { x: 50, y: 30 };
+  this.size = { x: 50, y: 50 };
   this.boundingBox = c.collider.CIRCLE;
   this.angle = 0;
 };
