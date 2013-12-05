@@ -91,7 +91,7 @@ var YourGame = function() {
 
 ### Modules
 
-When you instantiate Coquette, you get an object that has five modules. You can use these modules in your game.
+When you instantiate Coquette, you get an object that has some modules. You can use these modules in your game.
 
 #### Entities
 
@@ -164,7 +164,7 @@ c.entities.create(Block, {
 });
 ```
 
-When you create an entity with the `Entities` module, the entity will not actually get created until the next tick.  This avoids problems with logic and collision detection that arise from creating an entity mid-tick.
+When you call `create()`, the entity will not get created until the next tick.
 
 ##### Destroy an entity
 
@@ -179,7 +179,7 @@ c.entities.destroy(myBlock, function() {
 });
 ```
 
-When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids problems with logic and collision detection that arise from destroying an entity mid-tick.
+When you call `destroy()`, the entity will not get destroyed until the next tick.
 
 ##### Get all the entities in the game
 
@@ -230,10 +230,6 @@ var position = c.inputter.getMousePosition();
 ```
 
 `position` is relative to the game canvas.  If the mouse pointer is in the top left corner, position will be `{ x: 0, y: 0 }`.
-
-#### Ticker
-
-Does a tick - an iteration of the game update loop - sixty times a second.  If the main game object or a game entity has an `update()` function, it will get called on each tick.  If the main game object or a game entity has a `draw()` function, it will get called on each tick.
 
 #### Renderer
 

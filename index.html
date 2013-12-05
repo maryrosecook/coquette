@@ -218,7 +218,7 @@ c.entities.create(Block, {
 });
 </pre>
 
-    <p>When you create an entity with the <code>Entities</code> module, the entity will not actually get created until the next tick.  This avoids problems with logic and collision detection that arise from creating an entity mid-tick.</p>
+    <p>When you call <code>create()</code>, the entity will not get created until the next tick.</p>
 
     <h5>Destroy an entity</h5>
 
@@ -235,7 +235,7 @@ c.entities.destroy(myBlock, function() {
 });
 </pre>
 
-    <p>When you destroy an entity, it will not actually get destroyed until the next tick.  This avoids problems with logic and collision detection that arise from destroying an entity mid-tick.</p>
+    <p>When you call <code>destroy()</code>, the entity will not get destroyed until the next tick.</p>
 
     <h5>Get all the entities in the game</h5>
 
@@ -286,10 +286,6 @@ var position = c.inputter.getMousePosition();
 </pre>
 
     <p><code>position</code> is relative to the game canvas.  If the mouse pointer is in the top left corner, position will be <code>{ x: 0, y: 0 }</code>.</p>
-
-    <h4>Ticker</h4>
-
-    <p>Does a tick - an iteration of the game update loop - sixty times a second.  If the main game object or a game entity has an <code>update()</code> function, it will get called on each tick.  If the main game object or a game entity has a <code>draw()</code> function, it will get called on each tick.</p>
 
     <h4>Renderer</h4>
 
