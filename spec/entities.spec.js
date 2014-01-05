@@ -56,7 +56,7 @@ describe('Entities', function() {
       expect(c.entities.all().length).toEqual(1);
     });
 
-    it('should be ok without passed callback', function() {
+    it('should be ok without passed settings ', function() {
       var c = new MockCoquette();
       c.entities.create(Thing);
       expect(c.entities.all().length).toEqual(1);
