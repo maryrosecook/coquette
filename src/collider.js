@@ -1,6 +1,6 @@
 ;(function(exports) {
   var Collider = function(coquette) {
-    this.coquette = coquette;
+    this.c = coquette;
   };
 
   // if no entities have uncollision(), skip expensive record keeping for uncollisions
@@ -25,7 +25,7 @@
       this._currentCollisionPairs = [];
 
       // get all entity pairs to test for collision
-      var ent = this.coquette.entities.all();
+      var ent = this.c.entities.all();
       for (var i = 0, len = ent.length; i < len; i++) {
         for (var j = i + 1; j < len; j++) {
           this._currentCollisionPairs.push([ent[i], ent[j]]);
@@ -45,7 +45,7 @@
 
     collision: function(entity1, entity2) {
       var collisionType;
-      if (!isUncollisionOn(this.coquette.entities.all())) {
+      if (!isUncollisionOn(this.c.entities.all())) {
         collisionType = this.INITIAL;
       } else if (this.getCollideRecordIds(entity1, entity2).length === 0) {
         this._collideRecords.push([entity1, entity2]);
@@ -59,7 +59,7 @@
     },
 
     createEntity: function(entity) {
-      var ent = this.coquette.entities.all();
+      var ent = this.c.entities.all();
       for (var i = 0, len = ent.length; i < len; i++) {
         if (ent[i] !== entity) { // decouple from when c.entities adds to _entities
           this._currentCollisionPairs.push([ent[i], entity]);

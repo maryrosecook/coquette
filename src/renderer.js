@@ -7,7 +7,7 @@
   }
 
   var Renderer = function(coquette, game, canvas, wView, hView, backgroundColor) {
-    this.coquette = coquette;
+    this.c = coquette;
     this.game = game;
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
@@ -52,7 +52,7 @@
 
       // draw game and entities
       var drawables = [this.game]
-        .concat(this.coquette.entities.all().concat().sort(zindexSort));
+        .concat(this.c.entities.all().concat().sort(zindexSort));
       for (var i = 0, len = drawables.length; i < len; i++) {
         if (drawables[i].draw !== undefined) {
           var drawable = drawables[i];

@@ -1,6 +1,6 @@
 ;(function(exports) {
   function Entities(coquette, game) {
-    this.coquette = coquette;
+    this.c = coquette;
     this.game = game;
     this._entities = [];
   };
@@ -32,7 +32,7 @@
 
     create: function(Constructor, settings, callback) {
       var entity = new Constructor(this.game, settings || {});
-      this.coquette.collider.createEntity(entity);
+      this.c.collider.createEntity(entity);
       this._entities.push(entity);
       return entity;
     },
@@ -40,7 +40,7 @@
     destroy: function(entity, callback) {
       for(var i = 0; i < this._entities.length; i++) {
         if(this._entities[i] === entity) {
-          this.coquette.collider.destroyEntity(entity);
+          this.c.collider.destroyEntity(entity);
           this._entities.splice(i, 1);
           break;
         }
