@@ -33,6 +33,165 @@ describe('collider', function() {
       }
     };
 
+    describe('changes to entity list during collision detection', function() {
+      describe('create', function() {
+        it('should not add coll pair for new entity with itself', function() {
+          var c = new MockCoquette();
+          var unmock = mock(c.collider, "isColliding", function(a, b) {
+            return true;
+          });
+
+          var haveCreatedEntity = false;
+          var others = [];
+          c.entities.create(Thing, { id: 0, collision: function() {
+            if (!haveCreatedEntity) {
+              haveCreatedEntity = true;
+              c.entities.create(Thing, { id: 2, collision: function(other) {
+                others.push(other);
+              }});
+            }
+          }});
+          c.entities.create(Thing, { id: 1 });
+
+          c.collider.update();
+          expect(others[0].id).toEqual(0);
+          expect(others[1].id).toEqual(1);
+          expect(others.length).toEqual(2);
+          unmock();
+        });
+
+        it('should do collisions for new entity during current round of coll detection', function() {
+          var c = new MockCoquette();
+          var unmock = mock(c.collider, "isColliding", function(a, b) {
+            return true;
+          });
+
+          var haveCreatedEntity = false;
+          var createdEntityCollisions = 0;
+          c.entities.create(Thing, { id: 0, collision: function() {
+            if (!haveCreatedEntity) {
+              haveCreatedEntity = true;
+              c.entities.create(Thing, { id: 2, collision: function(other) {
+                createdEntityCollisions++;
+              }});
+            }
+          }});
+          c.entities.create(Thing, { id: 1 });
+
+          c.collider.update();
+          expect(createdEntityCollisions).toEqual(2);
+          unmock();
+        });
+
+        it('should support uncolls by ordering pairs for created entity in same way as pairs for existing entities', function() {
+          var c = new MockCoquette();
+          var unmock = mock(c.collider, "isColliding", function(a, b) {
+            return true;
+          });
+
+          // start with two entities, do coll det and in process create third entity
+          var haveCreatedEntity = false;
+          var uncollisions = 0;
+          var createdEntity;
+          c.entities.create(Thing, { id: 0, collision: function() {
+            if (!haveCreatedEntity) {
+              haveCreatedEntity = true;
+              createdEntity = c.entities.create(Thing, { id: 2, uncollision: function() {
+                uncollisions++;
+              }});
+            }
+          }});
+          c.entities.create(Thing, { id: 1 });
+          c.collider.update();
+
+          // produce an uncollision
+          unmock();
+          var unmock = mock(c.collider, "isColliding", function(a, b) {
+            return false;
+          });
+          c.collider.update();
+
+          // check uncollision happened
+          expect(uncollisions).toEqual(2);
+
+          unmock();
+        });
+      });
+
+      describe('destroy', function() {
+        it('should not do more coll tests for destroyed entity', function() {
+          var c = new MockCoquette();
+          var unmock = mock(c.collider, "isColliding", function(a, b) {
+            return true;
+          });
+
+          var collisionCounter = 0;
+          var collisionCounterFn = function(other) {
+            if (other.id === 0) {
+              collisionCounter++;
+            }
+          };
+
+          // 0 should collide with 1, 2 and 3
+          c.entities.create(Thing, { id: 0 });
+          c.entities.create(Thing, { id: 1, collision: collisionCounterFn });
+          c.entities.create(Thing, { id: 2, collision: collisionCounterFn });
+          c.entities.create(Thing, { id: 3, collision: collisionCounterFn });
+          c.collider.update();
+          expect(collisionCounter).toEqual(3);
+
+          // should only count coll for 0 and 1, not 2 and 3:
+          collisionCounter = 0;
+          c.entities._entities = [];
+          c.entities.create(Thing, { id: 0, collision: function() { c.entities.destroy(this); } });
+          c.entities.create(Thing, { id: 1, collision: collisionCounterFn });
+          c.entities.create(Thing, { id: 2, collision: collisionCounterFn });
+          c.entities.create(Thing, { id: 3, collision: collisionCounterFn });
+          c.collider.update();
+          expect(collisionCounter).toEqual(1);
+
+          unmock();
+        });
+
+        it('should still do all other entity collisions if entity removed for which all coll pairs already done', function() {
+          var c = new MockCoquette();
+          var unmock = mock(c.collider, "isColliding", function(a, b) {
+            return true;
+          });
+
+          var rmEnt = c.entities.create(Thing, { id: 0 });
+
+          var collisions = 0;
+          for (var i = 1; i < 4; i++) {
+            c.entities.create(Thing, { id: i, collision: function() { collisions++; }});
+          }
+
+          c.entities.create(Thing, { id: i, collision: function() { c.entities.destroy(rmEnt); }});
+          c.collider.update();
+          expect(collisions).toEqual(12);
+          unmock();
+        });
+
+        it('should still do all other entity collisions if entity removed for which only some coll pairs done', function() {
+          var c = new MockCoquette();
+          var unmock = mock(c.collider, "isColliding", function(a, b) {
+            return true;
+          });
+
+          var rmEnt = c.entities.create(Thing, { id: 0, collision: function() { c.entities.destroy(this); } });
+
+          var collisions = 0;
+          for (var i = 1; i < 4; i++) {
+            c.entities.create(Thing, { id: i, collision: function() { collisions++; }});
+          }
+
+          c.collider.update();
+          expect(collisions).toEqual(7);
+          unmock();
+        });
+      });
+    });
+
     describe('update()', function() {
       it('should test all entities against all other entities once', function() {
         var c = new MockCoquette();
