@@ -81,16 +81,6 @@ describe('Entities', function() {
       c.entities.create(Thing, { a:1 });
       expect(c.entities.all()[0].called).toEqual(true);
     });
-
-    it('should call callback after obj has been created', function() {
-      var c = new MockCoquette();
-      var called = false;
-      c.entities.create(Thing, { a:1 }, function() {
-        called = true;
-      });
-      c.runner.update();
-      expect(called).toEqual(true);
-    });
   });
 
   describe('destroy()', function() {
@@ -100,19 +90,6 @@ describe('Entities', function() {
       expect(c.entities.all()[0] instanceof Thing).toEqual(true);
       c.entities.destroy(c.entities.all()[0]);
       expect(c.entities.all()[0]).toBeUndefined();
-    });
-
-    it('should call callback after obj has been destroyed', function() {
-      var c = new MockCoquette();
-      var called = false;
-      c.entities.create(Thing);
-      c.runner.update();
-      expect(c.entities.all()[0] instanceof Thing).toEqual(true);
-      c.entities.destroy(c.entities.all()[0], function() {
-        called = true;
-      });
-      c.runner.update();
-      expect(called).toEqual(true);
     });
   });
 });
