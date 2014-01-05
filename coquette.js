@@ -26,7 +26,7 @@
 
 ;(function(exports) {
   var Collider = function(coquette) {
-    this.coquette = coquette;
+    this.c = coquette;
   };
 
   // if no entities have uncollision(), skip expensive record keeping for uncollisions
@@ -51,7 +51,7 @@
       this._currentCollisionPairs = [];
 
       // get all entity pairs to test for collision
-      var ent = this.coquette.entities.all();
+      var ent = this.c.entities.all();
       for (var i = 0, len = ent.length; i < len; i++) {
         for (var j = i + 1; j < len; j++) {
           this._currentCollisionPairs.push([ent[i], ent[j]]);
@@ -71,7 +71,7 @@
 
     collision: function(entity1, entity2) {
       var collisionType;
-      if (!isUncollisionOn(this.coquette.entities.all())) {
+      if (!isUncollisionOn(this.c.entities.all())) {
         collisionType = this.INITIAL;
       } else if (this.getCollideRecordIds(entity1, entity2).length === 0) {
         this._collideRecords.push([entity1, entity2]);
@@ -85,7 +85,7 @@
     },
 
     createEntity: function(entity) {
-      var ent = this.coquette.entities.all();
+      var ent = this.c.entities.all();
       for (var i = 0, len = ent.length; i < len; i++) {
         if (ent[i] !== entity) { // decouple from when c.entities adds to _entities
           this._currentCollisionPairs.push([ent[i], entity]);
@@ -693,7 +693,7 @@
 
 ;(function(exports) {
   function Runner(coquette) {
-    this.coquette = coquette;
+    this.c = coquette;
     this._runs = [];
   };
 
@@ -789,7 +789,7 @@
   }
 
   var Renderer = function(coquette, game, canvas, wView, hView, backgroundColor) {
-    this.coquette = coquette;
+    this.c = coquette;
     this.game = game;
     canvas.style.outline = "none"; // stop browser outlining canvas when it has focus
     canvas.style.cursor = "default"; // keep pointer normal when hovering over canvas
@@ -834,7 +834,7 @@
 
       // draw game and entities
       var drawables = [this.game]
-        .concat(this.coquette.entities.all().concat().sort(zindexSort));
+        .concat(this.c.entities.all().concat().sort(zindexSort));
       for (var i = 0, len = drawables.length; i < len; i++) {
         if (drawables[i].draw !== undefined) {
           var drawable = drawables[i];
@@ -885,7 +885,7 @@
 
 ;(function(exports) {
   function Entities(coquette, game) {
-    this.coquette = coquette;
+    this.c = coquette;
     this.game = game;
     this._entities = [];
   };
@@ -915,9 +915,9 @@
       }
     },
 
-    create: function(clazz, settings, callback) {
-      var entity = new clazz(this.game, settings || {});
-      this.coquette.collider.createEntity(entity);
+    create: function(Constructor, settings, callback) {
+      var entity = new Constructor(this.game, settings || {});
+      this.c.collider.createEntity(entity);
       this._entities.push(entity);
       return entity;
     },
@@ -925,7 +925,7 @@
     destroy: function(entity, callback) {
       for(var i = 0; i < this._entities.length; i++) {
         if(this._entities[i] === entity) {
-          this.coquette.collider.destroyEntity(entity);
+          this.c.collider.destroyEntity(entity);
           this._entities.splice(i, 1);
           break;
         }
