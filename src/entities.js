@@ -32,6 +32,7 @@
 
     create: function(clazz, settings, callback) {
       var entity = new clazz(this.game, settings || {});
+      this.coquette.collider.createEntity(entity);
       this._entities.push(entity);
       return entity;
     },
