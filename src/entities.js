@@ -17,7 +17,7 @@
 
     all: function(Constructor) {
       if (Constructor === undefined) {
-        return this._entities;
+        return this._entities.slice(); // return shallow copy of array
       } else {
         var entities = [];
         for (var i = 0; i < this._entities.length; i++) {
