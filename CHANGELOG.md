@@ -1,3 +1,13 @@
+0.3.1 / 2014-01-04
+
+[BREAKING CHANGE] Callback no longer called when entity created.
+
+[BREAKING CHANGE] Callback no longer called when entity destroyed.
+
+[NEW] c.entities.create() immediately creates and returns new entity. Does not wait for next tick.
+
+[NEW] c.entities.destroy() immediately destroys entity. Does not wait for next tick.
+
 0.3.0 / 2013-12-02
 
 [BREAKING CHANGE] The `center` attribute on an entity is now used to indicate the entity's position (center). This replaces the `pos` attribute.
