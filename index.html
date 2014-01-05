@@ -198,8 +198,9 @@ Block.prototype = {
       <li>The constructor function of the entity you want to create, e.g. <code>Block</code>.  When this constructor is called, it will get passed the main game object and a settings object.</li>
       <li>An optional settings object, e.g.<br/>
         <code>{ center: { x: 5, y: 10 }, size: { x: 10, y: 30 } }</code>.</li>
-      <li>An optional callback that will be called when the object is created.  This function will receive the created entity as an argument.</li>
     </ul>
+
+    <p>Returns the created entity.</p>
 
 <pre class="prettyprint">
 var Block = function(game, settings) {
@@ -209,16 +210,11 @@ var Block = function(game, settings) {
   this.angle = 0;
 };
 
-var myBlock;
-c.entities.create(Block, {
+var myBlock = c.entities.create(Block, {
   center: { x: 5, y: 10 },
   size: { x: 10, y: 30 }
-}, function(block) {
-  myBlock = block;
 });
 </pre>
-
-    <p>When you call <code>create()</code>, the entity will not get created until the next tick.</p>
 
     <h5>Destroy an entity</h5>
 
@@ -226,16 +222,11 @@ c.entities.create(Block, {
 
     <ul>
       <li>The entity you want to destroy, e.g. <code>myBlock</code>.</li>
-      <li>An optional callback that will be called when the object is destroyed.</li>
     </ul>
 
 <pre class="prettyprint">
-c.entities.destroy(myBlock, function() {
-  console.log("boom");
-});
+c.entities.destroy(myBlock);
 </pre>
-
-    <p>When you call <code>destroy()</code>, the entity will not get destroyed until the next tick.</p>
 
     <h5>Get all the entities in the game</h5>
 
@@ -331,10 +322,7 @@ c.entities.create(Player, {}); // drawn on top
 <pre class="prettyprint">
 var Game = function() {
   var c = new Coquette(this, "canvas", 500, 500, "#000");
-  var specialObject;
-  c.entities.create(SpecialObject, {}, function(obj) {
-    specialObject = obj;
-  });
+  var specialObject = c.entities.create(SpecialObject, {});
 
   this.update = function() {
     c.renderer.setViewCenter(specialObject.center);

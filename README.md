@@ -145,7 +145,8 @@ Call `c.entities.create()` with:
 
 * The constructor function of the entity you want to create, e.g. `Block`.  When this constructor is called, it will get passed the main game object and a settings object.
 * An optional settings object, e.g. `{ center: { x: 5, y: 10 }, size: { x: 10, y: 30 } }`.
-* An optional callback that will be called when the object is created.  This function will receive the created entity as an argument.
+
+Returns the created entity.
 
 ```javascript
 var Block = function(game, settings) {
@@ -155,31 +156,21 @@ var Block = function(game, settings) {
   this.angle = 0;
 };
 
-var myBlock;
-c.entities.create(Block, {
+var myBlock = c.entities.create(Block, {
   center: { x: 5, y: 10 },
   size: { x: 10, y: 30 }
-}, function(block) {
-  myBlock = block;
 });
 ```
-
-When you call `create()`, the entity will not get created until the next tick.
 
 ##### Destroy an entity
 
 Call `c.entities.destroy()` with:
 
 * The entity you want to destroy, e.g. `myBlock`.
-* An optional callback that will be called when the object is destroyed.
 
 ```javascript
-c.entities.destroy(myBlock, function() {
-  console.log("boom");
-});
+c.entities.destroy(myBlock);
 ```
-
-When you call `destroy()`, the entity will not get destroyed until the next tick.
 
 ##### Get all the entities in the game
 
@@ -260,8 +251,8 @@ When you create your entities, set an integer `zindex` attribute on them.  An en
     this.zindex = 0;
   };
 
-  c.entities.create(BackgroundTile, { });
-  c.entities.create(Player, { }); // drawn on top
+  c.entities.create(BackgroundTile, {});
+  c.entities.create(Player, {}); // drawn on top
 ```
 
 ##### Move the view
@@ -271,10 +262,7 @@ You can use `c.renderer.setViewCenter()` to move the view around the world.  For
 ```javascript
   var Game = function() {
     var c = new Coquette(this, "canvas", 500, 500, "#000");
-    var specialObject;
-    c.entities.create(SpecialObject, {}, function(obj) {
-      specialObject = obj;
-    });
+    var specialObject = c.entities.create(SpecialObject, {});
 
     this.update = function() {
       c.renderer.setViewCenter(specialObject.center);
