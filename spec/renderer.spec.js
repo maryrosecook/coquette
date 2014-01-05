@@ -19,6 +19,7 @@ var MockCanvas = function() {
 var MockCoquette = function() {
   this.entities = new Entities(this);
   this.runner = new Runner(this);
+  this.collider = new Collider(this);
   this.renderer = new Renderer(this, {}, new MockCanvas(), 100, 200);
 };
 
