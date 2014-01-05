@@ -16,7 +16,7 @@ describe('Entities', function() {
     it('should call update all entities', function() {
       var update = function() { this.updateCalled = true; };
       var c = new MockCoquette();
-      c.entities.all().push({ update: update}, { update: update });
+      c.entities._entities.push({ update: update}, { update: update });
       c.entities.update();
       expect(c.entities.all()[0].updateCalled).toEqual(true);
       expect(c.entities.all()[1].updateCalled).toEqual(true);
@@ -24,7 +24,7 @@ describe('Entities', function() {
 
     it('should pass interval when call update on entity', function() {
       var c = new MockCoquette();
-      c.entities.all().push({ update: function(interval) { this.interval = interval; }});
+      c.entities._entities.push({ update: function(interval) { this.interval = interval; }});
       c.entities.update(5);
       expect(c.entities.all()[0].interval).toEqual(5);
     });
@@ -33,13 +33,13 @@ describe('Entities', function() {
   describe('all()', function() {
     it('should return all entities when no constructor passed', function() {
       var c = new MockCoquette();
-      c.entities.all().push({ }, { });
+      c.entities._entities.push({ }, { });
       expect(c.entities.all().length).toEqual(2);
     });
 
     it('should return only entities made w constructor when constructor passed', function() {
       var c = new MockCoquette();
-      c.entities.all().push({}, new Thing(), new Thing(), {});
+      c.entities._entities.push({}, new Thing(), new Thing(), {});
       expect(c.entities.all().length).toEqual(4);
       expect(c.entities.all(Thing).length).toEqual(2);
     });
