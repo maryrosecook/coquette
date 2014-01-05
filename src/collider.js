@@ -19,16 +19,26 @@
 
   Collider.prototype = {
     _collideRecords: [],
+    _currentCollisionPairs: [],
 
     update: function() {
+      this._currentCollisionPairs = [];
+
+      // get all entity pairs to test for collision
       var ent = this.coquette.entities.all();
       for (var i = 0, len = ent.length; i < len; i++) {
         for (var j = i + 1; j < len; j++) {
-          if (this.isColliding(ent[i], ent[j])) {
-            this.collision(ent[i], ent[j]);
-          } else {
-            this.removeOldCollision(this.getCollideRecordIds(ent[i], ent[j])[0]);
-          }
+          this._currentCollisionPairs.push([ent[i], ent[j]]);
+        }
+      }
+
+      // test collisions
+      while (this._currentCollisionPairs.length > 0) {
+        var pair = this._currentCollisionPairs.shift();
+        if (this.isColliding(pair[0], pair[1])) {
+          this.collision(pair[0], pair[1]);
+        } else {
+          this.removeOldCollision(this.getCollideRecordIds(pair[0], pair[1])[0]);
         }
       }
     },
@@ -48,10 +58,27 @@
       notifyEntityOfCollision(entity2, entity1, collisionType);
     },
 
+    createEntity: function(entity) {
+      var ent = this.coquette.entities.all();
+      for (var i = 0, len = ent.length; i < len; i++) {
+        if (ent[i] !== entity) { // decouple from when c.entities adds to _entities
+          this._currentCollisionPairs.push([ent[i], entity]);
+        }
+      }
+    },
+
     destroyEntity: function(entity) {
       var recordIds = this.getCollideRecordIds(entity);
       for (var i = 0; i < recordIds.length; i++) {
         this.removeOldCollision(recordIds[i]);
+      }
+
+      // if coll detection happening, remove any pairs that include entity
+      for(var i = this._currentCollisionPairs.length - 1; i >= 0; i--){
+        if (this._currentCollisionPairs[i][0] === entity ||
+           this._currentCollisionPairs[i][1] === entity) {
+          this._currentCollisionPairs.splice(i, 1);
+        }
       }
     },
 
