@@ -1,7 +1,6 @@
 var Collider = require('../src/collider').Collider;
 var Renderer = require('../src/renderer').Renderer;
 var Entities = require('../src/entities').Entities;
-var Runner = require('../src/runner').Runner;
 var Maths = Collider.Maths;
 
 var mockObj = function(centerX, centerY, sizeX, sizeY, boundingBox, angle) {
@@ -25,7 +24,6 @@ describe('collider', function() {
   describe('main collider obj', function() {
     var MockCoquette = function() {
       this.entities = new Entities(this);
-      this.runner = new Runner(this);
       this.collider = new Collider(this);
     };
 
@@ -47,7 +45,6 @@ describe('collider', function() {
         c.entities.create(Thing, { id: 1 });
         c.entities.create(Thing, { id: 2 });
         c.entities.create(Thing, { id: 3 });
-        c.runner.update();
         c.collider.update();
         expect(comparisons.length).toEqual(6);
         expect(comparisons[0][0] === 0 && comparisons[0][1] === 1).toEqual(true);
@@ -66,7 +63,6 @@ describe('collider', function() {
         });
 
         c.entities.create(Thing, { id: 0 });
-        c.runner.update();
         c.collider.update();
         unmock();
       });
@@ -77,7 +73,6 @@ describe('collider', function() {
         var unmock = mock(c.collider, "isColliding", function() { return true; });
         c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
         c.entities.create(Thing);
-        c.runner.update();
         c.collider.update();
         mock(c.collider, "isColliding", function() { return false; })
         c.collider.update();
@@ -91,7 +86,6 @@ describe('collider', function() {
         var unmock = mock(c.collider, "isColliding", function() { return true; });
         c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
         c.entities.create(Thing);
-        c.runner.update();
         c.collider.update();
         mock(c.collider, "isColliding", function() { return false; })
         c.collider.update();
@@ -109,7 +103,6 @@ describe('collider', function() {
         var unmock = mock(c.collider, "isColliding", function() { return true; });
         c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
         c.entities.create(Thing);
-        c.runner.update();
         c.collider.update();
         expect(uncollisions).toEqual(0);
         c.collider.destroyEntity(c.entities._entities[0]);
@@ -122,7 +115,6 @@ describe('collider', function() {
         var uncollisions = 0;
         var unmock = mock(c.collider, "isColliding", function() { return false; });
         c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
-        c.runner.update();
         c.collider.update();
         c.collider.destroyEntity(c.entities._entities[0]);
         expect(uncollisions).toEqual(0);
@@ -145,7 +137,6 @@ describe('collider', function() {
           }
         });
         c.entities.create(Thing);
-        c.runner.update();
         c.collider.update();
         c.collider.update();
         c.collider.update();
@@ -167,7 +158,6 @@ describe('collider', function() {
           }
         });
         c.entities.create(Thing);
-        c.runner.update();
         c.collider.update();
         expect(initial).toEqual(1);
         unmock();
@@ -187,7 +177,6 @@ describe('collider', function() {
           }
         });
         c.entities.create(Thing);
-        c.runner.update();
         c.collider.update();
         c.collider.update();
         c.collider.update();
@@ -457,7 +446,6 @@ describe('collider', function() {
 
       var MockCoquette = function() {
         this.entities = new Entities(this);
-        this.runner = new Runner(this);
         this.collider = new Collider(this);
         this.renderer = new Renderer(this, {}, {
           style: {},
@@ -477,11 +465,10 @@ describe('collider', function() {
       var c = new MockCoquette();
       c.entities.create(Entity, { zindex: 0, id: 0 });
       c.entities.create(Entity, { zindex: 0, id: 1 });
-      c.runner.update();
       expect(c.entities.all()[0].id).toEqual(0);
       expect(c.entities.all()[1].id).toEqual(1);
 
-      c.entities.all().sort(function(a, b) {
+      c.entities._entities.sort(function(a, b) {
         return (a.zindex || 0) < (b.zindex || 0) ? -1 : 1;
       });
       expect(c.entities.all()[0].id).toEqual(1);
@@ -492,7 +479,6 @@ describe('collider', function() {
       c = new MockCoquette();
       c.entities.create(Entity, { zindex: 1 });
       c.entities.create(Entity, { zindex: 0 });
-      c.runner.update();
       expect(c.entities.all()[0].zindex).toEqual(1);
       expect(c.entities.all()[1].zindex).toEqual(0);
 
@@ -509,8 +495,6 @@ describe('collider', function() {
         }
       });
       c.entities.create(Entity);
-
-      c.runner.update();
 
       var restoreIsIntersecting = mock(c.collider, 'isColliding', function() {
         return true;

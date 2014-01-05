@@ -1,11 +1,9 @@
 var Entities = require('../src/entities').Entities;
-var Runner = require('../src/runner').Runner;
 var Collider = require('../src/collider').Collider;
 
 var MockCoquette = function() {
   this.game = "woo";
   this.entities = new Entities(this, this.game);
-  this.runner = new Runner(this);
   this.collider = new Collider(this);
 };
 
@@ -49,21 +47,18 @@ describe('Entities', function() {
     it('should create the thing you ask it to create', function() {
       var c = new MockCoquette();
       c.entities.create(Thing);
-      c.runner.update();
       expect(c.entities.all()[0] instanceof Thing).toEqual(true);
     });
 
     it('should be ok without passed settings ', function() {
       var c = new MockCoquette();
       c.entities.create(Thing);
-      c.runner.update();
       expect(c.entities.all().length).toEqual(1);
     });
 
     it('should be ok without passed callback', function() {
       var c = new MockCoquette();
       c.entities.create(Thing);
-      c.runner.update();
       expect(c.entities.all().length).toEqual(1);
     });
 
@@ -74,7 +69,6 @@ describe('Entities', function() {
         expect(game).toEqual(c.game);
       };
       c.entities.create(Thing, { a:1 });
-      c.runner.update();
       expect(c.entities.all()[0].called).toEqual(true);
     });
 
@@ -85,7 +79,6 @@ describe('Entities', function() {
         expect(settings).toEqual({ a:1 });
       };
       c.entities.create(Thing, { a:1 });
-      c.runner.update();
       expect(c.entities.all()[0].called).toEqual(true);
     });
 
@@ -104,10 +97,8 @@ describe('Entities', function() {
     it('should destroy the thing you ask it to destroy', function() {
       var c = new MockCoquette();
       c.entities.create(Thing);
-      c.runner.update();
       expect(c.entities.all()[0] instanceof Thing).toEqual(true);
       c.entities.destroy(c.entities.all()[0]);
-      c.runner.update();
       expect(c.entities.all()[0]).toBeUndefined();
     });
 
