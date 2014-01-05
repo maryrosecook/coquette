@@ -31,14 +31,9 @@
     },
 
     create: function(clazz, settings, callback) {
-      var self = this;
-      this.coquette.runner.add(this, function(entities) {
-        var entity = new clazz(self.game, settings || {});
-        entities._entities.push(entity);
-        if (callback !== undefined) {
-          callback(entity);
-        }
-      });
+      var entity = new clazz(this.game, settings || {});
+      this._entities.push(entity);
+      return entity;
     },
 
     destroy: function(entity, callback) {
