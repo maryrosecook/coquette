@@ -50,10 +50,10 @@ describe('Entities', function() {
       expect(c.entities.all()[0] instanceof Thing).toEqual(true);
     });
 
-    it('should be ok without passed settings ', function() {
+    it('should return created thing', function() {
       var c = new MockCoquette();
-      c.entities.create(Thing);
-      expect(c.entities.all().length).toEqual(1);
+      var thing = c.entities.create(Thing);
+      expect(thing instanceof Thing).toEqual(true);
     });
 
     it('should be ok without passed settings ', function() {
