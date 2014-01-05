@@ -116,10 +116,8 @@
       this.game.c.entities.destroy(this);
       var self = this;
       setTimeout(function() {
-        self.game.c.entities.create(Player, {
+        self.game.player = self.game.c.entities.create(Player, {
           center: { x:0, y:0 }
-        }, function(player) {
-          self.game.player = player;
         });
       }, respawnDelay);
     }

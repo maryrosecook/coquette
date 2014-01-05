@@ -21,10 +21,8 @@
 
     init: function() {
       var self = this;
-      this.c.entities.create(Player, {
+      this.player = this.c.entities.create(Player, {
         center: { x:0, y:0 }
-      }, function(player) {
-        self.player = player;
       });
     },
 
