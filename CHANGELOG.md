@@ -1,4 +1,4 @@
-0.4.0 / 2014-03-01
+0.4.1 / 2014-03-01
 
 [NEW] Demo that uses Box2D physics engine.
 
