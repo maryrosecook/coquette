@@ -1,3 +1,7 @@
+0.4.0 / 2014-03-01
+
+[NEW] Demo that uses Box2D physics engine.
+
 0.3.1 / 2014-01-04
 
 [BREAKING CHANGE] Callback no longer called when entity created.
