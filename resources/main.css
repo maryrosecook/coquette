@@ -16,9 +16,9 @@ h1 { font-size: 55px; font-weight:normal;
      margin-top:0; margin-bottom:0;
    }
 h2 { font-size: 30px; line-height: 30px; font-weight:normal; margin: 10px 0 2px -2px; }
-h3 { font-size: 24px; line-height: 24px; font-weight:normal; margin-top:16px; margin-bottom:14px;  }
-h4 { font-size: 21px; line-height: 21px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
-h5 { font-size: 16px; line-height: 16px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
+h3 { font-size: 21px; line-height: 24px; font-weight:normal; margin-top:16px; margin-bottom:14px;  }
+h4 { font-size: 18px; line-height: 21px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
+h5 { font-size: 14px; line-height: 16px; font-weight:normal; margin-top:16px; margin-bottom:16px; }
 
 code { font-family: 'monaco', 'courier'; font-size:12px; }
 

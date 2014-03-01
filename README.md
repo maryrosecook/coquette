@@ -67,9 +67,18 @@ var Person = function(game, settings) {
 };
 
 window.addEventListener('load', function() {
-  new Game(false);
+  new Game();
 });
 ```
+
+## Demos
+
+Four demos are included in this repository:
+
+`/demos/spinning-shapes` - an example of collisions between rotated entities.
+`/demos/box2d-physics` - a game that uses the Box2D physics engine.
+`/demos/leftrightspace` - a complete game.
+`/demos/simple` - the example at the top of this readme.
 
 ## Reference
 

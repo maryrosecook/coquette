@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Box2D physics</title>
+  <style type="text/css">
+    html,body {
+      background-color: #000;
+      color: #fff;
+      font-family: helvetica, arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      font-size: 12pt;
+    }
+
+    #canvas {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+    }
+  </style>
+
+  <script src="src/head.loader.js"></script>
+  <script type="text/javascript">
+    head.js("../../coquette.js",
+            "./lib/andro-min.js",
+            "./lib/box2d.js",
+            "./lib/underscore-min.js",
+            "./src/utils.js",
+            "./src/behaviours/destroy.js",
+            "./src/behaviours/exploder.js",
+            "./src/behaviours/flocker.js",
+            "./src/behaviours/follow.js",
+            "./src/behaviours/health.js",
+            "./src/behaviours/home.js",
+            "./src/behaviours/passer.js",
+            "./src/behaviours/pulse.js",
+            "./src/behaviours/push.js",
+            "./src/birds.js",
+            "./src/director.js",
+            "./src/drawer.js",
+            "./src/flock.js",
+            "./src/game.js",
+            "./src/image.js",
+            "./src/isla.js",
+            "./src/mary.js",
+            "./src/maths.js",
+            "./src/particle.js",
+            "./src/physics.js",
+            "./src/radar.js",
+            "./src/random-removal-buffer.js",
+            "./src/state-machine.js",
+            "./src/utils.js",
+            function() {
+              game = new Game('canvas', 600, 600);
+            });
+  </script>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+</body>
+</html>
