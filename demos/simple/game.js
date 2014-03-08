@@ -28,7 +28,10 @@
     this.size = { x:9, y:9 };
     this.draw = function(ctx) {
       ctx.fillStyle = settings.color;
-      ctx.fillRect(this.center.x, this.center.y, this.size.x, this.size.y);
+      ctx.fillRect(this.center.x - this.size.x / 2,
+                   this.center.y - this.size.y / 2,
+                   this.size.x,
+                   this.size.y);
     };
   };
 
