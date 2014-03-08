@@ -1,3 +1,7 @@
+0.4.3 / 2014-03-07
+
+[FIX] Draw people in correct place in simple demo.  (Thanks, tmcw.)
+
 0.4.1 / 2014-03-01
 
 [NEW] Demo that uses Box2D physics engine.
