@@ -17,7 +17,7 @@ http://coquette.maryrosecook.com
 
 A game where you, the valiant player, must find a person of indeterminate gender in distress so you can take them away from all this.  The code below appears in `/demos/simple/`.  Open `/demos/simple/index.html` to play.
 
-An HTML page that includes a canvas element, the Coquette library and the game code:
+The HTML below defines a canvas element and loads in Coquette and the game code.
 
 ```html
 <!DOCTYPE html>
@@ -155,8 +155,8 @@ See the Collider section for instructions on enabling collision detection.
 
 Call `c.entities.create()` with:
 
-* The constructor function of the entity you want to create, e.g. `Block`.  When this constructor is called, it will get passed the main game object and a settings object.
-* An optional settings object, e.g. `{ center: { x: 5, y: 10 }, size: { x: 10, y: 30 } }`.
+* The constructor function of the entity you want to create, e.g. `Block`.
+* An optional settings object that will be passed into the constructor, e.g. `{ center: { x: 5, y: 10 }, size: { x: 10, y: 30 } }`.
 
 Returns the created entity.
 
@@ -193,7 +193,7 @@ var all = c.entities.all();
 ##### Get all the entities of a certain type
 
 ```javascript
-var player = c.entities.all(Player)[0];
+var invaders = c.entities.all(Invader);
 ```
 
 #### Inputter
@@ -209,12 +209,12 @@ var rightMouseDown = c.inputter.isDown(c.inputter.RIGHT_MOUSE);
 
 ##### Find out if a certain key or mouse button is pressed
 
+This returns true for the tick following the key going down.  In subsequent ticks, it returns false until the key is released and pressed down again.
+
 ```javascript
 var leftArrowPressed = c.inputter.isPressed(c.inputter.LEFT_ARROW);
 var rightMousePressed = c.inputter.isPressed(c.inputter.RIGHT_MOUSE);
 ```
-
-This is true for one tick when the key goes down.  Subsequently, it is false until the key is released and pressed down again.
 
 ##### Run a function every time the mouse is moved
 

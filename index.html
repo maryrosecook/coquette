@@ -45,7 +45,7 @@
 
     <p>A game where you, the valiant player, must find a person of indeterminate gender in distress so you can take them away from all this.  Click on the game, then press the up arrow key to play.</p>
 
-    <p>An HTML page that includes a canvas element, the Coquette library and the game code:</p>
+    <p>The HTML below defines a canvas element and loads in Coquette and the game code.</p>
 
 <pre class="prettyprint">
 &lt;!DOCTYPE html&gt;
@@ -227,8 +227,8 @@ Block.prototype = {
     <p>Call <code>c.entities.create()</code> with:</p>
 
     <ul>
-      <li>The constructor function of the entity you want to create, e.g. <code>Block</code>.  When this constructor is called, it will get passed the main game object and a settings object.</li>
-      <li>An optional settings object, e.g.<br/>
+      <li>The constructor function of the entity you want to create, e.g. <code>Block</code>.</li>
+      <li>An optional settings object that will be passed into the constructor, e.g.<br/>
         <code>{ center: { x: 5, y: 10 }, size: { x: 10, y: 30 } }</code>.</li>
     </ul>
 
@@ -269,7 +269,7 @@ var all = c.entities.all();
     <h5>Get all the entities of a certain type</h5>
 
 <pre class="prettyprint">
-var player = c.entities.all(Player)[0];
+var invaders = c.entities.all(Invader);
 </pre>
 
     <h4>Inputter</h4>
@@ -285,12 +285,12 @@ var rightMouseDown = c.inputter.isDown(c.inputter.RIGHT_MOUSE);
 
     <h5>Find out if a certain key or mouse button is pressed</h5>
 
+    <p>This returns true for the tick following the key going down.  In subsequent ticks, it returns false until the key is released and pressed down again.</p>
+
 <pre class="prettyprint">
 var leftArrowPressed = c.inputter.isPressed(c.inputter.LEFT_ARROW);
 var rightMousePressed = c.inputter.isPressed(c.inputter.RIGHT_MOUSE);
 </pre>
-
-    <p>This is true for one tick when the key goes down.  Subsequently, it is false until the key is released and pressed down again.</p>
 
     <h5>Run a function every time the mouse is moved</h5>
 
@@ -417,7 +417,7 @@ Player.prototype = {
 
     <hr/>
     <div class="footer">
-      <a href="http://maryrosecook.com">maryrosecook.com</a>
+      <a href="http://maryrosecook.com">Mary Rose Cook</a>
     </div>
    </body>
  </html>
