@@ -30,14 +30,14 @@
       }
     },
 
-    create: function(Constructor, settings, callback) {
+    create: function(Constructor, settings) {
       var entity = new Constructor(this.game, settings || {});
       this.c.collider.createEntity(entity);
       this._entities.push(entity);
       return entity;
     },
 
-    destroy: function(entity, callback) {
+    destroy: function(entity) {
       for(var i = 0; i < this._entities.length; i++) {
         if(this._entities[i] === entity) {
           this.c.collider.destroyEntity(entity);
