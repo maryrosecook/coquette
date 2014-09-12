@@ -1,3 +1,9 @@
+0.4.5 / 2014-09-12
+
+[FIX] Spinning shapes demo uses relative paths for script loading. (Thanks, douglascalhoun.)
+
+[FIX] Box2D demo uses relative paths for script loading.
+
 0.4.4 / 2014-06-26
 
 [FIX] Remove unused callback params from `entities.create()` and `entities.destroy()`.
