@@ -53,7 +53,7 @@
     setupImages: function(callback) {
       var self = this;
       images.load({
-        keys: { url: "/demos/box2d-physics/images/keys.png", size: { x: 200, y: 200 } },
+        keys: { url: "./images/keys.png", size: { x: 200, y: 200 } },
       }, function(images) {
         self.images = images;
         self.images.keys.center = { x: 190, y: 158 };
