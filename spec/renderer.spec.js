@@ -6,7 +6,7 @@ var Runner = require('../src/runner').Runner;
 var MockContext = function() {
   this.translate = function() {};
   this.fillRect = function() {};
-  this.save = function() {},
+  this.save = function() {};
   this.restore = function() {}
 };
 
