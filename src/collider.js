@@ -1,6 +1,7 @@
 ;(function(exports) {
   var Collider = function(coquette) {
     this.c = coquette;
+    this._getPotentialCollisionPairs = allCollisionPairs;
   };
 
   // if no entities have uncollision(), skip expensive record keeping for uncollisions
@@ -22,15 +23,7 @@
     _currentCollisionPairs: [],
 
     update: function() {
-      this._currentCollisionPairs = [];
-
-      // get all entity pairs to test for collision
-      var ent = this.c.entities.all();
-      for (var i = 0, len = ent.length; i < len; i++) {
-        for (var j = i + 1; j < len; j++) {
-          this._currentCollisionPairs.push([ent[i], ent[j]]);
-        }
-      }
+      this._currentCollisionPairs = this._getPotentialCollisionPairs(this.c.entities.all());
 
       // test collisions
       while (this._currentCollisionPairs.length > 0) {
@@ -142,6 +135,23 @@
 
     RECTANGLE: 0,
     CIRCLE: 1
+  };
+
+  var quadTreeCollisionPairs = function(ent) {
+
+  };
+  
+  var allCollisionPairs = function(ent) {
+    var collisionPairs = [];
+
+    // get all entity pairs to test for collision
+    for (var i = 0, len = ent.length; i < len; i++) {
+      for (var j = i + 1; j < len; j++) {
+        collisionPairs.push([ent[i], ent[j]]);
+      }
+    }
+
+    return collisionPairs;
   };
 
   var getBoundingBox = function(obj) {
