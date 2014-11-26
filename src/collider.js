@@ -18,6 +18,45 @@
     return obj.center !== undefined && obj.size !== undefined;
   };
 
+  var RectangleShape = function(entity) {
+    this.entity = entity;
+  }
+
+  RectangleShape.prototype = {
+    isIntersecting: function(anotherShape) {
+      if(anotherShape instanceof CircleShape) {
+        return Maths.circleAndRectangleIntersecting(anotherShape.entity, this.entity);
+      }
+      if(anotherShape instanceof RectangleShape) {
+        return Maths.rectanglesIntersecting(this.entity, anotherShape.entity);
+      }
+      if(anotherShape.isIntersecting) {
+        return anotherShape.isIntersecting(this);
+      }
+      throw "Objects being collision tested have unsupported bounding box types."
+    }
+  }
+
+  var CircleShape = function(entity) {
+    this.entity = entity;
+  }
+
+  CircleShape.prototype = {
+    isIntersecting: function(anotherShape) {
+      if(anotherShape instanceof CircleShape) {
+        return Maths.circlesIntersecting(this.entity, anotherShape.entity);
+      }
+      if(anotherShape instanceof RectangleShape) {
+        return Maths.circleAndRectangleIntersecting(this.entity, anotherShape.entity);
+      }
+      if(anotherShape.isIntersecting) {
+        return anotherShape.isIntersecting(this);
+      }
+      throw "Objects being collision tested have unsupported bounding box types."
+    }
+  }
+
+
   Collider.prototype = {
     _collideRecords: [],
     _currentCollisionPairs: [],
@@ -114,27 +153,22 @@
     },
 
     isIntersecting: function(obj1, obj2) {
-      var obj1BoundingBox = getBoundingBox(obj1);
-      var obj2BoundingBox = getBoundingBox(obj2);
+      var Shape, shape1, shape2;
 
-      if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.RECTANGLE) {
-        return Maths.rectanglesIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.RECTANGLE) {
-        return Maths.circleAndRectangleIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.CIRCLE) {
-        return Maths.circleAndRectangleIntersecting(obj2, obj1);
-      } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.CIRCLE) {
-        return Maths.circlesIntersecting(obj1, obj2);
-      } else {
-        throw "Objects being collision tested have unsupported bounding box types."
-      }
+      Shape = getBoundingBox(obj1);
+      shape1 = new Shape(obj1);
+
+      Shape = getBoundingBox(obj2);
+      shape2 = new Shape(obj2);
+
+      return shape1.isIntersecting(shape2);
     },
 
     INITIAL: 0,
     SUSTAINED: 1,
 
-    RECTANGLE: 0,
-    CIRCLE: 1
+    RECTANGLE: RectangleShape,
+    CIRCLE:    CircleShape
   };
 
   var quadTreeCollisionPairs = function(ent) {
