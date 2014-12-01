@@ -254,7 +254,7 @@ describe('collider', function() {
         var correctObj = mockObj(5, 5, 10, 10);
         var c = new Collider();
         it('should return true for two objects with center and size', function() {
-          expect(c.isColliding(correctObj, correctObj)).toEqual(true);
+          expect(c.isColliding(correctObj, mockObj(5, 5, 10, 10))).toEqual(true);
         });
 
         it('should return false when center missing', function() {
