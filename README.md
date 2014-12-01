@@ -295,7 +295,7 @@ To make an entity support collisions, put these attributes on it:
 * `boundingBox`: The shape that best approximates the shape of the entity, either `c.collider.RECTANGLE` or `c.collider.CIRCLE`.
 * `angle`: The orientation of the entity in degrees, e.g. `30`.
 
-And, optionally, these methods:
+And, optionally, this method:
 
 * `collision(other)`: Called when the entity collides with another entity.  Takes `other`, the other entity involved in the collision.
 
