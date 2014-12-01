@@ -1,3 +1,7 @@
+0.5.2 / 2014-12-01
+
+[FIX] Fix Left Right Space to destroy ALL asteroids in group when one member hit with bullet.
+
 0.5.1 / 2014-12-01
 
 [FIX] Typo in docs.
