@@ -116,7 +116,9 @@
     },
 
     isColliding: function(obj1, obj2) {
-      return isSetupForCollisions(obj1) && isSetupForCollisions(obj2) &&
+      return obj1 !== obj2 &&
+        isSetupForCollisions(obj1) &&
+        isSetupForCollisions(obj2) &&
         this.isIntersecting(obj1, obj2);
     },
 
