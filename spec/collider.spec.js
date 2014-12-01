@@ -82,40 +82,6 @@ describe('collider', function() {
           expect(createdEntityCollisions).toEqual(2);
           unmock();
         });
-
-        it('should support uncolls by ordering pairs for created entity in same way as pairs for existing entities', function() {
-          var c = new MockCoquette();
-          var unmock = mock(c.collider, "isColliding", function(a, b) {
-            return true;
-          });
-
-          // start with two entities, do coll det and in process create third entity
-          var haveCreatedEntity = false;
-          var uncollisions = 0;
-          var createdEntity;
-          c.entities.create(Thing, { id: 0, collision: function() {
-            if (!haveCreatedEntity) {
-              haveCreatedEntity = true;
-              createdEntity = c.entities.create(Thing, { id: 2, uncollision: function() {
-                uncollisions++;
-              }});
-            }
-          }});
-          c.entities.create(Thing, { id: 1 });
-          c.collider.update();
-
-          // produce an uncollision
-          unmock();
-          var unmock = mock(c.collider, "isColliding", function(a, b) {
-            return false;
-          });
-          c.collider.update();
-
-          // check uncollision happened
-          expect(uncollisions).toEqual(2);
-
-          unmock();
-        });
       });
 
       describe('destroy', function() {
@@ -225,74 +191,17 @@ describe('collider', function() {
         c.collider.update();
         unmock();
       });
-
-      it('should fire uncollision on uncollision', function() {
-        var c = new MockCoquette();
-        var uncollisions = 0;
-        var unmock = mock(c.collider, "isColliding", function() { return true; });
-        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
-        c.entities.create(Thing);
-        c.collider.update();
-        mock(c.collider, "isColliding", function() { return false; })
-        c.collider.update();
-        expect(uncollisions).toEqual(1);
-        unmock();
-      });
-
-      it('should not fire uncollision on sustained non coll', function() {
-        var c = new MockCoquette();
-        var uncollisions = 0;
-        var unmock = mock(c.collider, "isColliding", function() { return true; });
-        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
-        c.entities.create(Thing);
-        c.collider.update();
-        mock(c.collider, "isColliding", function() { return false; })
-        c.collider.update();
-        expect(uncollisions).toEqual(1);
-        c.collider.update();
-        expect(uncollisions).toEqual(1);
-        unmock();
-      });
-    });
-
-    describe('destroyEntity()', function() {
-      it('should fire uncollision if colliding', function() {
-        var c = new MockCoquette();
-        var uncollisions = 0;
-        var unmock = mock(c.collider, "isColliding", function() { return true; });
-        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
-        c.entities.create(Thing);
-        c.collider.update();
-        expect(uncollisions).toEqual(0);
-        c.collider.destroyEntity(c.entities._entities[0]);
-        expect(uncollisions).toEqual(1);
-        unmock();
-      });
-
-      it('should not fire uncollision if not colliding', function() {
-        var c = new MockCoquette();
-        var uncollisions = 0;
-        var unmock = mock(c.collider, "isColliding", function() { return false; });
-        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
-        c.collider.update();
-        c.collider.destroyEntity(c.entities._entities[0]);
-        expect(uncollisions).toEqual(0);
-        unmock();
-      });
     });
 
     describe('collision()', function() {
-      it('should keep on banging out INITIAL colls if no uncollision fns', function() {
+      it('should keep on banging out collision callbacks', function() {
         var c = new MockCoquette();
 
         var unmock = mock(c.collider, "isColliding", function() { return true });
         var collisions = 0;
         c.entities.create(Thing, {
-          collision: function(__, type) {
+          collision: function() {
             collisions++;
-            if (type !== c.collider.INITIAL) {
-              throw "arg";
-            }
           }
         });
         c.entities.create(Thing);
@@ -300,46 +209,6 @@ describe('collider', function() {
         c.collider.update();
         c.collider.update();
         expect(collisions).toEqual(3);
-        unmock();
-      });
-
-      it('should do initial INITIAL coll if entity uncollision fn', function() {
-        var c = new MockCoquette();
-
-        var unmock = mock(c.collider, "isColliding", function() { return true });
-        var initial = 0;
-        c.entities.create(Thing, {
-          uncollision: function() {},
-          collision: function(__, type) {
-            if (type === c.collider.INITIAL) {
-              initial++;
-            }
-          }
-        });
-        c.entities.create(Thing);
-        c.collider.update();
-        expect(initial).toEqual(1);
-        unmock();
-      });
-
-      it('should bang out sustained colls if colls are sustained and entity has uncollision fn', function() {
-        var c = new MockCoquette();
-
-        var unmock = mock(c.collider, "isColliding", function() { return true });
-        var sustained = 0;
-        c.entities.create(Thing, {
-          uncollision: function() {},
-          collision: function(__, type) {
-            if (type === c.collider.SUSTAINED) {
-              sustained++;
-            }
-          }
-        });
-        c.entities.create(Thing);
-        c.collider.update();
-        c.collider.update();
-        c.collider.update();
-        expect(sustained).toEqual(2);
         unmock();
       });
     });
@@ -592,84 +461,6 @@ describe('collider', function() {
           expect(collider.isIntersecting(obj1, obj2)).toEqual(false);
         });
       });
-    });
-  });
-
-  describe('regressions', function() {
-    it('should not re-report coll as result of entity reorder', function() {
-      // In progress collisions recorded inside collider.  When checking to see
-      // if collision already recorded, assumed two entities would be in same order in
-      // record.  This assumption valid if entities always compared in same order.
-      // But, this was occasionally not the case after zindex sort following entity
-      // creation.
-
-      var MockCoquette = function() {
-        this.entities = new Entities(this);
-        this.collider = new Collider(this);
-        this.renderer = new Renderer(this, {}, {
-          style: {},
-          getContext: function() { }
-        });
-      };
-
-      var Entity = function(__, settings) {
-        for (var i in settings) {
-          this[i] = settings[i];
-        }
-      };
-
-      // prove that sorting on entities with zindexes of zeroes reorders them
-      // (this was how the entities got reordered)
-
-      var c = new MockCoquette();
-      c.entities.create(Entity, { zindex: 0, id: 0 });
-      c.entities.create(Entity, { zindex: 0, id: 1 });
-      expect(c.entities.all()[0].id).toEqual(0);
-      expect(c.entities.all()[1].id).toEqual(1);
-
-      c.entities._entities.sort(function(a, b) {
-        return (a.zindex || 0) < (b.zindex || 0) ? -1 : 1;
-      });
-      expect(c.entities.all()[0].id).toEqual(1);
-      expect(c.entities.all()[1].id).toEqual(0);
-
-      // prove that Entities.create no longer sorts on zindex
-
-      c = new MockCoquette();
-      c.entities.create(Entity, { zindex: 1 });
-      c.entities.create(Entity, { zindex: 0 });
-      expect(c.entities.all()[0].zindex).toEqual(1);
-      expect(c.entities.all()[1].zindex).toEqual(0);
-
-      // prove that reordering entities produces the bug
-
-      c = new MockCoquette();
-      var initial = 0;
-      c.entities.create(Entity, {
-        uncollision: function() {}, // switch off repeated collision reporting
-        collision: function(__, type) {
-          if (type === c.collider.INITIAL) {
-            initial++;
-          }
-        }
-      });
-      c.entities.create(Entity);
-
-      var restoreIsIntersecting = mock(c.collider, 'isColliding', function() {
-        return true;
-      });
-
-      c.collider.update();
-      expect(initial).toEqual(1);
-      c.collider.update();
-      expect(initial).toEqual(1); // collision not re-reported
-
-      var temp = c.entities._entities[0];
-      c.entities._entities[0] = c.entities._entities[1];
-      c.entities._entities[1] = temp; // reorder entities
-      c.collider.update();
-      expect(initial).toEqual(2); // boom
-      restoreIsIntersecting();
     });
   });
 });

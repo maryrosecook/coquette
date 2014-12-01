@@ -3,16 +3,6 @@
     this.c = coquette;
   };
 
-  // if no entities have uncollision(), skip expensive record keeping for uncollisions
-  var isUncollisionOn = function(entities) {
-    for (var i = 0, len = entities.length; i < len; i++) {
-      if (entities[i].uncollision !== undefined) {
-        return true;
-      }
-    }
-    return false;
-  };
-
   var isSetupForCollisions = function(obj) {
     return obj.center !== undefined && obj.size !== undefined;
   };
@@ -37,25 +27,17 @@
         var pair = this._currentCollisionPairs.shift();
         if (this.isColliding(pair[0], pair[1])) {
           this.collision(pair[0], pair[1]);
-        } else {
-          this.removeOldCollision(this.getCollideRecordIds(pair[0], pair[1])[0]);
         }
       }
     },
 
     collision: function(entity1, entity2) {
-      var collisionType;
-      if (!isUncollisionOn(this.c.entities.all())) {
-        collisionType = this.INITIAL;
-      } else if (this.getCollideRecordIds(entity1, entity2).length === 0) {
+      if (this.getCollideRecordIds(entity1, entity2).length === 0) {
         this._collideRecords.push([entity1, entity2]);
-        collisionType = this.INITIAL;
-      } else {
-        collisionType = this.SUSTAINED;
       }
 
-      notifyEntityOfCollision(entity1, entity2, collisionType);
-      notifyEntityOfCollision(entity2, entity1, collisionType);
+      notifyEntityOfCollision(entity1, entity2);
+      notifyEntityOfCollision(entity2, entity1);
     },
 
     createEntity: function(entity) {
@@ -68,27 +50,12 @@
     },
 
     destroyEntity: function(entity) {
-      var recordIds = this.getCollideRecordIds(entity);
-      for (var i = 0; i < recordIds.length; i++) {
-        this.removeOldCollision(recordIds[i]);
-      }
-
       // if coll detection happening, remove any pairs that include entity
       for(var i = this._currentCollisionPairs.length - 1; i >= 0; i--){
         if (this._currentCollisionPairs[i][0] === entity ||
            this._currentCollisionPairs[i][1] === entity) {
           this._currentCollisionPairs.splice(i, 1);
         }
-      }
-    },
-
-    // remove collision at passed index
-    removeOldCollision: function(recordId) {
-      var record = this._collideRecords[recordId];
-      if (record !== undefined) {
-        notifyEntityOfUncollision(record[0], record[1])
-        notifyEntityOfUncollision(record[1], record[0])
-        this._collideRecords.splice(recordId, 1);
       }
     },
 
@@ -139,9 +106,6 @@
       }
     },
 
-    INITIAL: 0,
-    SUSTAINED: 1,
-
     RECTANGLE: 0,
     CIRCLE: 1
   };
@@ -150,15 +114,9 @@
     return obj.boundingBox || Collider.prototype.RECTANGLE;
   };
 
-  var notifyEntityOfCollision = function(entity, other, type) {
+  var notifyEntityOfCollision = function(entity, other) {
     if (entity.collision !== undefined) {
-      entity.collision(other, type);
-    }
-  };
-
-  var notifyEntityOfUncollision = function(entity, other) {
-    if (entity.uncollision !== undefined) {
-      entity.uncollision(other);
+      entity.collision(other);
     }
   };
 
