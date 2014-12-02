@@ -52,7 +52,7 @@
 
       // draw game and entities
       var drawables = [this.game]
-        .concat(this.c.entities.all().concat().sort(zindexSort));
+        .concat(this.c.entities.all().sort(zindexSort));
       for (var i = 0, len = drawables.length; i < len; i++) {
         if (drawables[i].draw !== undefined) {
           var drawable = drawables[i];
