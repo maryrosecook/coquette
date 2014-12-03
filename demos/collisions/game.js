@@ -1,72 +1,110 @@
 ;(function(exports) {
-  var GOLDEN_RATIO = 1.61803398875;
+
+  var maxNumberOfShape = 100;
+  var width            = 800;
+  var height           = 500;
+
+
+  var time = {
+    size:      10,
+    data:      [],
+    pointer:   0,
+    startTime: 0,
+
+    timeEl: undefined,
+
+    start: function() {
+      this.startTime = +new Date();
+    },
+
+    end: function() {
+      var endTime = +new Date();
+      this.add(endTime - this.startTime);
+
+      if(!this.timeEl) {
+        this.timeEl = document.getElementById("time");
+      }
+      this.timeEl.innerHTML = this.avg();
+    },
+
+    add: function(diff) {
+      this.data[this.pointer] = diff;
+      this.pointer = ++this.pointer % this.size;
+    },
+
+    avg: function() {
+      var sum = 0;
+      this.data.forEach(function(time) {
+        sum += time;
+      });
+      return Math.round(sum/this.data.length);
+    }
+  }
 
   var Collisions = function() {
-    var autoFocus = false;
-    this.c = new Coquette(this, "collisions-canvas",
-                          800, 500 / GOLDEN_RATIO, "white", autoFocus);
+    var autoFocus = true;
+    var c = new Coquette(this, "collisions-canvas",
+                          width, height, "white", autoFocus);
+    this.c = c;
 
+    // Measuring time for calculating collisions
     var update = this.c.collider.update;
-
-    // Calculate statistics for collision detection
-    // by intercepting function calls on the collider.
     this.c.collider.update = function() {
-      var scanned   = 0;
-      var colliding = 0;
-
-      var isColliding = this.isColliding;
-      this.isColliding = function() {
-        scanned++;
-        var result = isColliding.apply(this, arguments);
-        if(result) colliding++
-          return result;
-      }
-
-      var start = +new Date();
+      time.start();
       update.apply(this);
-      var end = +new Date();
-      var diff = end - start;
-
-      this.isColliding = isColliding;
-
-      collisionStatistics.executionTime(diff);
-      collisionStatistics.scannedEntityPairs(scanned);
-      collisionStatistics.collidingEntityPairs(colliding);
-    }
+      time.end();
+    };
 
   };
 
   Collisions.prototype = {
+    entityEl: undefined,
+
     update: function() {
-      var viewSize = this.c.renderer.getViewSize();
+      var viewSize   = this.c.renderer.getViewSize();
       var viewCenter = this.c.renderer.getViewCenter();
 
-      if (this.c.entities.all().length < 50) { // not enough shapes
-        var dirFromCenter = randomDirection();
+      if (this.c.inputter.isPressed(this.c.inputter.SPACE)) {
+        this.c.collider._toggleCollisionStrategy();
+      }
+
+      var x1 = viewCenter.x - viewSize.x/2;
+      var x2 = viewCenter.x + viewSize.x/2;
+      var y1 = viewCenter.y - viewSize.y/2;
+      var y2 = viewCenter.y + viewSize.y/2;
+
+      var entities = this.c.entities.all();
+      if(!this.entityEl) {
+        this.entityEl = document.getElementById("entities");
+      }
+      this.entityEl.innerHTML = entities.length;
+
+      if (entities.length < maxNumberOfShape) { // not enough shapes
         var Shape = Math.random() > 0.5 ? Rectangle : Circle;
         this.c.entities.create(Shape, { // make one
-          center: offscreenPosition(dirFromCenter, viewSize, viewCenter),
-          vec: movingOnscreenVec(dirFromCenter)
+          center: randomPosition(x1, y1, x2, y2),
+          vec:    randomVec()
         });
       }
 
-      // destroy entities that are off screen
-      var entities = this.c.entities.all();
-      for (var i = 0; i < entities.length; i++) {
-        if (isOutOfView(entities[i], viewSize, viewCenter)) {
-          this.c.entities.destroy(entities[i]);
-        }
-      }
+      this.c.entities.all().forEach(function(entity) {
+        // Wrap it!
+        if(entity.center.x > x2) entity.center.x = x1;
+        if(entity.center.x < x1) entity.center.x = x2;
+        if(entity.center.y > y2) entity.center.y = y1;
+        if(entity.center.y < y1) entity.center.y = y2;
+      });
     },
   };
 
   var Rectangle = function(game, settings) {
-    this.c = game.c;
-    this.angle = Math.random() * 360;
-    this.center = settings.center;
-    this.size = { x: 70, y: 70 / GOLDEN_RATIO };
-    this.vec = settings.vec;
-    this.turnSpeed = 2 * Math.random() - 1;
+    this.c           = game.c;
+    this.boundingBox = new Coquette.Collider.Shape.Rectangle(this);
+    this.angle       = Math.random() * 360;
+    this.center      = settings.center;
+    this.size        = { x: 20, y: 10};
+    this.vec         = settings.vec;
+    this.turnSpeed   = 2 * Math.random() - 1;
 
     mixin(makeCurrentCollidersCountable, this);
   };
@@ -78,16 +116,13 @@
       this.center.y += this.vec.y;
 
       this.angle += this.turnSpeed; // turn
+      this.lineWidth = this.colliderCount>0 ? 2 : 1;
+      this.colliderCount = 0;
     },
 
     draw: function(ctx) {
-      if (this.colliderCount > 0) {
-        ctx.lineWidth = 2;
-      } else {
-        ctx.lineWidth = 1;
-      }
-
       ctx.strokeStyle = "black";
+      ctx.lineWidth = this.lineWidth;
       ctx.strokeRect(this.center.x - this.size.x / 2, this.center.y - this.size.y / 2,
                      this.size.x, this.size.y);
     },
@@ -95,11 +130,11 @@
   };
 
   var Circle = function(game, settings) {
-    this.c = game.c;
-    this.boundingBox = this.c.collider.CIRCLE;
-    this.center = settings.center;
-    this.size = { x: 55, y: 55 };
-    this.vec = settings.vec;
+    this.c           = game.c;
+    this.boundingBox = new Coquette.Collider.Shape.Circle(this);
+    this.center      = settings.center;
+    this.size        = { x: 10, y: 10 };
+    this.vec         = settings.vec;
 
     mixin(makeCurrentCollidersCountable, this);
   };
@@ -109,16 +144,14 @@
       // move
       this.center.x += this.vec.x;
       this.center.y += this.vec.y;
+
+      this.lineWidth = this.colliderCount>0 ? 2 : 1;
+      this.colliderCount = 0;
     },
 
     draw: function(ctx) {
-      if (this.colliderCount > 0) {
-        ctx.lineWidth = 2;
-      } else {
-        ctx.lineWidth = 1;
-      }
-
       ctx.beginPath();
+      ctx.lineWidth = this.lineWidth;
       ctx.arc(this.center.x, this.center.y, this.size.x / 2, 0, Math.PI * 2, true);
       ctx.closePath();
       ctx.strokeStyle = "black";
@@ -127,25 +160,17 @@
 
   };
 
-  var randomDirection = function() {
-    return Coquette.Collider.Maths.unitVector({ x:Math.random() - .5, y:Math.random() - .5 });
-  };
+  var randomPosition = function(x1, y1, x2, y2) {
+    var randx = Math.round(Math.random() * (x2-x1) + x1);
+    var randy = Math.round(Math.random() * (y2-y1) + y1);
+    return { x: randx, y: randy };
+  }
 
-  var movingOnscreenVec = function(dirFromCenter) {
-    return { x: -dirFromCenter.x * 3 * Math.random(), y: -dirFromCenter.y * 3 * Math.random() }
-  };
-
-  var offscreenPosition = function(dirFromCenter, viewSize, viewCenter) {
-    return {
-      x: viewCenter.x + dirFromCenter.x * viewSize.x,
-      y: viewCenter.y + dirFromCenter.y * viewSize.y,
-    };
-  };
-
-  var isOutOfView = function(obj, viewSize, viewCenter) {
-    return Coquette.Collider.Maths.distance(obj.center, viewCenter) >
-      Math.max(viewSize.x, viewSize.y);
-  };
+  var randomVec = function() {
+    var randx = Math.round(Math.random() * 10 - 5);
+    var randy = Math.round(Math.random() * 10 - 5);
+    return { x: randx, y: randy };
+  }
 
   var mixin = function(from, to) {
     for (var i in from) {
@@ -153,46 +178,12 @@
     }
   };
 
-  var collisionStatistics = {
-
-    collisionsEl: undefined,
-    scannedEl: undefined,
-    timeEl: undefined,
-
-    collidingEntityPairs: function(collidingEntities) {
-      if(!this.collisionsEl) {
-        this.collisionsEl = document.getElementById("collisions");
-      }
-      this.collisionsEl.innerHTML = collidingEntities;
-    },
-
-    scannedEntityPairs: function(scannedEntities) {
-      if(!this.scannedEl) {
-        this.scannedEl = document.getElementById("scanned");
-      }
-      this.scannedEl.innerHTML    = scannedEntities;
-    },
-
-    executionTime: function(time) {
-      if(!this.timeEl) {
-        this.timeEl = document.getElementById("time");
-      }
-      this.timeEl.innerHTML       = time;
-    }
-  }
-
   var makeCurrentCollidersCountable = {
     colliderCount: 0, // number of other shapes currently touching this shape
 
     collision: function(_, type) {
-      if (type === this.c.collider.INITIAL) {
-        this.colliderCount++;
-      }
+      this.colliderCount++;
     },
-
-    uncollision: function() {
-      this.colliderCount--;
-    }
 
   };
 
