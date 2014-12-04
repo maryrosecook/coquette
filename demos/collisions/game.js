@@ -1,18 +1,18 @@
 ;(function(exports) {
 
-  var maxNumberOfShape = 100;
   var width            = 800;
   var height           = 500;
 
+  var Timer = function() {
+    this.size      = 10;
+    this.data      = [];
+    this.pointer   = 0;
+    this.startTime = 0;
 
-  var time = {
-    size:      10,
-    data:      [],
-    pointer:   0,
-    startTime: 0,
+    this.timeEl    = undefined;
+  }
 
-    timeEl: undefined,
-
+  Timer.prototype = {
     start: function() {
       this.startTime = +new Date();
     },
@@ -41,18 +41,113 @@
     }
   }
 
+  var Test = function(settings) {
+    this.time = {};
+    this.timer = new Timer();
+    this.settings = settings;
+    this.quad = false;
+  }
+
+  Test.prototype.onStartCollisionDetection = function(collider) {
+    if(!this.start) {
+      collider._useQuadtree(this.quad, this.settings.quad);
+      this.start = +new Date();
+    }
+    this.timer.start();
+  }
+
+  Test.prototype.onEndCollisionDetection = function() {
+    this.timer.end();
+    var currentTime = +new Date();
+    if(currentTime - this.start > this.settings.duration) {
+      this.start = undefined;
+      if(!this.quad) {
+        this.time.all = this.timer.avg();
+        this.timer = new Timer();
+        this.quad  = true;
+      } else {
+        this.time.quad = this.timer.avg();
+        this.quad = false;
+        testSuite.nextTest();
+      }
+    }
+  }
+
+  var TestSuite = function() {
+    this.tests = [];
+    this.current = 0;
+
+    this.tableEl;
+  }
+
+  TestSuite.prototype = {
+    addTest: function(test) {
+      this.tests.push(test);
+    },
+    currentTest: function() {
+      return this.tests[this.current];
+    },
+    nextTest: function() {
+      this.logTest();
+      this.current = ((this.current+1) % this.tests.length);
+      return this.currentTest();
+    },
+    hasNextTest: function() {
+      return this.tests.length<this.current+1;
+    },
+    logTest: function() {
+      if(!this.tableEl) {
+        this.tableEl = document.getElementById("tests");
+      }
+      if(this.tableEl.rows.length>this.current+1) {
+        this.tableEl.deleteRow(this.current+1);
+      }
+      var row = this.tableEl.insertRow(this.current+1);
+
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      var cell3 = row.insertCell(2);
+
+      // Add some text to the new cells:
+      cell1.innerHTML = JSON.stringify(this.currentTest().settings);
+      if(this.currentTest().time.all < this.currentTest().time.quad) {
+        cell2.innerHTML = "<b>" + this.currentTest().time.all + "ms</b>";
+        cell3.innerHTML = this.currentTest().time.quad + "ms";
+      } else {
+      cell2.innerHTML = this.currentTest().time.all + "ms";
+      cell3.innerHTML = "<b>" + this.currentTest().time.quad + "ms</b>";
+
+      }
+    }
+  };
+
+  var testSuite = new TestSuite();
+  var entitiesCount = [50, 250, 500];
+  var maxObj = [1, 3, 5, 10, 20];
+  var maxLevel = [1, 3, 5, 10, 20];
+
+  entitiesCount.forEach(function(count) {
+    maxObj.forEach(function(obj) {
+      maxLevel.forEach(function(level) {
+        testSuite.addTest(new Test({entities: count, duration: 5000,
+          quad: {
+            maxObjects: obj, maxLevel: level
+          }}));
+      });
+    });
+  });
+
   var Collisions = function() {
     var autoFocus = true;
     var c = new Coquette(this, "collisions-canvas",
                           width, height, "white", autoFocus);
     this.c = c;
 
-    // Measuring time for calculating collisions
     var update = this.c.collider.update;
     this.c.collider.update = function() {
-      time.start();
+      testSuite.currentTest().onStartCollisionDetection(this);
       update.apply(this);
-      time.end();
+      testSuite.currentTest().onEndCollisionDetection(this);
     };
 
   };
@@ -63,10 +158,6 @@
     update: function() {
       var viewSize   = this.c.renderer.getViewSize();
       var viewCenter = this.c.renderer.getViewCenter();
-
-      if (this.c.inputter.isPressed(this.c.inputter.SPACE)) {
-        this.c.collider._toggleCollisionStrategy();
-      }
 
       var x1 = viewCenter.x - viewSize.x/2;
       var x2 = viewCenter.x + viewSize.x/2;
@@ -79,7 +170,9 @@
       }
       this.entityEl.innerHTML = entities.length;
 
-      if (entities.length < maxNumberOfShape) { // not enough shapes
+      var currentTestSettings = testSuite.currentTest().settings;
+      // Create if too less
+      for(var i=0; i<(currentTestSettings.entities-entities.length); i++) {
         var Shape = Math.random() > 0.5 ? Rectangle : Circle;
         this.c.entities.create(Shape, { // make one
           center: randomPosition(x1, y1, x2, y2),
@@ -87,8 +180,13 @@
         });
       }
 
+      // Destroy if too many
+      for(var i=0; i<(entities.length-currentTestSettings.entities); i++) {
+        this.c.entities.destroy(entities[i]);
+      }
+
+      // Wrap it!
       this.c.entities.all().forEach(function(entity) {
-        // Wrap it!
         if(entity.center.x > x2) entity.center.x = x1;
         if(entity.center.x < x1) entity.center.x = x2;
         if(entity.center.y > y2) entity.center.y = y1;

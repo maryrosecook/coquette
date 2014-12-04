@@ -2,7 +2,6 @@
   var Collider = function(coquette) {
     this.c = coquette;
     this._getCollisionPairs = quadTreeCollisionPairs;
-
   };
 
   // if no entities have uncollision(), skip expensive record keeping for uncollisions
@@ -57,18 +56,17 @@
     }
   }
 
-
   Collider.prototype = {
     _collideRecords: [],
     _currentCollisionPairs: [],
 
-    _toggleCollisionStrategy: function() {
-      if(this._getCollisionPairs == quadTreeCollisionPairs) {
-        this._getCollisionPairs = allCollisionPairs;
-        console.log("Using all pairs for collision");
-      } else {
+    _useQuadtree: function(useQuadtree, quadSettings) {
+      if(useQuadtree) {
         this._getCollisionPairs = quadTreeCollisionPairs;
-        console.log("Using quad tree for collision");
+        this._quadSettings = quadSettings;
+      } else {
+        this._getCollisionPairs = allCollisionPairs;
+        this.quadTree = undefined;
       }
     },
 
@@ -152,7 +150,6 @@
       }
     },
 
-
     INITIAL: 0,
     SUSTAINED: 1,
 
@@ -172,14 +169,6 @@
     return shape1.isIntersecting(shape2);
   };
 
-  var testPerformance = function(f, of) {
-    var start = +new Date();
-    f();
-    var end = +new Date();
-    var diff = end - start;
-    //console.log(of, diff);
-  }
-
   var quadTreeCollisionPairs = function(entities) {
     var viewSize   = this.c.renderer.getViewSize();
     var viewCenter = this.c.renderer.getViewCenter();
@@ -190,26 +179,23 @@
     var y2 = viewCenter.y + viewSize.y/2;
 
     this.quadTree = new Quadtree(x1, y1, x2, y2);
+    this.quadTree.settings = this._quadSettings;
     var quadTree = this.quadTree;
-    testPerformance(function() {
-      entities.forEach(function(entity) {
-        quadTree.insert(entity);
-      });
-    }, "Insertion")
+    entities.forEach(function(entity) {
+      quadTree.insert(entity);
+    });
 
     var collisionPairs   = [];
     var scannedEntities  = {};
-    testPerformance(function() {
-      entities.forEach(function(entity) {
-        var collisions = quadTree.collisions(getBoundingBox(entity));
-        collisions.forEach(function(collision) {
-          if(!scannedEntities[collision._id]) {
-            collisionPairs.push([entity, collision]);
-          }
-        });
-        scannedEntities[entity._id] = true;
+    entities.forEach(function(entity) {
+      var collisions = quadTree.collisions(getBoundingBox(entity));
+      collisions.forEach(function(collision) {
+        if(!scannedEntities[collision._id]) {
+          collisionPairs.push([entity, collision]);
+        }
       });
-    }, "Retrieving")
+      scannedEntities[entity._id] = true;
+    });
     return collisionPairs;
   };
   
@@ -498,13 +484,9 @@
     this.nodes      = [];
     this.rectangles = [];
     this.leaf       = true;
+    this.settings   = {maxObj: 1, maxLevel: 5};
 
     this.level   = level || 1;
-  }
-
-  Quadtree.prototype = {
-    MAX_OBJECTS: 1,
-    MAX_LEVEL:   7 
   }
 
   Quadtree.prototype.insert = function(object) {
@@ -513,7 +495,7 @@
     if(isNaN(x) || isNaN(y)) return;
 
     if(this.leaf) {
-      if(this.objects.length<this.MAX_OBJECTS || this.level === this.MAX_LEVEL) {
+      if(this.objects.length<this.settings.maxObj || this.level === this.settings.maxLevel) {
         this.objects.push(object);
         return this;
       } else {
