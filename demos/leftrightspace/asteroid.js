@@ -18,8 +18,6 @@
         y: 0.02 + Math.random() * 0.1 * this.game.maths.plusMinus()
       };
     }
-
-    this.collidingAsteroids = [];
   };
 
   Asteroid.prototype = {
@@ -57,7 +55,7 @@
       this.game.startClip(ctx);
 
       var color = "#fff";
-      if (this.collidingAsteroids.length === 0) {
+      if (this.getCollidingAsteroidGroup().length === 0) {
         color = "#666";
       }
       this.game.circle(this.center, this.size.x / 2, color);
@@ -65,35 +63,20 @@
       this.game.endClip(ctx);
     },
 
-    destroy: function() {
-      for (var i = 0, len = this.collidingAsteroids.length; i < len; i++) {
-        if (this.collidingAsteroids[i] !== undefined) {
-          if (this.collidingAsteroids[i].destroyed === false) {
-            this.collidingAsteroids[i].destroyed = true;
-            this.collidingAsteroids[i].destroy();
-          }
-        }
-      }
-      this.kill();
-    },
-
-    kill: function() {
-      this.game.c.entities.destroy(this);
-    },
-
-    collision: function(other, type) {
-      if (type === this.game.c.collider.INITIAL) {
-        if (other instanceof Bullet) {
-          if (this.collidingAsteroids.length === 0) {
-            this.spawnTwin(other);
-          } else if (this.collidingAsteroids.length > 0) {
-            this.destroy();
-          }
-        } else if (other instanceof Player) {
+    collision: function(other) {
+      if (other instanceof Bullet) {
+        var collidingAsteroids = this.getCollidingAsteroidGroup();
+        if (collidingAsteroids.length === 0) {
           this.spawnTwin(other);
-        } else if (other instanceof Asteroid) {
-          this.collidingAsteroids.push(other);
+        } else if (collidingAsteroids.length > 0) {
+          for (var i = 0, len = collidingAsteroids.length; i < len; i++) {
+            this.game.c.entities.destroy(collidingAsteroids[i]);
+          }
+
+          this.game.c.entities.destroy(this);
         }
+      } else if (other instanceof Player) {
+        this.spawnTwin(other);
       }
     },
 
@@ -108,16 +91,26 @@
       });
     },
 
-    uncollision: function(other) {
-      if (other instanceof Asteroid) {
-        for (var i = 0, len = this.collidingAsteroids.length; i < len; i++) {
-          if (this.collidingAsteroids[i] === other) {
-            this.collidingAsteroids.splice(i, 1);
-            break;
-          }
-        }
+    getCollidingAsteroidGroup: function() {
+      var asteroids = this.game.c.entities.all()
+          .filter(function(e) { return e instanceof Asteroid; });
+      return getCollidingGroup(this, asteroids);
+    }
+  };
+
+  function getCollidingGroup(entity, allEntities, group) {
+    if (group === undefined) { return getCollidingGroup(entity, allEntities, []); }
+
+    var next = allEntities
+        .filter(function(e) { return Coquette.Collider.prototype.isColliding(entity, e); });
+    for (var i = 0; i < next.length; i++) {
+      if (group.indexOf(next[i]) === -1) {
+        group.push(next[i]);
+        getCollidingGroup(next[i], allEntities, group);
       }
     }
+
+    return group;
   };
 
   exports.Asteroid = Asteroid;

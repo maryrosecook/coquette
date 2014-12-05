@@ -295,10 +295,9 @@ To make an entity support collisions, put these attributes on it:
 * `boundingBox`: The shape that best approximates the shape of the entity, either `c.collider.RECTANGLE` or `c.collider.CIRCLE`.
 * `angle`: The orientation of the entity in degrees, e.g. `30`.
 
-And, optionally, these methods:
+And, optionally, this method:
 
-* `collision(other, type)`: Called when the entity collides with another entity.  Takes `other`, the other entity involved in the collision.  Takes `type`, which will be `c.collider.INITIAL` if the entities were not colliding in the previous tick, or `c.collider.SUSTAINED` if the entities were colliding in the previous tick.
-* `uncollision(other)`: Called when the entity stops colliding with another entity.  Takes `other`, the other entity involved in the collision.
+* `collision(other)`: Called when the entity collides with another entity.  Takes `other`, the other entity involved in the collision.
 
 For example:
 
@@ -311,16 +310,8 @@ var Player = function() {
 };
 
 Player.prototype = {
-  collision: function(other, type) {
-    if (type === c.collider.INITIAL) {
-      console.log("Ow,", other, "hit me.");
-    } else if (type === c.collider.SUSTAINED) {
-      console.log("Ow,", other, "is still hitting me.");
-    }
-  },
-
-  uncollision: function(other) {
-    console.log("Phew,", other, "has stopped hitting me.");
+  collision: function(other) {
+    console.log("Ow,", other, "hit me.");
   }
 };
 ```

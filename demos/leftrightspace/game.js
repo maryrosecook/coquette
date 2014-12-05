@@ -35,7 +35,7 @@
         if(this.c.inputter.isDown(this.c.inputter.SPACE)) {
           var asteroids = this.c.entities.all(Asteroid);
           for (var i = 0; i < asteroids.length; i++) {
-            asteroids[i].kill();
+            this.c.entities.destroy(asteroids[i]);
           }
 
           for (var i = 0; i < 3; i++) {

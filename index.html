@@ -377,11 +377,10 @@ var Game = function() {
       <li><code>angle</code>: The orientation of the entity in degrees, e.g. <code>30</code>.</li>
     </ul>
 
-    <p>And, optionally, these methods:</p>
+    <p>And, optionally, this method:</p>
 
     <ul>
-      <li><code>collision(other, type)</code>: Called when the entity collides with another entity.  Takes <code>other</code>, the other entity involved in the collision.  Takes <code>type</code>, which will be <code>c.collider.INITIAL</code> if the entities were not colliding in the previous tick, or <code>c.collider.SUSTAINED</code> if the entities were colliding in the previous tick.</li>
-      <li><code>uncollision(other)</code>: Called when the entity stops colliding with another entity.  Takes <code>other</code>, the other entity involved in the collision.</li>
+      <li><code>collision(other)</code>: Called when the entity collides with another entity.  Takes <code>other</code>, the other entity involved in the collision.</li>
     </ul>
 
     <p>For example:</p>
@@ -395,16 +394,8 @@ var Player = function() {
 };
 
 Player.prototype = {
-  collision: function(other, type) {
-    if (type === c.collider.INITIAL) {
-      console.log("Ow,", other, "hit me.");
-    } else if (type === c.collider.SUSTAINED) {
-      console.log("Ow,", other, "is still hitting me.");
-    }
-  },
-
-  uncollision: function(other) {
-    console.log("Phew,", other, "has stopped hitting me.");
+  collision: function(other) {
+    console.log("Ow,", other, "hit me.");
   }
 };
 </pre>

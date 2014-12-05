@@ -41,11 +41,13 @@
     this.vec = settings.vec;
     this.turnSpeed = 2 * Math.random() - 1;
 
-    mixin(makeCurrentCollidersCountable, this);
+    this.collisionCounter = new CollisionCounter(this);
   };
 
   Rectangle.prototype = {
     update: function() {
+      this.collisionCounter.update();
+
       // move
       this.center.x += this.vec.x;
       this.center.y += this.vec.y;
@@ -54,7 +56,7 @@
     },
 
     draw: function(ctx) {
-      if (this.colliderCount > 0) {
+      if (this.collisionCounter.colliders.length > 0) {
         ctx.lineWidth = 2;
       } else {
         ctx.lineWidth = 1;
@@ -63,6 +65,10 @@
       ctx.strokeStyle = "black";
       ctx.strokeRect(this.center.x - this.size.x / 2, this.center.y - this.size.y / 2,
                      this.size.x, this.size.y);
+    },
+
+    collision: function(other) {
+      this.collisionCounter.collision(other);
     },
 
     startDrag: function() {
@@ -78,18 +84,20 @@
     this.size = { x: 55, y: 55 };
     this.vec = settings.vec;
 
-    mixin(makeCurrentCollidersCountable, this);
+    this.collisionCounter = new CollisionCounter(this);
   };
 
   Circle.prototype = {
     update: function() {
+      this.collisionCounter.update();
+
       // move
       this.center.x += this.vec.x;
       this.center.y += this.vec.y;
     },
 
     draw: function(ctx) {
-      if (this.colliderCount > 0) {
+      if (this.collisionCounter.colliders.length > 0) {
         ctx.lineWidth = 2;
       } else {
         ctx.lineWidth = 1;
@@ -100,6 +108,10 @@
       ctx.closePath();
       ctx.strokeStyle = "black";
       ctx.stroke();
+    },
+
+    collision: function(other) {
+      this.collisionCounter.collision(other);
     },
 
     startDrag: function() {
@@ -202,18 +214,19 @@
     }
   };
 
-  var makeCurrentCollidersCountable = {
-    colliderCount: 0, // number of other shapes currently touching this shape
+  var CollisionCounter = function(entity) {
+    this.colliders = [];
 
-    collision: function(_, type) {
-      if (type === this.c.collider.INITIAL) {
-        this.colliderCount++;
+    this.update = function() {
+      this.colliders = this.colliders
+        .filter(function(c) { return entity.c.collider.isColliding(entity, c); });
+    };
+
+    this.collision = function(other) {
+      if (this.colliders.indexOf(other) === -1) {
+        this.colliders.push(other);
       }
-    },
-
-    uncollision: function() {
-      this.colliderCount--;
-    }
+    };
   };
 
   exports.SpinningShapesGame = SpinningShapesGame;

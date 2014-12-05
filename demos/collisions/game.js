@@ -129,7 +129,7 @@
   entitiesCount.forEach(function(count) {
     maxObj.forEach(function(obj) {
       maxLevel.forEach(function(level) {
-        testSuite.addTest(new Test({entities: count, duration: 5000,
+        testSuite.addTest(new Test({entities: count, duration: 10000,
           quad: {
             maxObjects: obj, maxLevel: level
           }}));

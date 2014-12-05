@@ -1,3 +1,17 @@
+0.5.2 / 2014-12-01
+
+[FIX] Fix Left Right Space to destroy ALL asteroids in group when one member hit with bullet.
+
+0.5.1 / 2014-12-01
+
+[FIX] Typo in docs.
+
+0.5.0 / 2014-12-01
+
+[BREAKING CHANGE] Coquette no longer distingishes between initial collisions and sustained collisions.  `collision()` is still called for every tick that an entity intersects with another entity, but no collision type is passed.
+
+[BREAKING CHANGE] Coquette no longer calls `"uncollision()` on entities.
+
 0.4.5 / 2014-09-12
 
 [FIX] Spinning shapes demo uses relative paths for script loading. (Thanks, douglascalhoun.)
