@@ -3,13 +3,18 @@ var Renderer = require('../src/renderer').Renderer;
 var Entities = require('../src/entities').Entities;
 var Maths = Collider.Maths;
 
-var mockObj = function(centerX, centerY, sizeX, sizeY, boundingBox, angle) {
-  return {
+var mockObj = function(centerX, centerY, sizeX, sizeY, Shape, angle) {
+  var obj = {
     center: { x:centerX, y:centerY },
     size: { x:sizeX, y:sizeY },
-    boundingBox: boundingBox,
     angle: angle === undefined ? 0 : angle
   };
+
+  if(Shape) {
+    obj.boundingBox: new Shape(obj);
+  }
+
+  return obj;
 };
 
 var mock = function(thingToMockHost, thingToMockAttribute, mock) {
@@ -25,6 +30,7 @@ describe('collider', function() {
     var MockCoquette = function() {
       this.entities = new Entities(this);
       this.collider = new Collider(this);
+      this.renderer = {};
     };
 
     var Thing = function(__, settings) {
@@ -37,9 +43,12 @@ describe('collider', function() {
       describe('create', function() {
         it('should not add coll pair for new entity with itself', function() {
           var c = new MockCoquette();
-          var unmock = mock(c.collider, "isColliding", function(a, b) {
+          var unmockCollider = mock(c.collider, "isColliding", function(a, b) {
             return true;
           });
+          var unmockRenderer = mock(c.renderer, "getViewSize", function() {
+            return {x: 500, y: 500};
+          })
 
           var haveCreatedEntity = false;
           var others = [];
@@ -57,7 +66,8 @@ describe('collider', function() {
           expect(others[0].id).toEqual(0);
           expect(others[1].id).toEqual(1);
           expect(others.length).toEqual(2);
-          unmock();
+          unmockCollider();
+          unmockRenderer();
         });
 
         it('should do collisions for new entity during current round of coll detection', function() {
@@ -80,40 +90,6 @@ describe('collider', function() {
 
           c.collider.update();
           expect(createdEntityCollisions).toEqual(2);
-          unmock();
-        });
-
-        it('should support uncolls by ordering pairs for created entity in same way as pairs for existing entities', function() {
-          var c = new MockCoquette();
-          var unmock = mock(c.collider, "isColliding", function(a, b) {
-            return true;
-          });
-
-          // start with two entities, do coll det and in process create third entity
-          var haveCreatedEntity = false;
-          var uncollisions = 0;
-          var createdEntity;
-          c.entities.create(Thing, { id: 0, collision: function() {
-            if (!haveCreatedEntity) {
-              haveCreatedEntity = true;
-              createdEntity = c.entities.create(Thing, { id: 2, uncollision: function() {
-                uncollisions++;
-              }});
-            }
-          }});
-          c.entities.create(Thing, { id: 1 });
-          c.collider.update();
-
-          // produce an uncollision
-          unmock();
-          var unmock = mock(c.collider, "isColliding", function(a, b) {
-            return false;
-          });
-          c.collider.update();
-
-          // check uncollision happened
-          expect(uncollisions).toEqual(2);
-
           unmock();
         });
       });
@@ -225,74 +201,17 @@ describe('collider', function() {
         c.collider.update();
         unmock();
       });
-
-      it('should fire uncollision on uncollision', function() {
-        var c = new MockCoquette();
-        var uncollisions = 0;
-        var unmock = mock(c.collider, "isColliding", function() { return true; });
-        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
-        c.entities.create(Thing);
-        c.collider.update();
-        mock(c.collider, "isColliding", function() { return false; })
-        c.collider.update();
-        expect(uncollisions).toEqual(1);
-        unmock();
-      });
-
-      it('should not fire uncollision on sustained non coll', function() {
-        var c = new MockCoquette();
-        var uncollisions = 0;
-        var unmock = mock(c.collider, "isColliding", function() { return true; });
-        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
-        c.entities.create(Thing);
-        c.collider.update();
-        mock(c.collider, "isColliding", function() { return false; })
-        c.collider.update();
-        expect(uncollisions).toEqual(1);
-        c.collider.update();
-        expect(uncollisions).toEqual(1);
-        unmock();
-      });
-    });
-
-    describe('destroyEntity()', function() {
-      it('should fire uncollision if colliding', function() {
-        var c = new MockCoquette();
-        var uncollisions = 0;
-        var unmock = mock(c.collider, "isColliding", function() { return true; });
-        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
-        c.entities.create(Thing);
-        c.collider.update();
-        expect(uncollisions).toEqual(0);
-        c.collider.destroyEntity(c.entities._entities[0]);
-        expect(uncollisions).toEqual(1);
-        unmock();
-      });
-
-      it('should not fire uncollision if not colliding', function() {
-        var c = new MockCoquette();
-        var uncollisions = 0;
-        var unmock = mock(c.collider, "isColliding", function() { return false; });
-        c.entities.create(Thing, { uncollision: function() { uncollisions++; }});
-        c.collider.update();
-        c.collider.destroyEntity(c.entities._entities[0]);
-        expect(uncollisions).toEqual(0);
-        unmock();
-      });
     });
 
     describe('collision()', function() {
-      it('should keep on banging out INITIAL colls if no uncollision fns', function() {
+      it('should keep on banging out collision callbacks', function() {
         var c = new MockCoquette();
 
         var unmock = mock(c.collider, "isColliding", function() { return true });
         var collisions = 0;
         c.entities.create(Thing, {
-          collision: function(__, type) {
+          collision: function() {
             collisions++;
-            if (type !== c.collider.INITIAL) {
-              throw "arg";
-            }
           }
         });
         c.entities.create(Thing);
@@ -300,46 +219,6 @@ describe('collider', function() {
         c.collider.update();
         c.collider.update();
         expect(collisions).toEqual(3);
-        unmock();
-      });
-
-      it('should do initial INITIAL coll if entity uncollision fn', function() {
-        var c = new MockCoquette();
-
-        var unmock = mock(c.collider, "isColliding", function() { return true });
-        var initial = 0;
-        c.entities.create(Thing, {
-          uncollision: function() {},
-          collision: function(__, type) {
-            if (type === c.collider.INITIAL) {
-              initial++;
-            }
-          }
-        });
-        c.entities.create(Thing);
-        c.collider.update();
-        expect(initial).toEqual(1);
-        unmock();
-      });
-
-      it('should bang out sustained colls if colls are sustained and entity has uncollision fn', function() {
-        var c = new MockCoquette();
-
-        var unmock = mock(c.collider, "isColliding", function() { return true });
-        var sustained = 0;
-        c.entities.create(Thing, {
-          uncollision: function() {},
-          collision: function(__, type) {
-            if (type === c.collider.SUSTAINED) {
-              sustained++;
-            }
-          }
-        });
-        c.entities.create(Thing);
-        c.collider.update();
-        c.collider.update();
-        c.collider.update();
-        expect(sustained).toEqual(2);
         unmock();
       });
     });
@@ -385,7 +264,7 @@ describe('collider', function() {
         var correctObj = mockObj(5, 5, 10, 10);
         var c = new Collider();
         it('should return true for two objects with center and size', function() {
-          expect(c.isColliding(correctObj, correctObj)).toEqual(true);
+          expect(c.isColliding(correctObj, mockObj(5, 5, 10, 10))).toEqual(true);
         });
 
         it('should return false when center missing', function() {
@@ -432,18 +311,18 @@ describe('collider', function() {
           });
 
           it('should return true: rotated top right just touching rotated top left', function() {
-            expect(new Collider().isIntersecting(mockObj(207, 222, 70, 43, Collider.prototype.RECTANGLE, 325),
-                                                 mockObj(280, 235, 70, 43, Collider.prototype.RECTANGLE, -484))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(207, 222, 70, 43, Collider.Shape.Rectangle, 325),
+                                                 mockObj(280, 235, 70, 43, Collider.Shape.Rectangle, -484))).toEqual(true);
           });
 
           it('should return true: rotated bottom right just touching rotated top left', function() {
-            expect(new Collider().isIntersecting(mockObj(238, 205, 70, 43, Collider.prototype.RECTANGLE, 280),
-                                                 mockObj(207, 133, 70, 43, Collider.prototype.RECTANGLE, 93))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(238, 205, 70, 43, Collider.Shape.Rectangle, 280),
+                                                 mockObj(207, 133, 70, 43, Collider.Shape.Rectangle, 93))).toEqual(true);
           });
 
           it('should return true: rotated top right just touching rotated bottom left', function() {
-            expect(new Collider().isIntersecting(mockObj(349, 171, 70, 43, Collider.prototype.RECTANGLE, 113),
-                                                 mockObj(409, 123, 70, 43, Collider.prototype.RECTANGLE, 649))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(349, 171, 70, 43, Collider.Shape.Rectangle, 113),
+                                                 mockObj(409, 123, 70, 43, Collider.Shape.Rectangle, 649))).toEqual(true);
           });
         });
 
@@ -469,18 +348,18 @@ describe('collider', function() {
           });
 
           it('should return false: rotated top right just missing rotated top left', function() {
-            expect(new Collider().isIntersecting(mockObj(199, 223, 70, 43, Collider.prototype.RECTANGLE, 325),
-                                                 mockObj(283, 237, 70, 43, Collider.prototype.RECTANGLE, -484))).toEqual(false);
+            expect(new Collider().isIntersecting(mockObj(199, 223, 70, 43, Collider.Shape.Rectangle, 325),
+                                                 mockObj(283, 237, 70, 43, Collider.Shape.Rectangle, -484))).toEqual(false);
           });
 
           it('should return false: rotated bottom right just missing rotated top left', function() {
-            expect(new Collider().isIntersecting(mockObj(242, 213, 70, 43, Collider.prototype.RECTANGLE, 280),
-                                                 mockObj(207, 133, 70, 43, Collider.prototype.RECTANGLE, 93))).toEqual(false);
+            expect(new Collider().isIntersecting(mockObj(242, 213, 70, 43, Collider.Shape.Rectangle, 280),
+                                                 mockObj(207, 133, 70, 43, Collider.Shape.Rectangle, 93))).toEqual(false);
           });
 
           it('should return true: rotated top right just missing rotated bottom left', function() {
-            expect(new Collider().isIntersecting(mockObj(340, 177, 70, 43, Collider.prototype.RECTANGLE, 113),
-                                                 mockObj(409, 123, 70, 43, Collider.prototype.RECTANGLE, 649))).toEqual(false);
+            expect(new Collider().isIntersecting(mockObj(340, 177, 70, 43, Collider.Shape.Rectangle, 113),
+                                                 mockObj(409, 123, 70, 43, Collider.Shape.Rectangle, 649))).toEqual(false);
           });
         });
       });
@@ -488,25 +367,25 @@ describe('collider', function() {
       describe('circle and rectangle', function() {
         describe('collisions', function() {
           it('should return true: circles side by side just overlapping', function() {
-            expect(new Collider().isIntersecting(mockObj(332, 180, 55, 55, Collider.prototype.CIRCLE),
-                                                 mockObj(282, 182, 55, 55, Collider.prototype.CIRCLE))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(332, 180, 55, 55, Collider.Shape.Circle),
+                                                 mockObj(282, 182, 55, 55, Collider.Shape.Circle))).toEqual(true);
           });
 
           it('should return true: circles one on top of the other just overlapping', function() {
-            expect(new Collider().isIntersecting(mockObj(291, 192, 55, 55, Collider.prototype.CIRCLE),
-                                                 mockObj(289, 241, 55, 55, Collider.prototype.CIRCLE))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(291, 192, 55, 55, Collider.Shape.Circle),
+                                                 mockObj(289, 241, 55, 55, Collider.Shape.Circle))).toEqual(true);
           });
         });
 
         describe('non-collisions', function() {
           it('should return false: circles side by side just missing', function() {
-            expect(new Collider().isIntersecting(mockObj(345, 180, 55, 55, Collider.prototype.CIRCLE),
-                                                 mockObj(282, 182, 55, 55, Collider.prototype.CIRCLE))).toEqual(false);
+            expect(new Collider().isIntersecting(mockObj(345, 180, 55, 55, Collider.Shape.Circle),
+                                                 mockObj(282, 182, 55, 55, Collider.Shape.Circle))).toEqual(false);
           });
 
           it('should return false: circles one on top of the other just missing', function() {
-            expect(new Collider().isIntersecting(mockObj(291, 186, 55, 55, Collider.prototype.CIRCLE),
-                                                 mockObj(289, 249, 55, 55, Collider.prototype.CIRCLE))).toEqual(false);
+            expect(new Collider().isIntersecting(mockObj(291, 186, 55, 55, Collider.Shape.Circle),
+                                                 mockObj(289, 249, 55, 55, Collider.Shape.Circle))).toEqual(false);
           });
         });
       });
@@ -515,49 +394,49 @@ describe('collider', function() {
         describe('collisions', function() {
           it('should return true for circ+rect that are colliding', function() {
             var collider = new Collider();
-            var obj1 = mockObj(10, 10, 10, 10, collider.CIRCLE);
-            var obj2 = mockObj(14, 14, 10, 10, collider.RECTANGLE);
+            var obj1 = mockObj(10, 10, 10, 10, collider.Shape.Circle);
+            var obj2 = mockObj(14, 14, 10, 10, collider.Shape.Rectangle);
             expect(collider.isIntersecting(obj1, obj2)).toEqual(true);
           });
 
           it('should return true: rotated top right just touching circle', function() {
-            expect(new Collider().isIntersecting(mockObj(208, 181, 55, 55, Collider.prototype.CIRCLE),
-                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(208, 181, 55, 55, Collider.Shape.Circle),
+                                                 mockObj(153, 216, 70, 43, Collider.Shape.Rectangle, 123))).toEqual(true);
           });
 
           it('should return true: rotated bottom right just touching circle', function() {
-            expect(new Collider().isIntersecting(mockObj(163, 277, 55, 55, Collider.prototype.CIRCLE),
-                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(163, 277, 55, 55, Collider.Shape.Circle),
+                                                 mockObj(153, 216, 70, 43, Collider.Shape.Rectangle, 123))).toEqual(true);
           });
 
           it('should return true: rotated top left side just touching circle', function() {
-            expect(new Collider().isIntersecting(mockObj(112, 193, 55, 55, Collider.prototype.CIRCLE),
-                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(true);
+            expect(new Collider().isIntersecting(mockObj(112, 193, 55, 55, Collider.Shape.Circle),
+                                                 mockObj(153, 216, 70, 43, Collider.Shape.Rectangle, 123))).toEqual(true);
           });
         });
 
         describe('non-collisions', function() {
           it('should return false for circ+rect that are not colliding', function() {
             var collider = new Collider();
-            var obj1 = mockObj(10, 10, 10, 10, collider.CIRCLE);
-            var obj2 = mockObj(19, 19, 10, 10, collider.RECTANGLE);
+            var obj1 = mockObj(10, 10, 10, 10, collider.Shape.Circle);
+            var obj2 = mockObj(19, 19, 10, 10, collider.Shape.Rectangle);
             var intersecting = collider.isIntersecting(obj1, obj2);
             expect(intersecting).toEqual(false);
           });
 
           it('should return false: rotated top right just missing circle', function() {
-            expect(new Collider().isIntersecting(mockObj(223, 180, 55, 55, Collider.prototype.CIRCLE),
-                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(false);
+            expect(new Collider().isIntersecting(mockObj(223, 180, 55, 55, Collider.Shape.Circle),
+                                                 mockObj(153, 216, 70, 43, Collider.Shape.Rectangle, 123))).toEqual(false);
           });
 
           it('should return false: rotated bottom right just missing circle', function() {
-            expect(new Collider().isIntersecting(mockObj(166, 288, 55, 55, Collider.prototype.CIRCLE),
-                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(false);
+            expect(new Collider().isIntersecting(mockObj(166, 288, 55, 55, Collider.Shape.Circle),
+                                                 mockObj(153, 216, 70, 43, Collider.Shape.Rectangle, 123))).toEqual(false);
           });
 
           it('should return false: rotated top left side just missing circle', function() {
-            expect(new Collider().isIntersecting(mockObj(105, 186, 55, 55, Collider.prototype.CIRCLE),
-                                                 mockObj(153, 216, 70, 43, Collider.prototype.RECTANGLE, 123))).toEqual(false);
+            expect(new Collider().isIntersecting(mockObj(105, 186, 55, 55, Collider.Shape.Circle),
+                                                 mockObj(153, 216, 70, 43, Collider.Shape.Rectangle, 123))).toEqual(false);
           });
         });
       });
@@ -566,12 +445,12 @@ describe('collider', function() {
         var collider = new Collider();
 
         var obj1 = mockObj(5, 5, 1, 1, "la");
-        var obj2 = mockObj(0, 0, 10, 10, collider.CIRCLE);
+        var obj2 = mockObj(0, 0, 10, 10, collider.Shape.Circle);
         expect(function() {
           collider.isIntersecting(obj1, obj2);
         }).toThrow();
 
-        var obj1 = mockObj(5, 5, 1, 1, Collider.CIRCLE);
+        var obj1 = mockObj(5, 5, 1, 1, Collider.Shape.Circle);
         var obj2 = mockObj(0, 0, 10, 10, "la");
         expect(function() {
           collider.isIntersecting(obj1, obj2);
@@ -582,94 +461,16 @@ describe('collider', function() {
         it('should only return true when circle+rect in right order to collide', function() {
           var collider = new Collider();
 
-          var obj1 = mockObj(38, 38, 10, 10, collider.CIRCLE);
-          var obj2 = mockObj(20, 20, 30, 30, collider.RECTANGLE);
+          var obj1 = mockObj(38, 38, 10, 10, collider.Shape.Circle);
+          var obj2 = mockObj(20, 20, 30, 30, collider.Shape.Rectangle);
           expect(collider.isIntersecting(obj1, obj2)).toEqual(true);
 
           // same dimensions, swap shape type and get no collision
-          var obj1 = mockObj(38, 38, 10, 10, collider.RECTANGLE);
-          var obj2 = mockObj(20, 20, 30, 30, collider.CIRCLE);
+          var obj1 = mockObj(38, 38, 10, 10, collider.Shape.Rectangle);
+          var obj2 = mockObj(20, 20, 30, 30, collider.Shape.Circle);
           expect(collider.isIntersecting(obj1, obj2)).toEqual(false);
         });
       });
-    });
-  });
-
-  describe('regressions', function() {
-    it('should not re-report coll as result of entity reorder', function() {
-      // In progress collisions recorded inside collider.  When checking to see
-      // if collision already recorded, assumed two entities would be in same order in
-      // record.  This assumption valid if entities always compared in same order.
-      // But, this was occasionally not the case after zindex sort following entity
-      // creation.
-
-      var MockCoquette = function() {
-        this.entities = new Entities(this);
-        this.collider = new Collider(this);
-        this.renderer = new Renderer(this, {}, {
-          style: {},
-          getContext: function() { }
-        });
-      };
-
-      var Entity = function(__, settings) {
-        for (var i in settings) {
-          this[i] = settings[i];
-        }
-      };
-
-      // prove that sorting on entities with zindexes of zeroes reorders them
-      // (this was how the entities got reordered)
-
-      var c = new MockCoquette();
-      c.entities.create(Entity, { zindex: 0, id: 0 });
-      c.entities.create(Entity, { zindex: 0, id: 1 });
-      expect(c.entities.all()[0].id).toEqual(0);
-      expect(c.entities.all()[1].id).toEqual(1);
-
-      c.entities._entities.sort(function(a, b) {
-        return (a.zindex || 0) < (b.zindex || 0) ? -1 : 1;
-      });
-      expect(c.entities.all()[0].id).toEqual(1);
-      expect(c.entities.all()[1].id).toEqual(0);
-
-      // prove that Entities.create no longer sorts on zindex
-
-      c = new MockCoquette();
-      c.entities.create(Entity, { zindex: 1 });
-      c.entities.create(Entity, { zindex: 0 });
-      expect(c.entities.all()[0].zindex).toEqual(1);
-      expect(c.entities.all()[1].zindex).toEqual(0);
-
-      // prove that reordering entities produces the bug
-
-      c = new MockCoquette();
-      var initial = 0;
-      c.entities.create(Entity, {
-        uncollision: function() {}, // switch off repeated collision reporting
-        collision: function(__, type) {
-          if (type === c.collider.INITIAL) {
-            initial++;
-          }
-        }
-      });
-      c.entities.create(Entity);
-
-      var restoreIsIntersecting = mock(c.collider, 'isColliding', function() {
-        return true;
-      });
-
-      c.collider.update();
-      expect(initial).toEqual(1);
-      c.collider.update();
-      expect(initial).toEqual(1); // collision not re-reported
-
-      var temp = c.entities._entities[0];
-      c.entities._entities[0] = c.entities._entities[1];
-      c.entities._entities[1] = temp; // reorder entities
-      c.collider.update();
-      expect(initial).toEqual(2); // boom
-      restoreIsIntersecting();
     });
   });
 });
