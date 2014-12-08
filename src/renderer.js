@@ -50,11 +50,6 @@
                    this._viewSize.x,
                    this._viewSize.y);
 
-      // draw quad tree
-      if(this.c.collider.quadTree) {
-        drawQuad(this.c.collider.quadTree, ctx);
-      }
-
       // draw game and entities
       var drawables = [this.game]
         .concat(this.c.entities.all().sort(zindexSort));
@@ -89,20 +84,6 @@
       });
     }
   };
-
-  var levelToColor = ['green', 'red', 'orange', 'yellow', 'brown', 'purple', 'blue'];
-  var drawQuad = function(quadtree, ctx) {
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = levelToColor[quadtree.level-1];
-    var x1 = quadtree.x1;
-    var y1 = quadtree.y1;
-    var x2 = quadtree.x2;
-    var y2 = quadtree.y2;
-    ctx.strokeRect(x1, y1, x2-x1, y2-y1);
-    quadtree.nodes.forEach(function(node) {
-      drawQuad(node, ctx);
-    });
-  }
 
   var viewOffset = function(viewCenter, viewSize) {
     return {

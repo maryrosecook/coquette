@@ -136,12 +136,24 @@
                           width, height, "white", autoFocus);
     this.c = c;
 
-    var update = this.c.collider.update;
+    var colliderUpdate = this.c.collider.update;
     this.c.collider.update = function() {
       testSuite.currentTest().onStartCollisionDetection(this);
-      update.apply(this);
+      colliderUpdate.apply(this);
       testSuite.currentTest().onEndCollisionDetection(this);
     };
+
+    var rendererUpdate = this.c.renderer.update;
+    this.c.renderer.update = function(intercal) {
+      rendererUpdate.apply(this);
+      var ctx = this.getCtx();
+
+      // draw quad tree
+      if(this.c.collider.quadTree) {
+        drawQuad(this.c.collider.quadTree, ctx);
+      }
+
+    }
 
   };
 
@@ -250,6 +262,20 @@
     },
 
   };
+
+  var levelToColor = ['green', 'red', 'orange', 'yellow', 'brown', 'purple', 'blue'];
+  var drawQuad = function(quadtree, ctx) {
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = levelToColor[quadtree.level-1];
+    var x1 = quadtree.x1;
+    var y1 = quadtree.y1;
+    var x2 = quadtree.x2;
+    var y2 = quadtree.y2;
+    ctx.strokeRect(x1, y1, x2-x1, y2-y1);
+    quadtree.nodes.forEach(function(node) {
+      drawQuad(node, ctx);
+    });
+  }
 
   var randomPosition = function(x1, y1, x2, y2) {
     var randx = Math.round(Math.random() * (x2-x1) + x1);
