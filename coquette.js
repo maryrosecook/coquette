@@ -34,7 +34,6 @@
   };
 
   Collider.prototype = {
-    _collideRecords: [],
     _currentCollisionPairs: [],
 
     update: function() {
@@ -58,10 +57,6 @@
     },
 
     collision: function(entity1, entity2) {
-      if (this.getCollideRecordIds(entity1, entity2).length === 0) {
-        this._collideRecords.push([entity1, entity2]);
-      }
-
       notifyEntityOfCollision(entity1, entity2);
       notifyEntityOfCollision(entity2, entity1);
     },
@@ -82,29 +77,6 @@
            this._currentCollisionPairs[i][1] === entity) {
           this._currentCollisionPairs.splice(i, 1);
         }
-      }
-    },
-
-    getCollideRecordIds: function(entity1, entity2) {
-      if (entity1 !== undefined && entity2 !== undefined) {
-        var recordIds = [];
-        for (var i = 0, len = this._collideRecords.length; i < len; i++) {
-          if (this._collideRecords[i][0] === entity1 &&
-              this._collideRecords[i][1] === entity2) {
-            recordIds.push(i);
-          }
-        }
-        return recordIds;
-      } else if (entity1 !== undefined) {
-        for (var i = 0, len = this._collideRecords.length; i < len; i++) {
-          if (this._collideRecords[i][0] === entity1 ||
-              this._collideRecords[i][1] === entity1) {
-            return [i];
-          }
-        }
-        return [];
-      } else {
-        throw "You must pass at least one entity when searching collision records."
       }
     },
 

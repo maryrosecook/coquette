@@ -47,7 +47,6 @@
   }
 
   Collider.prototype = {
-    _collideRecords: [],
     _currentCollisionPairs: [],
 
     _useQuadtree: function(useQuadtree) {
@@ -68,10 +67,6 @@
     },
 
     collision: function(entity1, entity2) {
-      if (this.getCollideRecordIds(entity1, entity2).length === 0) {
-        this._collideRecords.push([entity1, entity2]);
-      }
-
       notifyEntityOfCollision(entity1, entity2);
       notifyEntityOfCollision(entity2, entity1);
     },
@@ -95,35 +90,15 @@
       }
     },
 
-    getCollideRecordIds: function(entity1, entity2) {
-      if (entity1 !== undefined && entity2 !== undefined) {
-        var recordIds = [];
-        for (var i = 0, len = this._collideRecords.length; i < len; i++) {
-          if (this._collideRecords[i][0] === entity1 &&
-              this._collideRecords[i][1] === entity2) {
-            recordIds.push(i);
-          }
-        }
-        return recordIds;
-      } else if (entity1 !== undefined) {
-        for (var i = 0, len = this._collideRecords.length; i < len; i++) {
-          if (this._collideRecords[i][0] === entity1 ||
-              this._collideRecords[i][1] === entity1) {
-            return [i];
-          }
-        }
-        return [];
-      } else {
-        throw "You must pass at least one entity when searching collision records."
-      }
-    },
-
     isIntersecting: function(obj1, obj2) {
       return isIntersecting(obj1, obj2);
     },
 
     isColliding: function(obj1, obj2) {
-      return isColliding(obj1, obj2);
+      return obj1 !== obj2 &&
+        isSetupForCollisions(obj1) &&
+        isSetupForCollisions(obj2) &&
+        this.isIntersecting(obj1, obj2);
     },
 
     RECTANGLE: 0,
