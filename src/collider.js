@@ -59,7 +59,6 @@
     },
 
     update: function() {
-      this._collideRecords = []; // Just for now until I merge Mary's changes
       var collisionPairs = this._getCollisionPairs(this.c.entities.all());
       collisionPairs.forEach(function(pair) {
         this.collision(pair[0], pair[1]);
