@@ -3,6 +3,8 @@
   var width            = 800;
   var height           = 500;
 
+  var shapeSize        = 15;
+
   var Timer = function() {
     this.size      = 10;
     this.data      = [];
@@ -45,12 +47,14 @@
     this.time = {};
     this.timer = new Timer();
     this.settings = settings;
-    this.quad = false;
+    if(settings.quad !== undefined) {
+      this.quad = settings.quad;
+    }
   }
 
   Test.prototype.onStartCollisionDetection = function(collider) {
     if(!this.start) {
-      collider._useQuadtree(this.quad, this.settings.quad);
+      collider._useQuadtree(this.quad);
       this.start = +new Date();
     }
     this.timer.start();
@@ -122,19 +126,8 @@
   };
 
   var testSuite = new TestSuite();
-  var entitiesCount = [50, 250, 500];
-  var maxObj = [1, 3, 5, 10, 20];
-  var maxLevel = [1, 3, 5, 10, 20];
-
-  entitiesCount.forEach(function(count) {
-    maxObj.forEach(function(obj) {
-      maxLevel.forEach(function(level) {
-        testSuite.addTest(new Test({entities: count, duration: 10000,
-          quad: {
-            maxObjects: obj, maxLevel: level
-          }}));
-      });
-    });
+  [50, 100, 250, 500].forEach(function(count) {
+        testSuite.addTest(new Test({entities: count, duration: 5000, quad: false}));
   });
 
   var Collisions = function() {
@@ -200,7 +193,7 @@
     this.boundingBox = new Coquette.Collider.Shape.Rectangle(this);
     this.angle       = Math.random() * 360;
     this.center      = settings.center;
-    this.size        = { x: 20, y: 10};
+    this.size        = { x: shapeSize*2, y: shapeSize};
     this.vec         = settings.vec;
     this.turnSpeed   = 2 * Math.random() - 1;
 
@@ -231,7 +224,7 @@
     this.c           = game.c;
     this.boundingBox = new Coquette.Collider.Shape.Circle(this);
     this.center      = settings.center;
-    this.size        = { x: 10, y: 10 };
+    this.size        = { x: shapeSize, y: shapeSize };
     this.vec         = settings.vec;
 
     mixin(makeCurrentCollidersCountable, this);
@@ -265,8 +258,8 @@
   }
 
   var randomVec = function() {
-    var randx = Math.round(Math.random() * 10 - 5);
-    var randy = Math.round(Math.random() * 10 - 5);
+    var randx = Math.round(Math.random() * 5 - 2.5);
+    var randy = Math.round(Math.random() * 5 - 2.5);
     return { x: randx, y: randy };
   }
 

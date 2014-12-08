@@ -50,10 +50,9 @@
     _collideRecords: [],
     _currentCollisionPairs: [],
 
-    _useQuadtree: function(useQuadtree, quadSettings) {
+    _useQuadtree: function(useQuadtree) {
       if(useQuadtree) {
         this._getCollisionPairs = quadTreeCollisionPairs;
-        this._quadSettings = quadSettings;
       } else {
         this._getCollisionPairs = allCollisionPairs;
         this.quadTree = undefined;
@@ -149,24 +148,16 @@
     var y2 = viewCenter.y + viewSize.y/2;
 
     this.quadTree = new Quadtree(x1, y1, x2, y2);
-    this.quadTree.settings = this._quadSettings;
+    this.quadTree.settings = {
+      maxObj:   Math.max(Math.round(entities.length/4), 1),
+      maxLevel: 5
+    };
     var quadTree = this.quadTree;
     entities.forEach(function(entity) {
       quadTree.insert(entity);
     });
 
-    var collisionPairs   = [];
-    var scannedEntities  = {};
-    entities.forEach(function(entity) {
-      var collisions = quadTree.collisions(getBoundingBox(entity));
-      collisions.forEach(function(collision) {
-        if(!scannedEntities[collision._id]) {
-          collisionPairs.push([entity, collision]);
-        }
-      });
-      scannedEntities[entity._id] = true;
-    });
-    return collisionPairs;
+    return quadTree.collisions();
   };
   
   var allCollisionPairs = function(ent) {
@@ -441,9 +432,7 @@
     var width  = this.x2-this.x1;
     var height = this.y2-this.y1;
     this.rectangle  = this.createRectangle(x1, y1, x2, y2);
-    if(this.rectangle.entity.size.y < 0) {
-      console.log("PANIK")
-    }
+
     this.objects    = [];
     this.nodes      = [];
     this.rectangles = [];
@@ -534,24 +523,32 @@
   }
 
   Quadtree.prototype.visit = function(callback) {
-    if(!callback(this.objects, this.rectangle) && !this.leaf) {
+    if(!callback(this.objects, this) && !this.leaf) {
       this.nodes.forEach(function(node) {
         node.visit(callback);
       });
     }
   }
 
-  Quadtree.prototype.collisions = function(shape) {
-    var found = [];
-    this.visit(function(objects, quadRectangle) {
-      objects.forEach(function(o) {
-        if(shape.entity._id !== o._id && shape.isIntersecting(getBoundingBox(o))) {
-          found.push(o);
+  Quadtree.prototype.collisions = function() {
+    var collisions = [];
+    var scanned    = {};
+    this.visit(function(objects, quad) {
+      allCollisionPairs(objects).forEach(function(pair) {
+        var pairId = uniquePairId(pair);
+        if(!scanned[pairId]) {
+          collisions.push(pair);
+          scanned[pairId] = true;
         }
       });
-      return !quadRectangle.isIntersecting(shape);
+      return false;
     });
-    return found;
+    return collisions;
+  }
+
+  function uniquePairId(pair) {
+    return [Math.min(pair[0]._id, pair[1]._id), 
+            Math.max(pair[0]._id, pair[1]._id)].toString();
   }
 
   exports.Collider = Collider;
