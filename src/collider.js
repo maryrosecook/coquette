@@ -119,7 +119,11 @@
     },
 
     isIntersecting: function(obj1, obj2) {
-      isIntersecting(obj1, obj2);
+      return isIntersecting(obj1, obj2);
+    },
+
+    isColliding: function(obj1, obj2) {
+      return isColliding(obj1, obj2);
     },
 
     RECTANGLE: 0,
