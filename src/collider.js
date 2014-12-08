@@ -90,7 +90,10 @@
     },
 
     isIntersecting: function(obj1, obj2) {
-      return isIntersecting(obj1, obj2);
+      var shape1 = getBoundingBox(obj1);
+      var shape2 = getBoundingBox(obj2);
+
+      return shape1.isIntersecting(shape2);
     },
 
     isColliding: function(obj1, obj2) {
@@ -104,26 +107,45 @@
     CIRCLE: 1
   };
 
-  var isColliding = function(obj1, obj2) {
-    return isSetupForCollisions(obj1) && isSetupForCollisions(obj2) &&
-      isIntersecting(obj1, obj2);
-  };
+  var getDimensions = function(entities) {
+    var maxx, minx, maxy, miny;
 
-  var isIntersecting = function(obj1, obj2) {
-    var shape1 = getBoundingBox(obj1);
-    var shape2 = getBoundingBox(obj2);
+    entities.forEach(function(entity) {
+      if(entity.center) {
+        if(maxx === undefined || entity.center.x > maxx) {
+          maxx = entity.center.x;
+        }
+        if(minx === undefined || entity.center.x < minx) {
+          minx = entity.center.x;
+        }
+        if(maxy === undefined || entity.center.y > maxy) {
+          maxy = entity.center.y;
+        }
+        if(miny === undefined || entity.center.y < miny) {
+          miny = entity.center.y;
+        }
+      }
+    });
 
-    return shape1.isIntersecting(shape2);
+    var width  = maxx - minx;
+    var height = maxy - miny;
+
+    var worldSize   = {x: width, y: height };
+    var worldCenter = {x: minx + width/2, y: miny + height/2};
+    return [worldSize, worldCenter];
   };
 
   var quadTreeCollisionPairs = function(entities) {
-    var viewSize   = this.c.renderer.getViewSize();
-    var viewCenter = this.c.renderer.getViewCenter();
+    var dimensions = getDimensions(entities);
 
-    var x1 = viewCenter.x - viewSize.x/2;
-    var y1 = viewCenter.y - viewSize.y/2;
-    var x2 = viewCenter.x + viewSize.x/2;
-    var y2 = viewCenter.y + viewSize.y/2;
+    var worldSize   = dimensions[0];
+    var worldCenter = dimensions[1];
+
+    var x1 = worldCenter.x - worldSize.x/2;
+    var y1 = worldCenter.y - worldSize.y/2;
+    var x2 = worldCenter.x + worldSize.x/2;
+    var y2 = worldCenter.y + worldSize.y/2;
+
 
     this.quadTree = new Quadtree(x1, y1, x2, y2);
     this.quadTree.settings = {
@@ -135,6 +157,7 @@
       quadTree.insert(entity);
     });
 
+    quadTree.allCollisionPairs = allCollisionPairs.bind(this);
     return quadTree.collisions();
   };
   
@@ -150,10 +173,10 @@
 
     var collisionPairs = [];
     potentialCollisionPairs.forEach(function(pair) {
-      if (isColliding(pair[0], pair[1])) {
+      if(this.isColliding(pair[0], pair[1])) {
         collisionPairs.push(pair);
       }
-    });
+    }.bind(this));
 
     return collisionPairs;
   };
@@ -459,22 +482,22 @@
     var size = {x: width/2,
                 y: height/2} 
 
-    this.rectangles[0] = new Coquette.Collider.Shape.Rectangle({
+    this.rectangles[0] = new Collider.Shape.Rectangle({
       center: 
         {x:  width/4 + this.x1,
          y: height/4 + this.y1}, 
       size: size});
-    this.rectangles[1] = new Coquette.Collider.Shape.Rectangle({
+    this.rectangles[1] = new Collider.Shape.Rectangle({
       center: 
         {x:  width/4*3 + this.x1,
          y: height/4   + this.y1}, 
       size: size});
-    this.rectangles[2] = new Coquette.Collider.Shape.Rectangle({
+    this.rectangles[2] = new Collider.Shape.Rectangle({
       center: 
         {x:  width/4   + this.x1,
          y: height/4*3 + this.y1}, 
       size: size});
-    this.rectangles[3] = new Coquette.Collider.Shape.Rectangle({
+    this.rectangles[3] = new Collider.Shape.Rectangle({
       center: 
         {x:  width/4*3 + this.x1,
          y: height/4*3 + this.y1}, 
@@ -490,7 +513,7 @@
   Quadtree.prototype.createRectangle = function(x1, y1, x2, y2) {
     var width  = this.x2-this.x1;
     var height = this.y2-this.y1;
-    return new Coquette.Collider.Shape.Rectangle({
+    return new Collider.Shape.Rectangle({
       center: 
         {x:  width/2 + x1,
          y: height/2 + y1}, 
@@ -512,7 +535,7 @@
     var collisions = [];
     var scanned    = {};
     this.visit(function(objects, quad) {
-      allCollisionPairs(objects).forEach(function(pair) {
+      this.allCollisionPairs(objects).forEach(function(pair) {
         var pairId = uniquePairId(pair);
         if(!scanned[pairId]) {
           collisions.push(pair);
@@ -520,7 +543,7 @@
         }
       });
       return false;
-    });
+    }.bind(this));
     return collisions;
   }
 
