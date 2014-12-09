@@ -1,3 +1,10 @@
+0.6.0 / 2014-12-09
+
+[NEW] Coquette is using a quad tree for collision detection now.
+[NEW] Support for own shapes has been added. Your own shape needs a function called `isIntersecting` which takes another Shape and returns true or false.
+
+[BREAKING CHANGE] To enable collision detection for an entity the `boundingBox` property has to return an instance of a Shape, either `Collider.Shape.Rectangle` or `Collider.Shape.Circle`. Both constructors take the entity as a parameter.
+
 0.5.2 / 2014-12-01
 
 [FIX] Fix Left Right Space to destroy ALL asteroids in group when one member hit with bullet.
