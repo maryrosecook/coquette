@@ -11,7 +11,7 @@ var mockObj = function(centerX, centerY, sizeX, sizeY, Shape, angle) {
   };
 
   if(Shape) {
-    obj.boundingBox: new Shape(obj);
+    obj.boundingBox = new Shape(obj);
   }
 
   return obj;
@@ -52,7 +52,11 @@ describe('collider', function() {
 
           var haveCreatedEntity = false;
           var others = [];
-          c.entities.create(Thing, { id: 0, collision: function() {
+          var center = {x: 0, y: 0};
+          var size   = {x: 0, y: 0};
+          c.entities.create(Thing, {
+            id: 0, center: center, size: size,
+            collision: function() {
             if (!haveCreatedEntity) {
               haveCreatedEntity = true;
               c.entities.create(Thing, { id: 2, collision: function(other) {
@@ -60,7 +64,7 @@ describe('collider', function() {
               }});
             }
           }});
-          c.entities.create(Thing, { id: 1 });
+          c.entities.create(Thing, { id: 1, center: center, size: size });
 
           c.collider.update();
           expect(others[0].id).toEqual(0);
@@ -78,15 +82,25 @@ describe('collider', function() {
 
           var haveCreatedEntity = false;
           var createdEntityCollisions = 0;
-          c.entities.create(Thing, { id: 0, collision: function() {
-            if (!haveCreatedEntity) {
-              haveCreatedEntity = true;
-              c.entities.create(Thing, { id: 2, collision: function(other) {
-                createdEntityCollisions++;
-              }});
+          var center = {x: 0, y: 0};
+          var size   = {x: 0, y: 0};
+          c.entities.create(Thing, {
+            id: 0,
+            center: center, size: size,
+            collision: function() {
+              if (!haveCreatedEntity) {
+                haveCreatedEntity = true;
+                c.entities.create(Thing, {
+                  id: 2,
+                  center: center, size: size,
+                  collision: function(other) {
+                    createdEntityCollisions++;
+                  }
+                });
+              }
             }
-          }});
-          c.entities.create(Thing, { id: 1 });
+          });
+          c.entities.create(Thing, { id: 1, center: center, size: size});
 
           c.collider.update();
           expect(createdEntityCollisions).toEqual(2);
@@ -108,21 +122,30 @@ describe('collider', function() {
             }
           };
 
+          var center = {x: 0, y: 0};
+          var size   = {x: 0, y: 0};
           // 0 should collide with 1, 2 and 3
-          c.entities.create(Thing, { id: 0 });
-          c.entities.create(Thing, { id: 1, collision: collisionCounterFn });
-          c.entities.create(Thing, { id: 2, collision: collisionCounterFn });
-          c.entities.create(Thing, { id: 3, collision: collisionCounterFn });
+          c.entities.create(Thing, { id: 0, center: center, size: size });
+          c.entities.create(Thing, { id: 1, center: center, size: size,
+            collision: collisionCounterFn });
+          c.entities.create(Thing, { id: 2, center: center, size: size,
+            collision: collisionCounterFn });
+          c.entities.create(Thing, { id: 3, center: center, size: size,
+            collision: collisionCounterFn });
           c.collider.update();
           expect(collisionCounter).toEqual(3);
 
           // should only count coll for 0 and 1, not 2 and 3:
           collisionCounter = 0;
           c.entities._entities = [];
-          c.entities.create(Thing, { id: 0, collision: function() { c.entities.destroy(this); } });
-          c.entities.create(Thing, { id: 1, collision: collisionCounterFn });
-          c.entities.create(Thing, { id: 2, collision: collisionCounterFn });
-          c.entities.create(Thing, { id: 3, collision: collisionCounterFn });
+          c.entities.create(Thing, { id: 0, center: center, size: size,
+            collision: function() { c.entities.destroy(this); } });
+          c.entities.create(Thing, { id: 1, center: center, size: size,
+            collision: collisionCounterFn });
+          c.entities.create(Thing, { id: 2, center: center, size: size,
+            collision: collisionCounterFn });
+          c.entities.create(Thing, { id: 3, center: center, size: size,
+            collision: collisionCounterFn });
           c.collider.update();
           expect(collisionCounter).toEqual(1);
 
@@ -135,14 +158,21 @@ describe('collider', function() {
             return true;
           });
 
-          var rmEnt = c.entities.create(Thing, { id: 0 });
+          var center = {x: 0, y: 0};
+          var size   = {x: 0, y: 0};
+
+          var rmEnt = c.entities.create(Thing, { id: 0, center: center, size: size});
 
           var collisions = 0;
           for (var i = 1; i < 4; i++) {
-            c.entities.create(Thing, { id: i, collision: function() { collisions++; }});
+            c.entities.create(Thing, {
+              id: i, center: center, size: size,
+              collision: function() { collisions++; }});
           }
 
-          c.entities.create(Thing, { id: i, collision: function() { c.entities.destroy(rmEnt); }});
+          c.entities.create(Thing, {
+            id: i, center: center, size: size,
+            collision: function() { c.entities.destroy(rmEnt); }});
           c.collider.update();
           expect(collisions).toEqual(12);
           unmock();
@@ -154,11 +184,19 @@ describe('collider', function() {
             return true;
           });
 
-          var rmEnt = c.entities.create(Thing, { id: 0, collision: function() { c.entities.destroy(this); } });
+          var center = {x: 0, y: 0};
+          var size   = {x: 0, y: 0};
+          var rmEnt = c.entities.create(Thing, {
+            id: 0, collision: function() { c.entities.destroy(this); },
+            center: center, size: size
+          });
 
           var collisions = 0;
           for (var i = 1; i < 4; i++) {
-            c.entities.create(Thing, { id: i, collision: function() { collisions++; }});
+            c.entities.create(Thing, { 
+              id: i, collision: function() { collisions++; },
+              center: center, size: size
+            });
           }
 
           c.collider.update();
@@ -172,14 +210,16 @@ describe('collider', function() {
       it('should test all entities against all other entities once', function() {
         var c = new MockCoquette();
         var comparisons = [];
-        var unmock = mock(c.collider, "isColliding", function(a, b) {
+        var unmock = mock(c.collider, "collision", function(a, b) {
           comparisons.push([a.id, b.id]);
         });
 
-        c.entities.create(Thing, { id: 0 });
-        c.entities.create(Thing, { id: 1 });
-        c.entities.create(Thing, { id: 2 });
-        c.entities.create(Thing, { id: 3 });
+        var center = {x: 0, y: 0};
+        var size   = {x: 0, y: 0};
+        c.entities.create(Thing, { id: 0, center: center, size: size });
+        c.entities.create(Thing, { id: 1, center: center, size: size });
+        c.entities.create(Thing, { id: 2, center: center, size: size });
+        c.entities.create(Thing, { id: 3, center: center, size: size });
         c.collider.update();
         expect(comparisons.length).toEqual(6);
         expect(comparisons[0][0] === 0 && comparisons[0][1] === 1).toEqual(true);
@@ -193,11 +233,14 @@ describe('collider', function() {
 
       it('should do no comparisons when only one entity', function() {
         var c = new MockCoquette();
+
         var unmock = mock(c.collider, "isColliding", function(a, b) {
           throw "arg";
         });
 
-        c.entities.create(Thing, { id: 0 });
+        c.entities.create(Thing, { 
+          id: 0, center: {x: 0, y: 0}, size: {x: 0, y: 0}
+        });
         c.collider.update();
         unmock();
       });
@@ -210,11 +253,14 @@ describe('collider', function() {
         var unmock = mock(c.collider, "isColliding", function() { return true });
         var collisions = 0;
         c.entities.create(Thing, {
+          center: {x: 0, y: 0}, size: {x: 0, y: 0},
           collision: function() {
             collisions++;
           }
         });
-        c.entities.create(Thing);
+        c.entities.create(Thing, {
+          center: {x: 0, y: 0}, size: {x: 0, y: 0},
+        });
         c.collider.update();
         c.collider.update();
         c.collider.update();
@@ -394,8 +440,8 @@ describe('collider', function() {
         describe('collisions', function() {
           it('should return true for circ+rect that are colliding', function() {
             var collider = new Collider();
-            var obj1 = mockObj(10, 10, 10, 10, collider.Shape.Circle);
-            var obj2 = mockObj(14, 14, 10, 10, collider.Shape.Rectangle);
+            var obj1 = mockObj(10, 10, 10, 10, Collider.Shape.Circle);
+            var obj2 = mockObj(14, 14, 10, 10, Collider.Shape.Rectangle);
             expect(collider.isIntersecting(obj1, obj2)).toEqual(true);
           });
 
@@ -418,8 +464,8 @@ describe('collider', function() {
         describe('non-collisions', function() {
           it('should return false for circ+rect that are not colliding', function() {
             var collider = new Collider();
-            var obj1 = mockObj(10, 10, 10, 10, collider.Shape.Circle);
-            var obj2 = mockObj(19, 19, 10, 10, collider.Shape.Rectangle);
+            var obj1 = mockObj(10, 10, 10, 10, Collider.Shape.Circle);
+            var obj2 = mockObj(19, 19, 10, 10, Collider.Shape.Rectangle);
             var intersecting = collider.isIntersecting(obj1, obj2);
             expect(intersecting).toEqual(false);
           });
@@ -444,15 +490,15 @@ describe('collider', function() {
       it('should throw when either obj has invalid bounding box', function() {
         var collider = new Collider();
 
-        var obj1 = mockObj(5, 5, 1, 1, "la");
-        var obj2 = mockObj(0, 0, 10, 10, collider.Shape.Circle);
         expect(function() {
+          var obj1 = mockObj(5, 5, 1, 1, "la");
+          var obj2 = mockObj(0, 0, 10, 10, Collider.Shape.Circle);
           collider.isIntersecting(obj1, obj2);
         }).toThrow();
 
-        var obj1 = mockObj(5, 5, 1, 1, Collider.Shape.Circle);
-        var obj2 = mockObj(0, 0, 10, 10, "la");
         expect(function() {
+          var obj1 = mockObj(5, 5, 1, 1, Collider.Shape.Circle);
+          var obj2 = mockObj(0, 0, 10, 10, "la");
           collider.isIntersecting(obj1, obj2);
         }).toThrow();
       });
@@ -461,13 +507,13 @@ describe('collider', function() {
         it('should only return true when circle+rect in right order to collide', function() {
           var collider = new Collider();
 
-          var obj1 = mockObj(38, 38, 10, 10, collider.Shape.Circle);
-          var obj2 = mockObj(20, 20, 30, 30, collider.Shape.Rectangle);
+          var obj1 = mockObj(38, 38, 10, 10, Collider.Shape.Circle);
+          var obj2 = mockObj(20, 20, 30, 30, Collider.Shape.Rectangle);
           expect(collider.isIntersecting(obj1, obj2)).toEqual(true);
 
           // same dimensions, swap shape type and get no collision
-          var obj1 = mockObj(38, 38, 10, 10, collider.Shape.Rectangle);
-          var obj2 = mockObj(20, 20, 30, 30, collider.Shape.Circle);
+          var obj1 = mockObj(38, 38, 10, 10, Collider.Shape.Rectangle);
+          var obj2 = mockObj(20, 20, 30, 30, Collider.Shape.Circle);
           expect(collider.isIntersecting(obj1, obj2)).toEqual(false);
         });
       });

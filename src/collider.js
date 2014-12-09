@@ -59,10 +59,13 @@
     },
 
     update: function() {
-      var collisionPairs = this._getCollisionPairs(this.c.entities.all());
-      collisionPairs.forEach(function(pair) {
-        this.collision(pair[0], pair[1]);
-      }.bind(this));
+      this._currentCollisionPairs = this._getCollisionPairs(this.c.entities.all());
+      for(var i=0; i<this._currentCollisionPairs.length; i++) {
+        var pair = this._currentCollisionPairs[i];
+        if(pair) { // pair can be undefined after it was destroyed in the meantime
+          this.collision(pair[0], pair[1]);
+        }
+      }
     },
 
     collision: function(entity1, entity2) {
@@ -84,7 +87,7 @@
       for(var i = this._currentCollisionPairs.length - 1; i >= 0; i--){
         if (this._currentCollisionPairs[i][0] === entity ||
            this._currentCollisionPairs[i][1] === entity) {
-          this._currentCollisionPairs.splice(i, 1);
+          this._currentCollisionPairs.splice(i, 1, undefined);
         }
       }
     },
