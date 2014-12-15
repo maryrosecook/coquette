@@ -76,9 +76,10 @@ window.addEventListener('load', function() {
 
 ## Demos
 
-Four demos are included in this repository:
+Five demos are included in this repository:
 
 * `/demos/spinning-shapes` - an example of collisions between rotated entities.
+* `/demos/racecar` - a 2D racing game.
 * `/demos/box2d-physics` - a game that uses the Box2D physics engine.
 * `/demos/leftrightspace` - a complete game.
 * `/demos/simple` - the example at the top of this readme.
