@@ -1,3 +1,7 @@
+0.5.5 / 2014-12-15
+
+[NEW] Add Racecar demo.
+
 0.5.2 / 2014-12-01
 
 [FIX] Fix Left Right Space to destroy ALL asteroids in group when one member hit with bullet.
