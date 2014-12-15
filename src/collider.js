@@ -1,30 +1,68 @@
 ;(function(exports) {
   var Collider = function(coquette) {
     this.c = coquette;
+    this._getCollisionPairs = quadTreeCollisionPairs;
   };
 
   var isSetupForCollisions = function(obj) {
     return obj.center !== undefined && obj.size !== undefined;
   };
 
+  var RectangleShape = function(entity) {
+    this.entity = entity;
+  }
+
+  RectangleShape.prototype = {
+    isIntersecting: function(anotherShape) {
+      if(anotherShape instanceof CircleShape) {
+        return Maths.circleAndRectangleIntersecting(anotherShape.entity, this.entity);
+      }
+      if(anotherShape instanceof RectangleShape) {
+        return Maths.rectanglesIntersecting(this.entity, anotherShape.entity);
+      }
+      if(anotherShape.isIntersecting) {
+        return anotherShape.isIntersecting(this);
+      }
+      throw "Objects being collision tested have unsupported bounding box types."
+    }
+  }
+
+  var CircleShape = function(entity) {
+    this.entity = entity;
+  }
+
+  CircleShape.prototype = {
+    isIntersecting: function(anotherShape) {
+      if(anotherShape instanceof CircleShape) {
+        return Maths.circlesIntersecting(this.entity, anotherShape.entity);
+      }
+      if(anotherShape instanceof RectangleShape) {
+        return Maths.circleAndRectangleIntersecting(this.entity, anotherShape.entity);
+      }
+      if(anotherShape.isIntersecting) {
+        return anotherShape.isIntersecting(this);
+      }
+      throw "Objects being collision tested have unsupported bounding box types."
+    }
+  }
+
   Collider.prototype = {
     _currentCollisionPairs: [],
 
-    update: function() {
-      this._currentCollisionPairs = [];
-
-      // get all entity pairs to test for collision
-      var ent = this.c.entities.all();
-      for (var i = 0, len = ent.length; i < len; i++) {
-        for (var j = i + 1; j < len; j++) {
-          this._currentCollisionPairs.push([ent[i], ent[j]]);
-        }
+    _useQuadtree: function(useQuadtree) {
+      if(useQuadtree) {
+        this._getCollisionPairs = quadTreeCollisionPairs;
+      } else {
+        this._getCollisionPairs = allCollisionPairs;
+        this.quadTree = undefined;
       }
+    },
 
-      // test collisions
-      while (this._currentCollisionPairs.length > 0) {
-        var pair = this._currentCollisionPairs.shift();
-        if (this.isColliding(pair[0], pair[1])) {
+    update: function() {
+      this._currentCollisionPairs = this._getCollisionPairs(this.c.entities.all());
+      for(var i=0; i<this._currentCollisionPairs.length; i++) {
+        var pair = this._currentCollisionPairs[i];
+        if(pair) { // pair can be undefined after it was destroyed in the meantime
           this.collision(pair[0], pair[1]);
         }
       }
@@ -49,9 +87,16 @@
       for(var i = this._currentCollisionPairs.length - 1; i >= 0; i--){
         if (this._currentCollisionPairs[i][0] === entity ||
            this._currentCollisionPairs[i][1] === entity) {
-          this._currentCollisionPairs.splice(i, 1);
+          this._currentCollisionPairs.splice(i, 1, undefined);
         }
       }
+    },
+
+    isIntersecting: function(obj1, obj2) {
+      var shape1 = getBoundingBox(obj1);
+      var shape2 = getBoundingBox(obj2);
+
+      return shape1.isIntersecting(shape2);
     },
 
     isColliding: function(obj1, obj2) {
@@ -61,29 +106,86 @@
         this.isIntersecting(obj1, obj2);
     },
 
-    isIntersecting: function(obj1, obj2) {
-      var obj1BoundingBox = getBoundingBox(obj1);
-      var obj2BoundingBox = getBoundingBox(obj2);
-
-      if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.RECTANGLE) {
-        return Maths.rectanglesIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.RECTANGLE) {
-        return Maths.circleAndRectangleIntersecting(obj1, obj2);
-      } else if (obj1BoundingBox === this.RECTANGLE && obj2BoundingBox === this.CIRCLE) {
-        return Maths.circleAndRectangleIntersecting(obj2, obj1);
-      } else if (obj1BoundingBox === this.CIRCLE && obj2BoundingBox === this.CIRCLE) {
-        return Maths.circlesIntersecting(obj1, obj2);
-      } else {
-        throw "Objects being collision tested have unsupported bounding box types."
-      }
-    },
-
     RECTANGLE: 0,
     CIRCLE: 1
   };
 
+  var getDimensions = function(entities) {
+    var maxx, minx, maxy, miny;
+
+    entities.forEach(function(entity) {
+      if(entity.center) {
+        if(maxx === undefined || entity.center.x > maxx) {
+          maxx = entity.center.x;
+        }
+        if(minx === undefined || entity.center.x < minx) {
+          minx = entity.center.x;
+        }
+        if(maxy === undefined || entity.center.y > maxy) {
+          maxy = entity.center.y;
+        }
+        if(miny === undefined || entity.center.y < miny) {
+          miny = entity.center.y;
+        }
+      }
+    });
+
+    var width  = maxx - minx;
+    var height = maxy - miny;
+
+    var worldSize   = {x: width, y: height };
+    var worldCenter = {x: minx + width/2, y: miny + height/2};
+    return [worldSize, worldCenter];
+  };
+
+  var quadTreeCollisionPairs = function(entities) {
+    var dimensions = getDimensions(entities);
+
+    var worldSize   = dimensions[0];
+    var worldCenter = dimensions[1];
+
+    var x1 = worldCenter.x - worldSize.x/2;
+    var y1 = worldCenter.y - worldSize.y/2;
+    var x2 = worldCenter.x + worldSize.x/2;
+    var y2 = worldCenter.y + worldSize.y/2;
+
+
+    this.quadTree = new Quadtree(x1, y1, x2, y2);
+    this.quadTree.settings = {
+      maxObj:   Math.max(Math.round(entities.length/4), 1),
+      maxLevel: 5
+    };
+    var quadTree = this.quadTree;
+    entities.forEach(function(entity) {
+      quadTree.insert(entity);
+    });
+
+    quadTree.allCollisionPairs = allCollisionPairs.bind(this);
+    return quadTree.collisions();
+  };
+  
+  var allCollisionPairs = function(ent) {
+    var potentialCollisionPairs = [];
+
+    // get all entity pairs to test for collision
+    for (var i = 0, len = ent.length; i < len; i++) {
+      for (var j = i + 1; j < len; j++) {
+        potentialCollisionPairs.push([ent[i], ent[j]]);
+      }
+    }
+
+    var collisionPairs = [];
+    potentialCollisionPairs.forEach(function(pair) {
+      if(this.isColliding(pair[0], pair[1])) {
+        collisionPairs.push(pair);
+      }
+    }.bind(this));
+
+    return collisionPairs;
+  };
+
   var getBoundingBox = function(obj) {
-    return obj.boundingBox || Collider.prototype.RECTANGLE;
+    return obj.boundingBox || new Collider.Shape.Rectangle(obj);
   };
 
   var notifyEntityOfCollision = function(entity, other) {
@@ -325,6 +427,138 @@
     RADIANS_TO_DEGREES: 0.01745
   };
 
+  function Quadtree(x1, y1, x2, y2, level) {
+    this.x1 = x1;
+    this.x2 = x2;
+    this.y1 = y1;
+    this.y2 = y2;
+
+    var width  = this.x2-this.x1;
+    var height = this.y2-this.y1;
+    this.rectangle  = this.createRectangle(x1, y1, x2, y2);
+
+    this.objects    = [];
+    this.nodes      = [];
+    this.rectangles = [];
+    this.leaf       = true;
+    this.settings   = {maxObj: 1, maxLevel: 5};
+
+    this.level   = level || 1;
+  }
+
+  Quadtree.prototype.insert = function(object) {
+    var x = object.center.x;
+    var y = object.center.y;
+    if(isNaN(x) || isNaN(y)) return;
+
+    if(this.leaf) {
+      if(this.objects.length<this.settings.maxObj || this.level === this.settings.maxLevel) {
+        this.objects.push(object);
+        return this;
+      } else {
+        this.split();
+        return this.insert(object);
+      }
+    } else {
+      for(var i=0; i<this.nodes.length; i++) {
+        if(this.rectangles[i].isIntersecting(getBoundingBox(object))) {
+          this.nodes[i].insert(object);
+        }
+      }
+    }
+  }
+
+  Quadtree.prototype.split = function() {
+    var x1 = this.x1, x2 = this.x2, y1 = this.y1, y2 = this.y2, level = this.level;
+
+    this.leaf     = false;
+    var hx = (x2-x1)/2+x1;
+    var hy = (y2-y1)/2+y1;
+    this.nodes[0] = new Quadtree(x1, y1, hx, hy, level+1);
+    this.nodes[1] = new Quadtree(hx, y1, x2, hy, level+1);
+    this.nodes[2] = new Quadtree(x1, hy, hx, y2, level+1);
+    this.nodes[3] = new Quadtree(hx, hy, x2, y2, level+1);
+
+    var width  = this.x2-this.x1;
+    var height = this.y2-this.y1;
+    // Is always the same - thanks symmetry
+    var size = {x: width/2,
+                y: height/2} 
+
+    this.rectangles[0] = new Collider.Shape.Rectangle({
+      center: 
+        {x:  width/4 + this.x1,
+         y: height/4 + this.y1}, 
+      size: size});
+    this.rectangles[1] = new Collider.Shape.Rectangle({
+      center: 
+        {x:  width/4*3 + this.x1,
+         y: height/4   + this.y1}, 
+      size: size});
+    this.rectangles[2] = new Collider.Shape.Rectangle({
+      center: 
+        {x:  width/4   + this.x1,
+         y: height/4*3 + this.y1}, 
+      size: size});
+    this.rectangles[3] = new Collider.Shape.Rectangle({
+      center: 
+        {x:  width/4*3 + this.x1,
+         y: height/4*3 + this.y1}, 
+      size: size});
+
+    for(var i=0; i<this.objects.length; i++) {
+      var object = this.objects[i];
+      this.insert(object);
+    }
+    this.objects.length = 0;
+  }
+
+  Quadtree.prototype.createRectangle = function(x1, y1, x2, y2) {
+    var width  = this.x2-this.x1;
+    var height = this.y2-this.y1;
+    return new Collider.Shape.Rectangle({
+      center: 
+        {x:  width/2 + x1,
+         y: height/2 + y1}, 
+      size: 
+        {x: width,
+         y: height} 
+    });
+  }
+
+  Quadtree.prototype.visit = function(callback) {
+    if(!callback(this.objects, this) && !this.leaf) {
+      this.nodes.forEach(function(node) {
+        node.visit(callback);
+      });
+    }
+  }
+
+  Quadtree.prototype.collisions = function() {
+    var collisions = [];
+    var scanned    = {};
+    this.visit(function(objects, quad) {
+      this.allCollisionPairs(objects).forEach(function(pair) {
+        var pairId = uniquePairId(pair);
+        if(!scanned[pairId]) {
+          collisions.push(pair);
+          scanned[pairId] = true;
+        }
+      });
+      return false;
+    }.bind(this));
+    return collisions;
+  }
+
+  function uniquePairId(pair) {
+    return [Math.min(pair[0]._id, pair[1]._id), 
+            Math.max(pair[0]._id, pair[1]._id)].toString();
+  }
+
   exports.Collider = Collider;
   exports.Collider.Maths = Maths;
+  exports.Collider.Shape = {
+    Rectangle: RectangleShape,
+    Circle:    CircleShape
+  }
 })(typeof exports === 'undefined' ? this.Coquette : exports);
