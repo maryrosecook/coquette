@@ -16,10 +16,10 @@ var InputReceiver = function() {
   };
 
   this.getBoundingClientRect = function() {
-      return {
-          left: 0,
-          top: 0
-      }
+    return {
+      left: 0,
+      top: 0
+    }
   };
 };
 
@@ -322,11 +322,11 @@ describe('inputter', function() {
         });
 
         it('should return mouse positions relative to canvas', function(done) {
-          canvas.getBoundingClientRect = function() { 
-              return {
-                  left : 20,
-                  top : 15
-              }
+          canvas.getBoundingClientRect = function() {
+            return {
+              left : 20,
+              top : 15
+            }
           }
 
           // remake to recalc elementPosition: will be fine in real code
