@@ -14,6 +14,13 @@ var InputReceiver = function() {
     callbacks[eventName] = callbacks[eventName] || [];
     callbacks[eventName].push(fn);
   };
+
+  this.getBoundingClientRect = function() {
+      return {
+          left: 0,
+          top: 0
+      }
+  };
 };
 
 // very simple - just has basic stuff
@@ -34,14 +41,14 @@ describe('inputter', function() {
         });
 
         it('should use window if autoFocus set to false', function() {
-          var canvas = { addEventListener: function() {} }; // swallow incidental binds
+          var canvas = new InputReceiver(); // swallow incidental binds
           var inp = new Inputter(null, canvas, true);
           window.fire("keydown", { keyCode: 51 });
           expect(inp.isDown(51)).toEqual(true);
         });
 
         it('should ignore presses on suppressed keys', function() {
-          var canvas = { addEventListener: function() {} }; // swallow incidental binds
+          var canvas = new InputReceiver(); // swallow incidental binds
           var inp = new Inputter(null, canvas, true);
 
           var run = false;
@@ -315,8 +322,12 @@ describe('inputter', function() {
         });
 
         it('should return mouse positions relative to canvas', function(done) {
-          canvas.offsetLeft = 20;
-          canvas.offsetTop = 15;
+          canvas.getBoundingClientRect = function() { 
+              return {
+                  left : 20,
+                  top : 15
+              }
+          }
 
           // remake to recalc elementPosition: will be fine in real code
           // cause canvas will be positioned
