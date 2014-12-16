@@ -21,6 +21,13 @@ var InputReceiver = function() {
       top: 0
     }
   };
+
+  // mock scroll state, body borders for element position tests
+  this.nodeType = 9;
+  this.ownerDocument = {
+    defaultView: {},
+    body: { scrollLeft: 0, scrollTop: 0, clientLeft: 0, clientTop: 0 }
+  };
 };
 
 // very simple - just has basic stuff
