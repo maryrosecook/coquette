@@ -16,14 +16,11 @@
     isIntersecting: function(anotherShape) {
       if(anotherShape instanceof CircleShape) {
         return Maths.circleAndRectangleIntersecting(anotherShape.entity, this.entity);
-      }
-      if(anotherShape instanceof RectangleShape) {
+      } else if(anotherShape instanceof RectangleShape) {
         return Maths.rectanglesIntersecting(this.entity, anotherShape.entity);
-      }
-      if(anotherShape.isIntersecting) {
+      } else if(anotherShape.isIntersecting) {
         return anotherShape.isIntersecting(this);
-      }
-      throw "Objects being collision tested have unsupported bounding box types."
+      } else throw "Objects being collision tested have unsupported bounding box types."
     }
   }
 
