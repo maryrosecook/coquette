@@ -192,9 +192,10 @@
     this._bindings = [];
     this._mousePosition;
     var self = this;
+    var offset = canvas.getBoundingClientRect();
 
-    var elementPosition = { x: canvas.offsetLeft, y: canvas.offsetTop };
-
+    var elementPosition = { x: offset.left, y: offset.top };
+    
     canvas.addEventListener('mousemove', function(e) {
       var absoluteMousePosition = self._getAbsoluteMousePosition(e);
       self._mousePosition = {
