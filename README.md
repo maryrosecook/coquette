@@ -292,7 +292,7 @@ To make an entity support collisions, put these attributes on it:
 
 * `center`: The center of the entity, e.g. `{ x: 10, y: 20 }`.
 * `size`: The size of the entity, e.g. `{ x: 50, y: 30 }`.
-* `boundingBox`: The shape that best approximates the shape of the entity, either an instance of `Coquette.Collider.Shape.Rectangle` or `Coquette.Collider.Shape.Circle` with the entity passed to the constructor.
+* `boundingBox`: The shape that best approximates the shape of the entity, either `c.collider.RECTANGLE` or `c.collider.CIRCLE`.
 * `angle`: The orientation of the entity in degrees, e.g. `30`.
 
 And, optionally, this method:
@@ -305,7 +305,7 @@ For example:
 var Player = function() {
   this.center = { x: 10, y: 20 };
   this.size = { x: 50, y: 50 };
-  this.boundingBox = new Coquette.Collider.Shape.Circle(this);
+  this.boundingBox = c.collider.CIRCLE;
   this.angle = 0;
 };
 
