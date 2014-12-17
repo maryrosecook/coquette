@@ -1,7 +1,7 @@
 ;(function(exports) {
   var Player = function(game, settings) {
     this.game = game;
-    this.boundingBox = new Coquette.Collider.Shape.Circle(this);
+    this.boundingBox = this.game.c.collider.CIRCLE;
     this.center = settings.center;
     this.vel = { x:0, y:0 }; // bullshit
     this.pathInset = this.game.c.renderer.getViewSize().x / 2;

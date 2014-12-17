@@ -202,7 +202,7 @@
 
   var Rectangle = function(game, settings) {
     this.c           = game.c;
-    this.boundingBox = new Coquette.Collider.Shape.Rectangle(this);
+    this.boundingBox = this.c.collider.RECTANGLE;
     this.angle       = Math.random() * 360;
     this.center      = settings.center;
     this.size        = { x: shapeSize*2, y: shapeSize};
@@ -234,7 +234,7 @@
 
   var Circle = function(game, settings) {
     this.c           = game.c;
-    this.boundingBox = new Coquette.Collider.Shape.Circle(this);
+    this.boundingBox = this.c.collider.CIRCLE;
     this.center      = settings.center;
     this.size        = { x: shapeSize, y: shapeSize };
     this.vec         = settings.vec;

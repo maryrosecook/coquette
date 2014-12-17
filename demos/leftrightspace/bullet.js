@@ -1,7 +1,7 @@
 ;(function(exports) {
   var Bullet = function(game, settings) {
     this.game = game;
-    this.boundingBox = new Coquette.Collider.Shape.Circle(this);
+    this.boundingBox = this.game.c.collider.CIRCLE;
     this.center = settings.center;
     this.vel = settings.vector;
   };

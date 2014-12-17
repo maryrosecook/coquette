@@ -79,7 +79,7 @@
 
   var Circle = function(game, settings) {
     this.c = game.c;
-    this.boundingBox = new Coquette.Collider.Shape.Circle(this);
+    this.boundingBox = this.c.collider.CIRCLE;
     this.center = settings.center;
     this.size = { x: 55, y: 55 };
     this.vec = settings.vec;

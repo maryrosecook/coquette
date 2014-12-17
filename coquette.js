@@ -34,43 +34,34 @@
     return obj.center !== undefined && obj.size !== undefined;
   };
 
-  var RectangleShape = function(entity) {
-    this.entity = entity;
-  }
+  var Shape = {
+    isIntersecting: function(e1, e2) {
+      var s1 = getBoundingBox(e1);
+      var s2 = getBoundingBox(e2);
 
-  RectangleShape.prototype = {
-    isIntersecting: function(anotherShape) {
-      if(anotherShape instanceof CircleShape) {
-        return Maths.circleAndRectangleIntersecting(anotherShape.entity, this.entity);
-      }
-      if(anotherShape instanceof RectangleShape) {
-        return Maths.rectanglesIntersecting(this.entity, anotherShape.entity);
-      }
-      if(anotherShape.isIntersecting) {
-        return anotherShape.isIntersecting(this);
-      }
-      throw "Objects being collision tested have unsupported bounding box types."
+      var circle    = Collider.prototype.CIRCLE;
+      var rectangle = Collider.prototype.RECTANGLE;
+
+      if (s1 === rectangle && s2 === rectangle) {
+        return Maths.rectanglesIntersecting(e1, e2);
+      } else 
+      if (s1 === circle    && s2 === rectangle) {
+        return Maths.circleAndRectangleIntersecting(e1, e2);
+      } else
+      if (s1 === rectangle && s2 === circle) {
+        return Maths.circleAndRectangleIntersecting(e2, e1);
+      } else
+      if (s1 === circle    && s2 === circle) {
+        return Maths.circlesIntersecting(e1, e2);
+      } else return undefined;
     }
   }
 
-  var CircleShape = function(entity) {
-    this.entity = entity;
-  }
+  var RectangleShape = function() {}
+  RectangleShape.prototype = Shape;
 
-  CircleShape.prototype = {
-    isIntersecting: function(anotherShape) {
-      if(anotherShape instanceof CircleShape) {
-        return Maths.circlesIntersecting(this.entity, anotherShape.entity);
-      }
-      if(anotherShape instanceof RectangleShape) {
-        return Maths.circleAndRectangleIntersecting(this.entity, anotherShape.entity);
-      }
-      if(anotherShape.isIntersecting) {
-        return anotherShape.isIntersecting(this);
-      }
-      throw "Objects being collision tested have unsupported bounding box types."
-    }
-  }
+  var CircleShape = function() {}
+  CircleShape.prototype = Shape;
 
   Collider.prototype = {
     _currentCollisionPairs: [],
@@ -85,10 +76,13 @@
     },
 
     update: function() {
-      var collisionPairs = this._getCollisionPairs(this.c.entities.all());
-      collisionPairs.forEach(function(pair) {
-        this.collision(pair[0], pair[1]);
-      }.bind(this));
+      this._currentCollisionPairs = this._getCollisionPairs(this.c.entities.all());
+      for(var i=0; i<this._currentCollisionPairs.length; i++) {
+        var pair = this._currentCollisionPairs[i];
+        if(pair) { // pair can be undefined after it was destroyed in the meantime
+          this.collision(pair[0], pair[1]);
+        }
+      }
     },
 
     collision: function(entity1, entity2) {
@@ -110,7 +104,7 @@
       for(var i = this._currentCollisionPairs.length - 1; i >= 0; i--){
         if (this._currentCollisionPairs[i][0] === entity ||
            this._currentCollisionPairs[i][1] === entity) {
-          this._currentCollisionPairs.splice(i, 1);
+          this._currentCollisionPairs.splice(i, 1, undefined);
         }
       }
     },
@@ -119,7 +113,15 @@
       var shape1 = getBoundingBox(obj1);
       var shape2 = getBoundingBox(obj2);
 
-      return shape1.isIntersecting(shape2);
+      var result;
+      if((result = shape1.isIntersecting(obj1, obj2)) !== undefined) {
+        return result;
+      } else
+      if((result = shape2.isIntersecting(obj1, obj2)) !== undefined) {
+        return result;
+      } else {
+        throw new Error("Unsupported bounding box shapes for collision detection.");
+      }
     },
 
     isColliding: function(obj1, obj2) {
@@ -129,8 +131,8 @@
         this.isIntersecting(obj1, obj2);
     },
 
-    RECTANGLE: 0,
-    CIRCLE: 1
+    RECTANGLE: new RectangleShape(),
+    CIRCLE:    new CircleShape()
   };
 
   var getDimensions = function(entities) {
@@ -208,7 +210,7 @@
   };
 
   var getBoundingBox = function(obj) {
-    return obj.boundingBox || new Collider.Shape.Rectangle(obj);
+    return obj.boundingBox || Collider.prototype.RECTANGLE;
   };
 
   var notifyEntityOfCollision = function(entity, other) {
@@ -458,7 +460,6 @@
 
     var width  = this.x2-this.x1;
     var height = this.y2-this.y1;
-    this.rectangle  = this.createRectangle(x1, y1, x2, y2);
 
     this.objects    = [];
     this.nodes      = [];
@@ -484,7 +485,7 @@
       }
     } else {
       for(var i=0; i<this.nodes.length; i++) {
-        if(this.rectangles[i].isIntersecting(getBoundingBox(object))) {
+        if(Collider.prototype.isIntersecting(this.rectangles[i], object)) {
           this.nodes[i].insert(object);
         }
       }
@@ -508,45 +509,36 @@
     var size = {x: width/2,
                 y: height/2} 
 
-    this.rectangles[0] = new Collider.Shape.Rectangle({
+    this.rectangles[0] = {
       center: 
         {x:  width/4 + this.x1,
          y: height/4 + this.y1}, 
-      size: size});
-    this.rectangles[1] = new Collider.Shape.Rectangle({
+      size: size,
+      boundingBox: Collider.prototype.RECTANGLE};
+    this.rectangles[1] = {
       center: 
         {x:  width/4*3 + this.x1,
          y: height/4   + this.y1}, 
-      size: size});
-    this.rectangles[2] = new Collider.Shape.Rectangle({
+      size: size,
+      boundingBox: Collider.prototype.RECTANGLE};
+    this.rectangles[2] = {
       center: 
         {x:  width/4   + this.x1,
          y: height/4*3 + this.y1}, 
-      size: size});
-    this.rectangles[3] = new Collider.Shape.Rectangle({
+      size: size,
+      boundingBox: Collider.prototype.RECTANGLE};
+    this.rectangles[3] = {
       center: 
         {x:  width/4*3 + this.x1,
          y: height/4*3 + this.y1}, 
-      size: size});
+      size: size,
+      boundingBox: Collider.prototype.RECTANGLE};
 
     for(var i=0; i<this.objects.length; i++) {
       var object = this.objects[i];
       this.insert(object);
     }
     this.objects.length = 0;
-  }
-
-  Quadtree.prototype.createRectangle = function(x1, y1, x2, y2) {
-    var width  = this.x2-this.x1;
-    var height = this.y2-this.y1;
-    return new Collider.Shape.Rectangle({
-      center: 
-        {x:  width/2 + x1,
-         y: height/2 + y1}, 
-      size: 
-        {x: width,
-         y: height} 
-    });
   }
 
   Quadtree.prototype.visit = function(callback) {
@@ -580,10 +572,6 @@
 
   exports.Collider = Collider;
   exports.Collider.Maths = Maths;
-  exports.Collider.Shape = {
-    Rectangle: RectangleShape,
-    Circle:    CircleShape
-  }
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
 ;(function(exports) {
@@ -1047,7 +1035,7 @@
 })(typeof exports === 'undefined' ? this.Coquette : exports);
 
 ;(function(exports) {
-  var freeId = 0;
+  var id = 0;
 
   function Entities(coquette, game) {
     this.c = coquette;
@@ -1082,7 +1070,7 @@
 
     create: function(Constructor, settings) {
       var entity = new Constructor(this.game, settings || {});
-      entity._id = freeId++;
+      entity._id = id++;
       this.c.collider.createEntity(entity);
       this._entities.push(entity);
       return entity;
