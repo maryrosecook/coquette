@@ -1,5 +1,5 @@
 ;(function(exports) {
-  var freeId = 0;
+  var id = 0;
 
   function Entities(coquette, game) {
     this.c = coquette;
@@ -34,7 +34,7 @@
 
     create: function(Constructor, settings) {
       var entity = new Constructor(this.game, settings || {});
-      entity._id = freeId++;
+      entity._id = id++;
       this.c.collider.createEntity(entity);
       this._entities.push(entity);
       return entity;
