@@ -77,11 +77,10 @@
 
     update: function() {
       this._currentCollisionPairs = this._getCollisionPairs(this.c.entities.all());
-      for(var i=0; i<this._currentCollisionPairs.length; i++) {
-        var pair = this._currentCollisionPairs[i];
-        if(pair) { // pair can be undefined after it was destroyed in the meantime
-          this.collision(pair[0], pair[1]);
-        }
+
+      while (this._currentCollisionPairs.length > 0) {
+        var pair = this._currentCollisionPairs.shift();
+        this.collision(pair[0], pair[1]);
       }
     },
 
@@ -104,7 +103,7 @@
       for(var i = this._currentCollisionPairs.length - 1; i >= 0; i--){
         if (this._currentCollisionPairs[i][0] === entity ||
            this._currentCollisionPairs[i][1] === entity) {
-          this._currentCollisionPairs.splice(i, 1, undefined);
+          this._currentCollisionPairs.splice(i, 1);
         }
       }
     },
