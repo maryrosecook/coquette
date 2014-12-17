@@ -148,11 +148,10 @@
     var y2 = worldCenter.y + worldSize.y/2;
 
 
-    this.quadTree = new Quadtree(x1, y1, x2, y2);
-    this.quadTree.settings = {
+    this.quadTree = new Quadtree(x1, y1, x2, y2, {
       maxObj:   Math.max(Math.round(entities.length/4), 1),
       maxLevel: 5
-    };
+    });
     var quadTree = this.quadTree;
     entities.forEach(function(entity) {
       quadTree.insert(entity);
@@ -425,7 +424,7 @@
     RADIANS_TO_DEGREES: 0.01745
   };
 
-  function Quadtree(x1, y1, x2, y2, level) {
+  function Quadtree(x1, y1, x2, y2, settings, level) {
     this.x1 = x1;
     this.x2 = x2;
     this.y1 = y1;
@@ -438,7 +437,7 @@
     this.nodes      = [];
     this.rectangles = [];
     this.leaf       = true;
-    this.settings   = {maxObj: 1, maxLevel: 5};
+    this.settings   = settings;
 
     this.level   = level || 1;
   }
@@ -471,10 +470,10 @@
     this.leaf     = false;
     var hx = (x2-x1)/2+x1;
     var hy = (y2-y1)/2+y1;
-    this.nodes[0] = new Quadtree(x1, y1, hx, hy, level+1);
-    this.nodes[1] = new Quadtree(hx, y1, x2, hy, level+1);
-    this.nodes[2] = new Quadtree(x1, hy, hx, y2, level+1);
-    this.nodes[3] = new Quadtree(hx, hy, x2, y2, level+1);
+    this.nodes[0] = new Quadtree(x1, y1, hx, hy, this.settings, level+1);
+    this.nodes[1] = new Quadtree(hx, y1, x2, hy, this.settings, level+1);
+    this.nodes[2] = new Quadtree(x1, hy, hx, y2, this.settings, level+1);
+    this.nodes[3] = new Quadtree(hx, hy, x2, y2, this.settings, level+1);
 
     var width  = this.x2-this.x1;
     var height = this.y2-this.y1;
