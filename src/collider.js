@@ -121,22 +121,16 @@
     var width  = maxx - minx;
     var height = maxy - miny;
 
-    var worldSize   = {x: width, y: height };
-    var worldCenter = {x: minx + width/2, y: miny + height/2};
-    return [worldSize, worldCenter];
+    return {size: {x: width, y: height }, center: {x: minx + width/2, y: miny + height/2}}
   };
 
   var quadTreeCollisionPairs = function(entities) {
     var dimensions = getDimensions(entities);
 
-    var worldSize   = dimensions[0];
-    var worldCenter = dimensions[1];
-
-    var p1 = {x: worldCenter.x - worldSize.x/2,
-              y: worldCenter.y - worldSize.y/2};
-    var p2 = {x: worldCenter.x + worldSize.x/2,
-              y: worldCenter.y + worldSize.y/2};
-
+    var p1 = {x: dimensions.center.x - dimensions.size.x/2,
+              y: dimensions.center.y - dimensions.size.y/2};
+    var p2 = {x: dimensions.center.x + dimensions.size.x/2,
+              y: dimensions.center.y + dimensions.size.y/2};
 
     this.quadTree = new Quadtree(p1, p2, {
       maxObj:   Math.max(Math.round(entities.length/4), 1),
