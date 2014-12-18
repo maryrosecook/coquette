@@ -128,7 +128,7 @@
     var maxx, minx, maxy, miny;
 
     entities.forEach(function(entity) {
-      if(entity.center) {
+      if(isSetupForCollisions(entity)) {
         if(maxx === undefined || entity.center.x > maxx) {
           maxx = entity.center.x;
         }
