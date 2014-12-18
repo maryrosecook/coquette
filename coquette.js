@@ -168,13 +168,13 @@
     var worldSize   = dimensions[0];
     var worldCenter = dimensions[1];
 
-    var x1 = worldCenter.x - worldSize.x/2;
-    var y1 = worldCenter.y - worldSize.y/2;
-    var x2 = worldCenter.x + worldSize.x/2;
-    var y2 = worldCenter.y + worldSize.y/2;
+    var p1 = {x: worldCenter.x - worldSize.x/2,
+              y: worldCenter.y - worldSize.y/2};
+    var p2 = {x: worldCenter.x + worldSize.x/2,
+              y: worldCenter.y + worldSize.y/2};
 
 
-    this.quadTree = new Quadtree(x1, y1, x2, y2, {
+    this.quadTree = new Quadtree(p1, p2, {
       maxObj:   Math.max(Math.round(entities.length/4), 1),
       maxLevel: 5
     });
@@ -450,14 +450,12 @@
     RADIANS_TO_DEGREES: 0.01745
   };
 
-  function Quadtree(x1, y1, x2, y2, settings, level) {
-    this.x1 = x1;
-    this.x2 = x2;
-    this.y1 = y1;
-    this.y2 = y2;
+  function Quadtree(p1, p2, settings, level) {
+    this.p1 = p1;
+    this.p2 = p2;
 
-    var width  = this.x2-this.x1;
-    var height = this.y2-this.y1;
+    var width  = this.p2.x-this.p1.x;
+    var height = this.p2.y-this.p1.y;
 
     this.objects    = [];
     this.nodes      = [];
@@ -491,44 +489,44 @@
   }
 
   Quadtree.prototype.split = function() {
-    var x1 = this.x1, x2 = this.x2, y1 = this.y1, y2 = this.y2, level = this.level;
+    var x1 = this.p1.x, x2 = this.p2.x, y1 = this.p1.y, y2 = this.p2.y, level = this.level;
 
     this.leaf     = false;
     var hx = (x2-x1)/2+x1;
     var hy = (y2-y1)/2+y1;
-    this.nodes[0] = new Quadtree(x1, y1, hx, hy, this.settings, level+1);
-    this.nodes[1] = new Quadtree(hx, y1, x2, hy, this.settings, level+1);
-    this.nodes[2] = new Quadtree(x1, hy, hx, y2, this.settings, level+1);
-    this.nodes[3] = new Quadtree(hx, hy, x2, y2, this.settings, level+1);
+    this.nodes[0] = new Quadtree({x: x1, y: y1} , {x: hx, y: hy}, this.settings, level+1);
+    this.nodes[1] = new Quadtree({x: hx, y: y1} , {x: x2, y: hy}, this.settings, level+1);
+    this.nodes[2] = new Quadtree({x: x1, y: hy} , {x: hx, y: y2}, this.settings, level+1);
+    this.nodes[3] = new Quadtree({x: hx, y: hy} , {x: x2, y: y2}, this.settings, level+1);
 
-    var width  = this.x2-this.x1;
-    var height = this.y2-this.y1;
+    var width  = this.p2.x-this.p1.x;
+    var height = this.p2.y-this.p1.y;
     // Is always the same - thanks symmetry
     var size = {x: width/2,
                 y: height/2} 
 
     this.rectangles[0] = {
       center: 
-        {x:  width/4 + this.x1,
-         y: height/4 + this.y1}, 
+        {x:  width/4 + this.p1.x,
+         y: height/4 + this.p1.y}, 
       size: size,
       boundingBox: Collider.prototype.RECTANGLE};
     this.rectangles[1] = {
       center: 
-        {x:  width/4*3 + this.x1,
-         y: height/4   + this.y1}, 
+        {x:  width/4*3 + this.p1.x,
+         y: height/4   + this.p1.y}, 
       size: size,
       boundingBox: Collider.prototype.RECTANGLE};
     this.rectangles[2] = {
       center: 
-        {x:  width/4   + this.x1,
-         y: height/4*3 + this.y1}, 
+        {x:  width/4   + this.p1.x,
+         y: height/4*3 + this.p1.y}, 
       size: size,
       boundingBox: Collider.prototype.RECTANGLE};
     this.rectangles[3] = {
       center: 
-        {x:  width/4*3 + this.x1,
-         y: height/4*3 + this.y1}, 
+        {x:  width/4*3 + this.p1.x,
+         y: height/4*3 + this.p1.y}, 
       size: size,
       boundingBox: Collider.prototype.RECTANGLE};
 
