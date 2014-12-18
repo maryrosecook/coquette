@@ -54,7 +54,6 @@
 
   Test.prototype.onStartCollisionDetection = function(collider) {
     if(!this.start) {
-      collider._useQuadtree(this.quad);
       this.start = +new Date();
     }
     this.timer.start();
@@ -81,7 +80,7 @@
     this.tests = [];
     this.current = 0;
 
-    this.tableEl;
+    this.tbodyEl;
   }
 
   TestSuite.prototype = {
@@ -100,28 +99,27 @@
       return this.tests.length<this.current+1;
     },
     logTest: function() {
-      if(!this.tableEl) {
-        this.tableEl = document.getElementById("tests");
+      if(!this.tbodyEl) {
+        this.tbodyEl = document.getElementById("results");
       }
-      if(this.tableEl.rows.length>this.current+1) {
-        this.tableEl.deleteRow(this.current+1);
+      if(this.tbodyEl.rows.length>this.current) {
+        this.tbodyEl.deleteRow(this.current);
       }
-      var row = this.tableEl.insertRow(this.current+1);
+      var row = this.tbodyEl.insertRow(this.current);
 
       var cell1 = row.insertCell(0);
       var cell2 = row.insertCell(1);
       var cell3 = row.insertCell(2);
 
       // Add some text to the new cells:
-      cell1.innerHTML = JSON.stringify(this.currentTest().settings);
+      cell1.innerHTML = this.currentTest().settings.entities;
       if(this.currentTest().time.all < this.currentTest().time.quad) {
-        cell2.innerHTML = "<b>" + this.currentTest().time.all + "ms</b>";
-        cell3.innerHTML = this.currentTest().time.quad + "ms";
+        cell2.className = "faster";
       } else {
-      cell2.innerHTML = this.currentTest().time.all + "ms";
-      cell3.innerHTML = "<b>" + this.currentTest().time.quad + "ms</b>";
-
+        cell3.className = "faster";
       }
+        cell2.innerHTML = this.currentTest().time.all + "ms";
+        cell3.innerHTML = this.currentTest().time.quad + "ms";
     }
   };
 
@@ -136,10 +134,20 @@
                           width, height, "white", autoFocus);
     this.c = c;
 
-    var colliderUpdate = this.c.collider.update;
-    this.c.collider.update = function() {
+    var collider = this.c.collider;
+    var colliderUpdate = collider.update;
+    collider.update = function() {
       testSuite.currentTest().onStartCollisionDetection(this);
-      colliderUpdate.apply(this);
+      if(testSuite.currentTest().quad) {
+        colliderUpdate.apply(collider);
+      } else {
+        var ent = this.c.entities.all();
+        collider._currentCollisionPairs = allCollisionPairs.apply(collider, [ent]);        
+        while (collider._currentCollisionPairs.length > 0) {
+          var pair = collider._currentCollisionPairs.shift();
+          collider.collision(pair[0], pair[1]);
+        }
+      }
       testSuite.currentTest().onEndCollisionDetection(this);
     };
 
@@ -149,8 +157,8 @@
       var ctx = this.getCtx();
 
       // draw quad tree
-      if(this.c.collider.quadTree) {
-        drawQuad(this.c.collider.quadTree, ctx);
+      if(testSuite.currentTest().quad && collider.quadTree) {
+        drawQuad(collider.quadTree, ctx);
       }
 
     }
@@ -302,6 +310,26 @@
       this.colliderCount++;
     },
 
+  };
+
+  var allCollisionPairs = function(ent) {
+    var potentialCollisionPairs = [];
+
+    // get all entity pairs to test for collision
+    for (var i = 0, len = ent.length; i < len; i++) {
+      for (var j = i + 1; j < len; j++) {
+        potentialCollisionPairs.push([ent[i], ent[j]]);
+      }
+    }
+
+    var collisionPairs = [];
+    potentialCollisionPairs.forEach(function(pair) {
+      if(this.isColliding(pair[0], pair[1])) {
+        collisionPairs.push(pair);
+      }
+    }.bind(this));
+
+    return collisionPairs;
   };
 
   exports.Collisions = Collisions;

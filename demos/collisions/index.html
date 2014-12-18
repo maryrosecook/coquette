@@ -8,14 +8,33 @@
         new Collisions();
       });
     </script>
+    <style>
+      table#tests {
+        width: 500px;
+      }
+      table#tests td {
+        padding: 10px;
+        text-align: center;
+      }
+      table#tests > thead {
+        font-size: 1.2em;
+        font-weight: bold;
+        background-color: lightgrey;
+      }
+      table#tests td.faster {
+        background-color: green;
+        color: white;
+        font-weight: bolder;
+      }
+    </style>
   </head>
   <body>
     <canvas id="collisions-canvas"></canvas>
-    <div><span id="time">0</span>ms for testing <span id="entities">0</span> entities.</div>
-    <h1>Test results</h1>
+    <h4><span id="time">0</span>ms for testing <span id="entities">0</span> entities.</h4>
     <div>
       <table id="tests">
-        <thead><td>Settings</td><td>Naive</td><td>Quad</td></thead>
+        <thead><td>Entities</td><td>Without quadtree</td><td>With quadtree</td></thead>
+        <tbody id="results"><tr><td>...</td><td>...</td><td>...</td></tr></tbody>
       </table>
     </div>
   </body>

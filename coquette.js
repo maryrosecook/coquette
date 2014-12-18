@@ -27,7 +27,6 @@
 ;(function(exports) {
   var Collider = function(coquette) {
     this.c = coquette;
-    this._getCollisionPairs = quadTreeCollisionPairs;
   };
 
   var isSetupForCollisions = function(obj) {
@@ -66,17 +65,8 @@
   Collider.prototype = {
     _currentCollisionPairs: [],
 
-    _useQuadtree: function(useQuadtree) {
-      if(useQuadtree) {
-        this._getCollisionPairs = quadTreeCollisionPairs;
-      } else {
-        this._getCollisionPairs = allCollisionPairs;
-        this.quadTree = undefined;
-      }
-    },
-
     update: function() {
-      this._currentCollisionPairs = this._getCollisionPairs(this.c.entities.all());
+      this._currentCollisionPairs = quadTreeCollisionPairs.apply(this, [this.c.entities.all()]);
 
       while (this._currentCollisionPairs.length > 0) {
         var pair = this._currentCollisionPairs.shift();
