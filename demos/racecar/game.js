@@ -298,10 +298,6 @@
     });
   };
 
-  function angleDiff(a, b) {
-    return Math.atan2(Math.sin(a - b), Math.cos(a - b)) * util.DEGREES_TO_RADIANS;
-  };
-
   Car.prototype = {
     update: function(delta) {
       if (this.game.state === "countingDown") { return; }
@@ -322,7 +318,7 @@
         } else {
           var velocityAngle = util.vectorToAngle(this.velocity);
           var orientationAngle = util.vectorToAngle(util.angleToVector(this.angle));
-          var reversing = Math.abs(angleDiff(velocityAngle, orientationAngle)) > 90;
+          var reversing = Math.abs(util.angleDiff(velocityAngle, orientationAngle)) > 90;
           dir = reversing ? -1 : 1;
         }
 
@@ -441,6 +437,12 @@
   var util = {
     RADIANS_TO_DEGREES: Math.PI / 180,
     DEGREES_TO_RADIANS: 180 / Math.PI,
+
+    angleDiff : function(a, b) {
+      var ra = a * this.RADIANS_TO_DEGREES;
+      var rb = b * this.RADIANS_TO_DEGREES;
+      return Math.atan2(Math.sin(rb - ra), Math.cos(rb - ra)) * util.DEGREES_TO_RADIANS;
+    },
 
     angleToVector: function(angle) {
       var r = angle * 0.01745;
