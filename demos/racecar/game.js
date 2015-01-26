@@ -439,8 +439,8 @@
   };
 
   var util = {
-    RADIANS_TO_DEGREES: 0.01745,
-    DEGREES_TO_RADIANS: 57.30659026,
+    RADIANS_TO_DEGREES: Math.PI / 180,
+    DEGREES_TO_RADIANS: 180 / Math.PI,
 
     angleToVector: function(angle) {
       var r = angle * 0.01745;
