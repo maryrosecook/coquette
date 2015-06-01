@@ -9,13 +9,13 @@
 
     var self = this;
     this.ticker = new Coquette.Ticker(this, function(interval) {
-      self.collider.update(interval);
       self.runner.update(interval);
       if (game.update !== undefined) {
         game.update(interval);
       }
 
       self.entities.update(interval)
+      self.collider.update(interval);
       self.renderer.update(interval);
       self.inputter.update();
     });
