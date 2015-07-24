@@ -37,6 +37,10 @@
       this._viewCenter = { x:pos.x, y:pos.y };
     },
 
+    setBackground: function(color) {
+      this._backgroundColor = color;
+    },
+
     update: function(interval) {
       var ctx = this.getCtx();
       var viewTranslate = viewOffset(this._viewCenter, this._viewSize);
