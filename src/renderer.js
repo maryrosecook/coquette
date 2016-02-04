@@ -37,6 +37,10 @@
       this._viewCenter = { x:pos.x, y:pos.y };
     },
 
+    setBackground: function(color) {
+      this._backgroundColor = color;
+    },
+
     update: function(interval) {
       var ctx = this.getCtx();
       var viewTranslate = viewOffset(this._viewCenter, this._viewSize);
@@ -44,11 +48,18 @@
       ctx.translate(viewTranslate.x, viewTranslate.y);
 
       // draw background
-      ctx.fillStyle = this._backgroundColor;
-      ctx.fillRect(this._viewCenter.x - this._viewSize.x / 2,
-                   this._viewCenter.y - this._viewSize.y / 2,
-                   this._viewSize.x,
-                   this._viewSize.y);
+      var viewArgs = [
+            this._viewCenter.x - this._viewSize.x / 2,
+            this._viewCenter.y - this._viewSize.y / 2,
+            this._viewSize.x,
+            this._viewSize.y 
+      ]
+      if (this._backgroundColor !== undefined) {
+          ctx.fillStyle = this._backgroundColor;
+          ctx.fillRect.apply(ctx, viewArgs);
+      } else {
+          ctx.clearRect.apply(ctx, viewArgs);
+      }
 
       // draw game and entities
       var drawables = [this.game]

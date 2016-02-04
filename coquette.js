@@ -9,13 +9,13 @@
 
     var self = this;
     this.ticker = new Coquette.Ticker(this, function(interval) {
-      self.collider.update(interval);
       self.runner.update(interval);
       if (game.update !== undefined) {
         game.update(interval);
       }
 
       self.entities.update(interval)
+      self.collider.update(interval);
       self.renderer.update(interval);
       self.inputter.update();
     });
@@ -678,9 +678,9 @@
     };
 
     this.start = function() {
-      var prev = new Date().getTime();
+      var prev = Date.now();
       var tick = function() {
-        var now = new Date().getTime();
+        var now = Date.now();
         var interval = now - prev;
         prev = now;
         gameLoop(interval);
@@ -707,7 +707,7 @@
 
     if (!window.requestAnimationFrame) {
       window.requestAnimationFrame = function(callback, element) {
-        var currTime = new Date().getTime();
+        var currTime = Date.now();
         var timeToCall = Math.max(0, interval - (currTime - lastTime));
         var id = window.setTimeout(function() { callback(currTime + timeToCall); },
                                    timeToCall);
@@ -765,6 +765,10 @@
       this._viewCenter = { x:pos.x, y:pos.y };
     },
 
+    setBackground: function(color) {
+      this._backgroundColor = color;
+    },
+
     update: function(interval) {
       var ctx = this.getCtx();
       var viewTranslate = viewOffset(this._viewCenter, this._viewSize);
@@ -772,11 +776,18 @@
       ctx.translate(viewTranslate.x, viewTranslate.y);
 
       // draw background
-      ctx.fillStyle = this._backgroundColor;
-      ctx.fillRect(this._viewCenter.x - this._viewSize.x / 2,
-                   this._viewCenter.y - this._viewSize.y / 2,
-                   this._viewSize.x,
-                   this._viewSize.y);
+      var viewArgs = [
+            this._viewCenter.x - this._viewSize.x / 2,
+            this._viewCenter.y - this._viewSize.y / 2,
+            this._viewSize.x,
+            this._viewSize.y 
+      ]
+      if (this._backgroundColor !== undefined) {
+          ctx.fillStyle = this._backgroundColor;
+          ctx.fillRect.apply(ctx, viewArgs);
+      } else {
+          ctx.clearRect.apply(ctx, viewArgs);
+      }
 
       // draw game and entities
       var drawables = [this.game]
