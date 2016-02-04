@@ -149,7 +149,7 @@ describe('entities', function() {
         coquette.entities.create(Entity, { angle: 0, center: { x: 0, y: 0 }, draw: function() {} });
         coquette.runner.update();
         coquette.renderer.update();
-      }).toThrow("Object [object Object] has no method 'rotate'")
+      }).toThrow("ctx.rotate is not a function")
 
       var coquette = new MockCoquette();
       coquette.entities.create(Entity, { angle: 0, draw: function() {} });
