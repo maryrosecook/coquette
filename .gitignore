@@ -3,4 +3,4 @@ node_modules
 *~
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
-
+.tern-port
